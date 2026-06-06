@@ -96,7 +96,9 @@ def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
 
 
 def draw_text_fallback(draw, xy, text, font_primary, font_fallback, fill):
-    """Render text with emoji fallback — emoji pake Segoe UI, sisanya pake Nunito."""
+    """Render text with emoji fallback — emoji pake Segoe UI, sisanya pake Nunito.
+    Emoji rendered with embedded_color=True for colorful glyphs.
+    """
     if font_fallback is None:
         draw.text(xy, text, fill=fill, font=font_primary)
         return
@@ -105,6 +107,11 @@ def draw_text_fallback(draw, xy, text, font_primary, font_fallback, fill):
     chunks = []
     current = ""
     current_is_emoji = None
+
+    # Calculate baseline alignment: offset so emoji sits on same baseline as Nunito
+    prim_ascent, prim_descent = font_primary.getmetrics()
+    fall_ascent, fall_descent = font_fallback.getmetrics()
+    y_offset = prim_ascent - fall_ascent
 
     for char in text:
         is_emoji = _is_emoji_or_special(char)
@@ -123,7 +130,12 @@ def draw_text_fallback(draw, xy, text, font_primary, font_fallback, fill):
         chunks.append((current, font_fallback if current_is_emoji else font_primary))
 
     for chunk, fnt in chunks:
-        draw.text((x, y), chunk, fill=fill, font=fnt)
+        is_emoji_chunk = fnt == font_fallback
+        ey = y + (y_offset if is_emoji_chunk else 0)
+        if is_emoji_chunk:
+            draw.text((x, ey), chunk, font=fnt, embedded_color=True)
+        else:
+            draw.text((x, ey), chunk, fill=fill, font=fnt)
         bb = draw.textbbox((0, 0), chunk, font=fnt)
         x += bb[2] - bb[0]
 

@@ -1,4 +1,5 @@
 from PIL import Image, ImageDraw
+from pathlib import Path
 
 import config
 from carousel.composer import (
@@ -31,9 +32,17 @@ def build_cta_slide(facts: dict, subject_img: Image.Image | None, palette: dict 
     font_body = _get_font("nunito", 30)
     font_icon_label = _get_font("nunito", 26)
 
-    # Subject image (smaller, center)
-    if subject_img:
-        small_img = subject_img.resize((280, 280), Image.LANCZOS)
+    # Subject image (smaller, center) — fallback ke logo kalo ga ada gambar
+    img_to_show = subject_img
+    if img_to_show is None:
+        logo_path = Path("resource") / "logo" / "logo-aquarisamatiran.png"
+        if logo_path.exists():
+            try:
+                img_to_show = Image.open(logo_path).convert("RGBA")
+            except Exception:
+                pass
+    if img_to_show:
+        small_img = img_to_show.resize((280, 280), Image.LANCZOS)
         img_x = (W - 280) // 2
         bg.paste(small_img, (img_x, 120), small_img)
         img_bottom = 120 + 280 + 30

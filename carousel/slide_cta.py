@@ -35,22 +35,16 @@ def build_cta_slide(facts: dict, subject_img: Image.Image | None, palette: dict 
     # Subject image (smaller, center) — fallback ke logo kalo ga ada gambar
     img_to_show = subject_img
     if img_to_show is None:
-        logo_path = Path("resource") / "logo" / "logo-aquarisamatiran.png"
+        logo_path = Path("resource") / "logo" / "logo-cta-square.png"
         if logo_path.exists():
             try:
                 img_to_show = Image.open(logo_path).convert("RGBA")
             except Exception:
                 pass
     if img_to_show:
-        # Fit in max 280x280 box with aspect ratio preserved
-        max_w, max_h = 280, 280
-        iw, ih = img_to_show.size
-        scale = min(max_w / iw, max_h / ih)
-        nw, nh = int(iw * scale), int(ih * scale)
-        small_img = img_to_show.resize((nw, nh), Image.LANCZOS)
-        img_x = (W - nw) // 2
-        img_y = 120 + (280 - nh) // 2
-        bg.paste(small_img, (img_x, img_y), small_img)
+        small_img = img_to_show.resize((280, 280), Image.LANCZOS)
+        img_x = (W - 280) // 2
+        bg.paste(small_img, (img_x, 120), small_img)
         img_bottom = 120 + 280 + 30
     else:
         img_bottom = 120

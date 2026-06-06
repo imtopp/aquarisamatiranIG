@@ -24,6 +24,7 @@ def build_fact_slide(fact: dict, subject_img: Image.Image | None, palette: dict 
     font_body = _get_font("nunito", 48)
     font_small = _get_font("nunito", 24)
     font_tags = _get_font("nunito", 26)
+    font_watermark = _get_font("nunito", 18)
 
     # Fact number (top left)
     num = fact.get("number", "01")
@@ -65,5 +66,10 @@ def build_fact_slide(fact: dict, subject_img: Image.Image | None, palette: dict 
     tags = fact.get("tags", [])
     if tags:
         draw_tag_pills(draw, tags, text_x, H - 100, font_tags, palette)
+
+    # Watermark
+    hb = draw.textbbox((0, 0), config.IG_HANDLE, font=font_watermark)
+    hw = hb[2] - hb[0]
+    draw.text((W - 40 - hw, H - 30), config.IG_HANDLE, fill=accent + (100,), font=font_watermark)
 
     return bg.convert("RGB")

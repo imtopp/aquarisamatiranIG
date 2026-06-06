@@ -71,7 +71,7 @@ def generate_facts(topic: str, num_facts: int = 4) -> dict:
                 raise ValueError("Facts harus list minimal 1")
 
             def _strip_emoji(t):
-                return re.sub(r"[\U0001F300-\U0001F9FF\u2600-\u27BF\u2700-\u27BF\U0001F600-\U0001F64F\U0001F680-\U0001F6FF\u2300-\u23FF]", "", t).strip()
+                return re.sub(r"[\U0001F300-\U0001F9FF\u2600-\u27BF\u2700-\u27BF\U0001F600-\U0001F64F\U0001F680-\U0001F6FF\u2300-\u23FF\uFE00-\uFE0F\u200D]", "", t).strip()
 
             data.setdefault("scientific_name", topic)
             data.setdefault("subtitle", "")

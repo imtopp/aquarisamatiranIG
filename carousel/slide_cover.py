@@ -3,6 +3,7 @@ from PIL import Image, ImageDraw
 import config
 from carousel.composer import (
     _hex_to_rgb, _get_font, draw_gradient_bg, wrap_text,
+    draw_text_fallback, _get_emoji_font,
 )
 
 
@@ -22,7 +23,7 @@ def build_cover(facts: dict, subject_img: Image.Image | None) -> Image.Image:
     font_title = _get_font("nunito_bold", 56)
     font_subtitle = _get_font("nunito", 30)
     font_tagline = _get_font("nunito", 28)
-    font_emoji = _get_font("nunito", 56)
+    font_emoji = _get_emoji_font(56)
 
     # Handle
     draw.text((40, 60), config.IG_HANDLE, fill=accent + (255,), font=font_handle)
@@ -48,14 +49,12 @@ def build_cover(facts: dict, subject_img: Image.Image | None) -> Image.Image:
 
     # Display name (large title)
     display = facts.get("display_name", facts.get("topic", ""))
-    for label, fnt in [(display, font_title), (display, font_emoji)]:
-        break
     lines = wrap_text(display, font_title, W - 80, draw)
     ly = ct_y + 10
     for line in lines:
-        bbox = draw.textbbox((0, 0), line, font=font_title)
-        lw = bbox[2] - bbox[0]
-        draw.text(((W - lw) // 2, ly), line, fill=accent2 + (255,), font=font_title)
+        bb = draw.textbbox((0, 0), line, font=font_title)
+        lw = bb[2] - bb[0]
+        draw_text_fallback(draw, ((W - lw) // 2, ly), line, font_title, font_emoji, fill=accent2 + (255,))
         ly += 70
 
     # Scientific name

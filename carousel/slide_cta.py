@@ -4,6 +4,7 @@ from pathlib import Path
 import config
 from carousel.composer import (
     _hex_to_rgb, _get_font, _get_symbol_font, draw_gradient_bg, wrap_text,
+    draw_text_fallback, _get_emoji_font,
 )
 
 
@@ -31,6 +32,7 @@ def build_cta_slide(facts: dict, subject_img: Image.Image | None, palette: dict 
     font_handle = _get_font("nunito_bold", 52)
     font_body = _get_font("nunito", 30)
     font_icon_label = _get_font("nunito", 26)
+    font_emoji = _get_emoji_font(38)
 
     # Subject image (smaller, center) — fallback ke logo kalo ga ada gambar
     img_to_show = subject_img
@@ -95,9 +97,9 @@ def build_cta_slide(facts: dict, subject_img: Image.Image | None, palette: dict 
     cta = facts.get("cta_text", f"Follow {config.IG_HANDLE}")
     cta_lines = cta.replace("\\n", "\n").split("\n")
     for line in cta_lines:
-        bbox = draw.textbbox((0, 0), line, font=font_cta)
-        cw = bbox[2] - bbox[0]
-        draw.text(((W - cw) // 2, cta_y), line, fill=text_main + (255,), font=font_cta)
+        bb = draw.textbbox((0, 0), line, font=font_cta)
+        cw = bb[2] - bb[0]
+        draw_text_fallback(draw, ((W - cw) // 2, cta_y), line, font_cta, font_emoji, fill=text_main + (255,))
         cta_y += 46
 
     return bg.convert("RGB")

@@ -65,6 +65,69 @@ def _get_symbol_font(size: int) -> ImageFont.FreeTypeFont:
     return ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", size)
 
 
+_EMOJI_RANGES = [
+    (0x1F300, 0x1F9FF), (0x2600, 0x27BF), (0x2700, 0x27BF),
+    (0x1F600, 0x1F64F), (0x1F680, 0x1F6FF), (0x2300, 0x23FF),
+    (0xFE00, 0xFE0F), (0x200D, 0x200D), (0x1FA00, 0x1FA6F),
+    (0x1F900, 0x1F9FF), (0x2B00, 0x2BFF), (0x2E00, 0x2E7F),
+    (0x3000, 0x303F), (0x3200, 0x32FF), (0x3300, 0x33FF),
+    (0xFE10, 0xFE1F), (0xFF00, 0xFFEF),
+]
+
+
+def _is_emoji_or_special(char: str) -> bool:
+    cp = ord(char)
+    return any(lo <= cp <= hi for lo, hi in _EMOJI_RANGES)
+
+
+def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
+    candidates = [
+        "C:/Windows/Fonts/seguiemj.ttf",
+        "C:/Windows/Fonts/seguisym.ttf",
+    ]
+    for path in candidates:
+        p = Path(path)
+        if p.exists():
+            try:
+                return ImageFont.truetype(str(p), size)
+            except Exception:
+                continue
+    return None
+
+
+def draw_text_fallback(draw, xy, text, font_primary, font_fallback, fill):
+    """Render text with emoji fallback — emoji pake Segoe UI, sisanya pake Nunito."""
+    if font_fallback is None:
+        draw.text(xy, text, fill=fill, font=font_primary)
+        return
+
+    x, y = xy
+    chunks = []
+    current = ""
+    current_is_emoji = None
+
+    for char in text:
+        is_emoji = _is_emoji_or_special(char)
+        if current_is_emoji is None:
+            current_is_emoji = is_emoji
+
+        if is_emoji != current_is_emoji:
+            if current:
+                chunks.append((current, font_fallback if current_is_emoji else font_primary))
+            current = char
+            current_is_emoji = is_emoji
+        else:
+            current += char
+
+    if current:
+        chunks.append((current, font_fallback if current_is_emoji else font_primary))
+
+    for chunk, fnt in chunks:
+        draw.text((x, y), chunk, fill=fill, font=fnt)
+        bb = draw.textbbox((0, 0), chunk, font=fnt)
+        x += bb[2] - bb[0]
+
+
 def draw_rounded_rect(draw, xy, radius, fill):
     x1, y1, x2, y2 = xy
     draw.rounded_rectangle([x1, y1, x2, y2], radius=radius, fill=fill)

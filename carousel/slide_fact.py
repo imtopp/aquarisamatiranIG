@@ -3,6 +3,7 @@ from PIL import Image, ImageDraw
 import config
 from carousel.composer import (
     _hex_to_rgb, _get_font, draw_gradient_bg, draw_tag_pills, wrap_text,
+    draw_text_fallback, _get_emoji_font,
 )
 
 
@@ -25,6 +26,7 @@ def build_fact_slide(fact: dict, subject_img: Image.Image | None, palette: dict 
     font_small = _get_font("nunito", 24)
     font_tags = _get_font("nunito", 26)
     font_watermark = _get_font("nunito", 18)
+    font_emoji = _get_emoji_font(64)
 
     # Fact number (top left)
     num = fact.get("number", "01")
@@ -47,7 +49,7 @@ def build_fact_slide(fact: dict, subject_img: Image.Image | None, palette: dict 
     title_lines = wrap_text(title, font_title, text_max_w, draw)
     ty = 170
     for line in title_lines:
-        draw.text((text_x, ty), line, fill=text_main + (255,), font=font_title)
+        draw_text_fallback(draw, (text_x, ty), line, font_title, font_emoji, fill=text_main + (255,))
         ty += 76
 
     # Separator
@@ -59,7 +61,7 @@ def build_fact_slide(fact: dict, subject_img: Image.Image | None, palette: dict 
     desc = fact.get("description", "")
     body_lines = wrap_text(desc, font_body, text_max_w, draw)
     for line in body_lines:
-        draw.text((text_x, ty), line, fill=text_main + (255,), font=font_body)
+        draw_text_fallback(draw, (text_x, ty), line, font_body, font_emoji, fill=text_main + (255,))
         ty += 58
 
     # Tags

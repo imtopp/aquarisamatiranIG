@@ -70,18 +70,10 @@ def generate_facts(topic: str, num_facts: int = 4) -> dict:
             if not isinstance(data["facts"], list) or len(data["facts"]) == 0:
                 raise ValueError("Facts harus list minimal 1")
 
-            def _strip_emoji(t):
-                return re.sub(r"[\U0001F300-\U0001F9FF\u2600-\u27BF\u2700-\u27BF\U0001F600-\U0001F64F\U0001F680-\U0001F6FF\u2300-\u23FF\uFE00-\uFE0F\u200D]", "", t).strip()
-
             data.setdefault("scientific_name", topic)
             data.setdefault("subtitle", "")
             data.setdefault("cta_text",
                             f"Follow {config.IG_HANDLE}\nuntuk edukasi aquarium\nsetiap minggu!")
-            data["cta_text"] = _strip_emoji(data["cta_text"])
-            data["subtitle"] = _strip_emoji(data["subtitle"])
-            for f in data.get("facts", []):
-                f["title"] = _strip_emoji(f["title"])
-                f["description"] = _strip_emoji(f["description"])
 
             cache_path.parent.mkdir(parents=True, exist_ok=True)
             cache_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")

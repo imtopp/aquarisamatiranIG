@@ -1,0 +1,37 @@
+[
+  {
+    "time": "2026-06-07 09:00",
+    "type": "photo",
+    "url": "",
+    "caption": "",
+    "done": false
+  },
+  {
+    "time": "2026-06-08 19:00",
+    "type": "reel",
+    "url": "",
+    "caption": "",
+    "done": false
+  },
+  {
+    "time": "2026-06-10 19:00",
+    "type": "carousel",
+    "urls": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "caption": "",
+    "done": false
+  },
+  {
+    "time": "2026-06-12 19:00",
+    "type": "reel",
+    "url": "",
+    "caption": "",
+    "done": false
+  }
+]

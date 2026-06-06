@@ -53,14 +53,25 @@ def parse_schedule(text: str) -> int:
 
 @dataclass
 class InstagramClient:
-    access_token: str = field(default_factory=lambda: os.getenv("IG_ACCESS_TOKEN", ""))
+    access_token: str = ""
     ig_user_id: str = field(default_factory=lambda: os.getenv("IG_USER_ID", ""))
     api_version: str = "v22.0"
-    base_url: str = "https://graph.instagram.com"
+    base_url: str = ""
 
     def __post_init__(self):
-        if not self.access_token or not self.ig_user_id:
-            raise InstagramError("IG_ACCESS_TOKEN dan IG_USER_ID wajib diisi di .env")
+        # Prioritaskan FB_PAGE_TOKEN (graph.facebook.com), fallback IG_ACCESS_TOKEN (graph.instagram.com)
+        fb_token = os.getenv("FB_PAGE_TOKEN") or os.getenv("FB_ACCESS_TOKEN", "")
+        ig_token = os.getenv("IG_ACCESS_TOKEN", "")
+        if fb_token:
+            self.access_token = fb_token
+            self.base_url = "https://graph.facebook.com"
+        elif ig_token:
+            self.access_token = ig_token
+            self.base_url = "https://graph.instagram.com"
+        else:
+            raise InstagramError("FB_PAGE_TOKEN atau IG_ACCESS_TOKEN wajib diisi di .env")
+        if not self.ig_user_id:
+            raise InstagramError("IG_USER_ID wajib diisi di .env")
 
     def _url(self, path: str) -> str:
         return f"{self.base_url}/{self.api_version}/{path.lstrip('/')}"
@@ -82,6 +93,8 @@ class InstagramClient:
     # ── Profile ──
 
     def get_profile(self) -> dict:
+        if "facebook.com" in self.base_url:
+            return self._get(f"{self.ig_user_id}", {"fields": "id,username,profile_picture_url,followers_count,media_count"})
         return self._get("me", {"fields": "user_id,username,account_type,profile_picture_url,followers_count,media_count"})
 
     # ── Media ──

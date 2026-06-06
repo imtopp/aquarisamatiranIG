@@ -1,0 +1,39 @@
+{
+  "topic": "Kekurangan Pseudomugil Luminatus",
+  "display_name": "Pseudomugil Luminatus",
+  "subtitle": "Nggak Semudah Kelihatannya!",
+  "scientific_name": "Pseudomugil luminatus",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Air Harus Spesifik Banget",
+      "description": "Butuh pH 4.5-6.5 dan air hitam dengan tannin. Kalo pake air biasa, mereka gampang stress dan rentan sakit. Wajib pake daun ketapang atau peat moss!",
+      "tags": ["pH Asam", "Air Hitam", "Daun Ketapang"]
+    },
+    {
+      "number": "02",
+      "title": "Gampang Stress Sendirian",
+      "description": "Ikan schooling wajib minimal 8-10 ekor. Kalo cuma 2-3 ekor, mereka stress berat, warnanya pudar, dan sembunyi terus. Nggak keliatan indahnya sama sekali!",
+      "tags": ["Min. 8 Ekor", "Schooling", "Stress"]
+    },
+    {
+      "number": "03",
+      "title": "Warna Gampang Pudar",
+      "description": "Biru neon di matanya cuma keluar kalo kondisi ideal. Lampu terlalu terang, air kotor, atau salah parameter bikin warnanya langsung kusam. Nggak sabar? hasilnya ngga maksimal!",
+      "tags": ["Warna Pudar", "Lampu Redup", "Sabar"]
+    },
+    {
+      "number": "04",
+      "title": "Pilih-pilih Makanan",
+      "description": "Nggak bisa dikasih pelet sembarangan. Mereka lebih suka pakan hidup kayak artemia, daphnia, atau micro worm. Kalo cuma dikasih pelet kering, bisa mogok makan!",
+      "tags": ["Pakan Hidup", "Artemia", "Mogok Makan"]
+    },
+    {
+      "number": "05",
+      "title": "Harga Lumayan Per Nak.",
+      "description": "Ukuran cuma 3-4cm tapi harga per ekor bisa 15-25rb. Buat 10 ekor aja udah 150-250rb. Belum include ongkir dan resiko stress selama perjalanan!",
+      "tags": ["Harga", "Budget", "Ongkir"]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

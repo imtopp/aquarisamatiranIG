@@ -1,0 +1,32 @@
+# Environment
+.env
+
+# Virtual env
+.venv/
+
+# Temp files
+*TEMP_MPY*
+output.txt
+gen*.txt
+out.txt
+test_*.png
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# Generated files
+resource/output/
+resource/photos/*_slide_*.png
+resource/photos/edu_*.jpg
+
+# Large video files (>100MB)
+resource/videos/*.mp4
+resource/published/*.mp4

@@ -1,0 +1,49 @@
+{
+  "topic": "Siklus Nitrogen Aquascape",
+  "display_name": "Siklus Nitrogen",
+  "subtitle": "Jantung Ekosistem Aquarium Kamu",
+  "scientific_name": "Biogeochemical Nitrogen Cycle",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Amonia si Racun Pertama",
+      "description": "Kotoran ikan, sisa pakan, dan tanaman busuk akan menghasilkan Amonia yang sangat beracun bagi fauna. Inilah alasan utama mengapa kita wajib melakukan proses 'cycling' sebelum memasukkan ikan ke tank baru.",
+      "tags": [
+        "Amonia (NH3)",
+        "Toksik Tinggi",
+        "Fase Awal"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Pasukan Pengurai Nitrosomonas",
+      "description": "Bakteri baik bernama Nitrosomonas akan muncul secara alami untuk mengubah Amonia menjadi Nitrit. Meski kadar amonia turun, Nitrit ini masih sangat berbahaya dan bisa membuat ikanmu sulit bernapas.",
+      "tags": [
+        "Nitrosomonas",
+        "Butuh Oksigen",
+        "Mengurai Amonia"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Penyelamat Bernama Nitrobacter",
+      "description": "Selanjutnya, bakteri Nitrobacter akan mengubah Nitrit menjadi Nitrat yang jauh lebih aman. Nitrat inilah yang menjadi makanan lezat dan nutrisi utama bagi tanaman aquascape agar tumbuh subur.",
+      "tags": [
+        "Nitrobacter",
+        "Nitrat (NO3)",
+        "Nutrisi Tanaman"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Kunci Sukses: Sabar Cycling! ️",
+      "description": "Siklus ini membutuhkan waktu 2 hingga 4 minggu untuk terbentuk sempurna di dalam filter biologis. Pastikan kadar Amonia dan Nitrit berada di angka 0 ppm sebelum kamu mulai memasukkan ikan kesayanganmu.",
+      "tags": [
+        "Durasi 2-4 Minggu",
+        "Target: 0 ppm",
+        "Filter Biologis"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\\nuntuk edukasi aquarium\\nsetiap minggu!"
+}

@@ -2,46 +2,46 @@
   "topic": "Siklus Nitrogen Aquascape",
   "display_name": "Siklus Nitrogen",
   "subtitle": "Jantung Ekosistem Aquarium Kamu",
-  "scientific_name": "Nitrosomonas & Nitrobacter",
+  "scientific_name": "Biogeochemical Nitrogen Cycle",
   "facts": [
     {
       "number": "01",
-      "title": "Amonia si Racun Tersembunyi 💀",
-      "description": "Kotoran ikan dan sisa pakan yang membusuk akan menghasilkan amonia yang sangat beracun bagi biota. Tanpa adanya bakteri pengurai, akumulasi amonia yang tinggi dapat membuat ikan mati mendadak dalam hitungan hari.",
+      "title": "Amonia si Racun Pertama",
+      "description": "Kotoran ikan, sisa pakan, dan tanaman busuk akan menghasilkan Amonia yang sangat beracun bagi fauna. Inilah alasan utama mengapa kita wajib melakukan proses 'cycling' sebelum memasukkan ikan ke tank baru.",
       "tags": [
-        "Amonia (NH3/NH4+)",
-        "Target: 0 ppm",
-        "Bahaya: Sangat Tinggi"
+        "Amonia (NH3)",
+        "Toksik Tinggi",
+        "Fase Awal"
       ]
     },
     {
       "number": "02",
-      "title": "Penyelamat Fase Pertama 🦠",
-      "description": "Bakteri menguntungkan bernama Nitrosomonas akan tumbuh untuk mengubah amonia beracun menjadi nitrit. Meskipun mengalami perubahan wujud, nitrit ini tetap zat beracun yang bisa mengganggu sistem pernapasan ikan Anda.",
+      "title": "Pasukan Pengurai Nitrosomonas",
+      "description": "Bakteri baik bernama Nitrosomonas akan muncul secara alami untuk mengubah Amonia menjadi Nitrit. Meski kadar amonia turun, Nitrit ini masih sangat berbahaya dan bisa membuat ikanmu sulit bernapas.",
       "tags": [
-        "Nitrit (NO2-)",
-        "Target: 0 ppm",
-        "Suhu Bakteri: 25-30°C"
+        "Nitrosomonas",
+        "Butuh Oksigen",
+        "Mengurai Amonia"
       ]
     },
     {
       "number": "03",
-      "title": "Nitrobacter Sang Pengurai Akhir 🧼",
-      "description": "Selanjutnya, bakteri Nitrobacter bertugas mengubah nitrit berbahaya menjadi nitrat yang jauh lebih aman. Menariknya, nitrat inilah yang nantinya akan diserap oleh tanaman aquascape Anda sebagai nutrisi atau pupuk alami.",
+      "title": "Penyelamat Bernama Nitrobacter",
+      "description": "Selanjutnya, bakteri Nitrobacter akan mengubah Nitrit menjadi Nitrat yang jauh lebih aman. Nitrat inilah yang menjadi makanan lezat dan nutrisi utama bagi tanaman aquascape agar tumbuh subur.",
       "tags": [
-        "Nitrat (NO3-)",
-        "Target: < 20 ppm",
+        "Nitrobacter",
+        "Nitrat (NO3)",
         "Nutrisi Tanaman"
       ]
     },
     {
       "number": "04",
-      "title": "Pentingnya Water Change 🪣",
-      "description": "Meskipun nitrat relatif aman, kadarnya yang terlalu menumpuk bisa memicu ledakan alga (algae bloom). Melakukan pergantian air (water change) secara rutin adalah cara paling efektif untuk membuang sisa nitrat ini keluar dari sistem.",
+      "title": "Kunci Sukses: Sabar Cycling!",
+      "description": "Siklus ini membutuhkan waktu 2 hingga 4 minggu untuk terbentuk sempurna di dalam filter biologis. Pastikan kadar Amonia dan Nitrit berada di angka 0 ppm sebelum kamu mulai memasukkan ikan kesayanganmu.",
       "tags": [
-        "Water Change: 20-30%",
-        "Rutin: 1-2 Minggu",
-        "pH Stabilizer"
+        "Durasi 2-4 Minggu",
+        "Target: 0 ppm",
+        "Filter Biologis"
       ]
     }
   ],

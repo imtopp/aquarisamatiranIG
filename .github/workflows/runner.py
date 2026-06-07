@@ -5,6 +5,8 @@ import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
+sys.stdout.reconfigure(encoding='utf-8')
+
 # Tambah root project ke path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
@@ -21,7 +23,7 @@ def wib_now():
 def load_schedule():
     if not SCHEDULE_PATH.exists():
         return []
-    return json.loads(SCHEDULE_PATH.read_text())
+    return json.loads(SCHEDULE_PATH.read_text(encoding="utf-8"))
 
 
 def save_schedule(data):
@@ -29,21 +31,23 @@ def save_schedule(data):
 
 
 def main():
-    now_str = wib_now()
+    now = datetime.now(WIB)
+    now_str = now.strftime("%Y-%m-%d %H:%M")
     print(f"🕐 Scheduler jalan: {now_str} WIB")
-
-    # Cek force_time dari workflow_dispatch
-    force_time = os.environ.get("FORCE_SCHEDULE_TIME")
-    if force_time:
-        print(f"⚡ Force jadwal: {force_time}")
-        now_str = force_time
 
     schedule = load_schedule()
     if not schedule:
         print("📭 schedule.json kosong — ngga ada jadwal")
         return
 
-    due = [p for p in schedule if p.get("time") == now_str and not p.get("done")]
+    # Cek force_time dari workflow_dispatch
+    force_time = os.environ.get("FORCE_SCHEDULE_TIME")
+    if force_time:
+        print(f"⚡ Force jadwal: {force_time}")
+        due = [p for p in schedule if p.get("time") == force_time and not p.get("done")]
+    else:
+        due = [p for p in schedule if not p.get("done") and p.get("time") and p["time"] <= now_str]
+
     if not due:
         print(f"✅ Ngga ada postingan due di {now_str}")
         return

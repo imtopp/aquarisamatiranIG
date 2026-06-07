@@ -27,6 +27,9 @@ resource/output/
 resource/photos/*_slide_*.png
 resource/photos/edu_*.jpg
 
+# Temp scripts
+_*.py
+
 # Large video files (>100MB)
 resource/videos/*.mp4
 resource/published/*.mp4

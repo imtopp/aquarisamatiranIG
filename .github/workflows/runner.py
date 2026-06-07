@@ -66,28 +66,23 @@ def main():
             print(f"   ⏭️  url kosong — skip")
             continue
 
-        # Tentukan scheduled_publish_time
-        sched_ts = None
         caption = post.get("caption", "")
-        if post.get("time") and not force_time:
-            try:
+        try:
+            if post.get("time") and not force_time:
                 dt = datetime.strptime(post["time"], "%Y-%m-%d %H:%M")
                 dt_wib = dt.replace(tzinfo=WIB)
                 if dt_wib > now:
-                    sched_ts = int(dt_wib.timestamp())
-                    print(f"   📅 Jadwal: {post['time']} WIB → IG publish otomatis")
+                    print(f"   ⏳ Belum waktunya — cron nanti yg handle")
+                    continue
                 else:
                     print(f"   ⏰ Udah lewat → publish sekarang")
-            except ValueError:
-                pass
 
-        try:
             if ptype == "photo":
-                result = client.post_photo(post["url"], caption, scheduled_publish_time=sched_ts)
+                result = client.post_photo(post["url"], caption)
             elif ptype == "reel":
-                result = client.post_reel(post["url"], caption, scheduled_publish_time=sched_ts)
+                result = client.post_reel(post["url"], caption)
             elif ptype == "carousel":
-                result = client.post_carousel(post["urls"], caption, scheduled_publish_time=sched_ts)
+                result = client.post_carousel(post["urls"], caption)
             else:
                 print(f"   ⚠️  Tipe '{ptype}' ngga dikenal")
                 continue

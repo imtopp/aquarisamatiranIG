@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'schedule.json'
+  schedule:
+    - cron: '*/30 * * * *'
   workflow_dispatch:
     inputs:
       force_time:

@@ -1,0 +1,49 @@
+{
+  "topic": "Filter Aquarium",
+  "display_name": "Sistem Filtrasi",
+  "subtitle": "Jantung Kehidupan Ekosistem Air",
+  "scientific_name": "Mechanical & Biological Filtration",
+  "facts": [
+    {
+      "number": "01",
+      "title": "3 Jurus Jernih! 💧",
+      "description": "Filter bekerja dengan tiga metode: mekanis menyaring kotoran padat, biologis mengandalkan bakteri pengurai racun, dan kimiawi menyerap zat berbahaya. Kombinasi ketiganya adalah kunci air aquarium sebening kristal.",
+      "tags": [
+        "Mekanis",
+        "Biologis",
+        "Kimiawi"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Rumah Bakteri Baik 🦠",
+      "description": "Media biologis seperti ceramic ring atau batu apung adalah tempat tinggal bakteri pengurai. Bakteri ini sangat penting untuk mengubah amonia beracun dari kotoran ikan menjadi senyawa nitrat yang jauh lebih aman.",
+      "tags": [
+        "Amonia",
+        "Nitrifikasi",
+        "Bio-media"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Aturan Putaran Air 🔄",
+      "description": "Idealnya, pilihlah filter dengan kapasitas pompa (flow rate) minimal 4 hingga 8 kali volume air aquariummu per jam. Jika aquariummu berisi 50 liter air, gunakan filter dengan rating minimal 200 hingga 400 Liter Per Jam (LPH).",
+      "tags": [
+        "Flow Rate",
+        "LPH",
+        "Volume"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Jangan Asal Cuci! 🧼",
+      "description": "Saat membersihkan media filter biologis, gunakan selalu air bekas aquarium, bukan air keran langsung. Kandungan klorin pada air keran bisa membunuh seluruh koloni bakteri baik yang sudah terbentuk.",
+      "tags": [
+        "Klorin",
+        "Perawatan",
+        "Bakteri"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\\nuntuk edukasi aquarium\\nsetiap minggu!"
+}

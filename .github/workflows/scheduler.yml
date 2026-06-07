@@ -1,17 +1,10 @@
 name: Instagram Scheduler
 
 on:
-  schedule:
-    # Jadwal posting — WIB = UTC+7
-    # Minggu 09:00 WIB = 02:00 UTC
-    # Senin 19:00 WIB = 12:00 UTC
-    # Rabu 19:00 WIB = 12:00 UTC
-    # Jumat 19:00 WIB = 12:00 UTC
-    - cron: '0 2 * * 0'    # Minggu 09:00 WIB
-    - cron: '0 12 * * 1'   # Senin 19:00 WIB
-    - cron: '0 12 * * 3'   # Rabu 19:00 WIB
-    - cron: '0 12 * * 5'   # Jumat 19:00 WIB
-  workflow_dispatch:  # Bisa dijalanin manual dari GitHub juga
+  push:
+    paths:
+      - 'schedule.json'
+  workflow_dispatch:
     inputs:
       force_time:
         description: 'Paksa jalan (format: YYYY-MM-DD HH:MM WIB)'

@@ -33,52 +33,61 @@ def save_schedule(data):
 def main():
     now = datetime.now(WIB)
     now_str = now.strftime("%Y-%m-%d %H:%M")
-    print(f"🕐 Scheduler jalan: {now_str} WIB")
+    print(f"🕐 Runner jalan: {now_str} WIB")
 
     schedule = load_schedule()
     if not schedule:
         print("📭 schedule.json kosong — ngga ada jadwal")
         return
 
-    # Cek force_time dari workflow_dispatch
     force_time = os.environ.get("FORCE_SCHEDULE_TIME")
     if force_time:
         print(f"⚡ Force jadwal: {force_time}")
-        due = [p for p in schedule if p.get("time") == force_time and not p.get("done")]
+        target = [p for p in schedule if p.get("time") == force_time and not p.get("done")]
     else:
-        due = [p for p in schedule if not p.get("done") and p.get("time") and p["time"] <= now_str]
+        target = [p for p in schedule if not p.get("done")]
 
-    if not due:
-        print(f"✅ Ngga ada postingan due di {now_str}")
+    if not target:
+        print("✅ Semua postingan udah selesai")
         return
 
     client = InstagramClient()
 
-    for post in due:
-        print(f"📤 Posting: {post.get('type', '?')} — {post.get('time')}")
-        # Parse jadwal ke unix timestamp (scheduled_publish_time)
+    for post in target:
+        ptype = post.get("type", "?")
+        ptime = post.get("time", "?")
+        print(f"\n📤 {ptype} — {ptime}")
+
+        # Skip kalo kontennya kosong
+        if ptype == "carousel" and not post.get("urls"):
+            print(f"   ⏭️  url kosong — skip")
+            continue
+        if ptype != "carousel" and not post.get("url"):
+            print(f"   ⏭️  url kosong — skip")
+            continue
+
+        # Tentukan scheduled_publish_time
         sched_ts = None
-        if post.get("time"):
+        caption = post.get("caption", "")
+        if post.get("time") and not force_time:
             try:
                 dt = datetime.strptime(post["time"], "%Y-%m-%d %H:%M")
-                sched_ts = int(dt.replace(tzinfo=WIB).timestamp())
+                dt_wib = dt.replace(tzinfo=WIB)
+                if dt_wib > now:
+                    sched_ts = int(dt_wib.timestamp())
+                    print(f"   📅 Jadwal: {post['time']} WIB → IG publish otomatis")
+                else:
+                    print(f"   ⏰ Udah lewat → publish sekarang")
             except ValueError:
                 pass
+
         try:
-            ptype = post.get("type")
-            caption = post.get("caption", "")
             if ptype == "photo":
-                url = post["url"]
-                result = client.post_photo(url, caption, scheduled_publish_time=sched_ts)
-                print(f"   ✅ ID: {result.get('id')}")
+                result = client.post_photo(post["url"], caption, scheduled_publish_time=sched_ts)
             elif ptype == "reel":
-                url = post["url"]
-                result = client.post_reel(url, caption, scheduled_publish_time=sched_ts)
-                print(f"   ✅ ID: {result.get('id')}")
+                result = client.post_reel(post["url"], caption, scheduled_publish_time=sched_ts)
             elif ptype == "carousel":
-                urls = post["urls"]
-                result = client.post_carousel(urls, caption, scheduled_publish_time=sched_ts)
-                print(f"   ✅ ID: {result.get('id')}")
+                result = client.post_carousel(post["urls"], caption, scheduled_publish_time=sched_ts)
             else:
                 print(f"   ⚠️  Tipe '{ptype}' ngga dikenal")
                 continue
@@ -86,6 +95,7 @@ def main():
             post["done"] = True
             post["result_id"] = result.get("id", "")
             save_schedule(schedule)
+            print(f"   ✅ ID: {result.get('id')}")
             print(f"   📝 schedule.json diupdate")
 
         except Exception as e:

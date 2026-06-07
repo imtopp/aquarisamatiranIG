@@ -56,20 +56,28 @@ def main():
 
     for post in due:
         print(f"📤 Posting: {post.get('type', '?')} — {post.get('time')}")
+        # Parse jadwal ke unix timestamp (scheduled_publish_time)
+        sched_ts = None
+        if post.get("time"):
+            try:
+                dt = datetime.strptime(post["time"], "%Y-%m-%d %H:%M")
+                sched_ts = int(dt.replace(tzinfo=WIB).timestamp())
+            except ValueError:
+                pass
         try:
             ptype = post.get("type")
             caption = post.get("caption", "")
             if ptype == "photo":
                 url = post["url"]
-                result = client.post_photo(url, caption)
+                result = client.post_photo(url, caption, scheduled_publish_time=sched_ts)
                 print(f"   ✅ ID: {result.get('id')}")
             elif ptype == "reel":
                 url = post["url"]
-                result = client.post_reel(url, caption)
+                result = client.post_reel(url, caption, scheduled_publish_time=sched_ts)
                 print(f"   ✅ ID: {result.get('id')}")
             elif ptype == "carousel":
                 urls = post["urls"]
-                result = client.post_carousel(urls, caption)
+                result = client.post_carousel(urls, caption, scheduled_publish_time=sched_ts)
                 print(f"   ✅ ID: {result.get('id')}")
             else:
                 print(f"   ⚠️  Tipe '{ptype}' ngga dikenal")

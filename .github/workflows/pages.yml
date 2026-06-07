@@ -3,7 +3,10 @@ name: Deploy Bio Page
 on:
   push:
     branches: [main]
-    paths: ['bio/**']
+    paths:
+      - 'bio/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read

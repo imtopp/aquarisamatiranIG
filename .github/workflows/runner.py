@@ -50,6 +50,19 @@ def main():
 
     client = InstagramClient()
 
+    # Backfill permalink untuk post lama yang belum punya
+    for post in schedule:
+        if post.get("result_id") and not post.get("permalink"):
+            print(f"   🔄 Backfill permalink buat {post.get('result_id')}...")
+            try:
+                info = client.get_media_by_id(post["result_id"])
+                post["permalink"] = info.get("permalink", "")
+                if post["permalink"]:
+                    print(f"      ✅ {post['permalink']}")
+            except Exception as e:
+                print(f"      ⚠️  Gagal: {e}")
+    save_schedule(schedule)
+
     if not target:
         print("✅ Semua postingan udah selesai")
         update_bio(schedule)

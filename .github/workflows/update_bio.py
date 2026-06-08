@@ -75,7 +75,8 @@ def update_bio(schedule=None):
 
         # Update href kalo ada permalink
         if permalink:
-            href_pattern = r'(<a class="card-link" href=")[^"]+(".*?<div class="num">' + str(card_num) + r')'
+            # Match specifically the <a> that wraps this card (not any previous <a>)
+            href_pattern = r'(<a class="card-link" href=")[^"]+("><div class="card[^"]*".*?<div class="num">' + str(card_num) + r')'
             html, href_count = re.subn(href_pattern, r'\1' + permalink + r'\2', html, count=1, flags=re.DOTALL)
             if href_count:
                 print(f"  🔗 Card #{card_num} → {permalink}")

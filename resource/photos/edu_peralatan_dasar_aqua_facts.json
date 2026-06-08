@@ -1,0 +1,69 @@
+{
+  "topic": "Peralatan Dasar Aquarium",
+  "display_name": "Peralatan Dasar Aquarium",
+  "subtitle": "Mulai Hobi Tanpa Bingung!",
+  "scientific_name": "Sistem Pendukung Kehidupan Akuatik",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Filter: Jantung Aquarium 🌀",
+      "description": "Filter bukan sekadar menjernihkan air, melainkan tempat tumbuh bakteri baik yang mengurai amonia beracun dari kotoran ikan. Pastikan kapasitas putaran airnya (flow rate) minimal 3-5 kali lipat dari total volume aquariummu.",
+      "tags": [
+        "Filtrasi",
+        "Bakteri Baik",
+        "Sirkulasi Air"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Lampu: Matahari Buatan 💡",
+      "description": "Lampu LED sangat penting untuk merangsang fotosintesis tanaman air dan memunculkan warna alami ikan. Batasi durasi pencahayaan cukup 6-8 jam sehari untuk mencegah ledakan alga (blooming alga) di dalam tank.",
+      "tags": [
+        "Spektrum LED",
+        "Fotosintesis",
+        "Timer 6-8 Jam"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Heater: Penjaga Suhu 🌡️",
+      "description": "Ikan hias adalah hewan berdarah dingin yang sensitif terhadap perubahan suhu drastis. Heater otomatis membantu menjaga suhu air tetap stabil di kisaran ideal 24-28°C agar ikan tidak mudah stres dan terserang penyakit.",
+      "tags": [
+        "Suhu 24-28°C",
+        "Termostat",
+        "Cegah White Spot"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Substrat: Rumah Bakteri 🪨",
+      "description": "Pasir, kerikil, atau soil bukan cuma hiasan estetik, tapi juga media jangkar akar tanaman dan rumah bagi bakteri pengurai. Pilih jenis substrat inert yang tidak mengubah parameter pH air secara ekstrem.",
+      "tags": [
+        "Pasir & Soil",
+        "Media Bakteri",
+        "pH Buffer"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Aerator: Penyuplai Oksigen 🫧",
+      "description": "Gelembung dari aerator membantu memecah permukaan air untuk memfasilitasi pertukaran gas. Proses ini sangat vital untuk meningkatkan kadar oksigen terlarut (O2) sekaligus membuang karbon dioksida (CO2) sisa respirasi.",
+      "tags": [
+        "Oksigen Terlarut",
+        "Pertukaran Gas",
+        "Pompa Udara"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Water Conditioner: Penetral Air 🧪",
+      "description": "Air keran umumnya mengandung klorin dan logam berat yang berbahaya bagi insang ikan. Penggunaan water conditioner saat siklus ganti air sangat wajib untuk menetralkan racun tersebut secara instan.",
+      "tags": [
+        "Anti-Klorin",
+        "Detoksifikasi",
+        "Water Change"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\\nuntuk edukasi aquarium\\nsetiap minggu!"
+}

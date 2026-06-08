@@ -1,0 +1,69 @@
+{
+  "topic": "Cara Merawat Aquarium Mingguan untuk Pemula",
+  "display_name": "Perawatan Mingguan Aquarium",
+  "subtitle": "Air Jernih, Ikan Happy!",
+  "scientific_name": "Aquatic Ecosystem Homeostasis",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Ganti Air 20-30% 🪣",
+      "description": "Jangan menguras seluruh air aquarium kamu! Cukup ganti sekitar 20-30% air setiap minggu untuk membuang racun amonia tanpa merusak koloni bakteri baik. Pastikan air baru sudah diendapkan atau diberi kondisioner air anti-klorin.",
+      "tags": [
+        "Water Change",
+        "Klorin Free",
+        "Suhu Stabil"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Siphon Kotoran Dasar 🧹",
+      "description": "Gunakan selang siphon (penyedot) untuk membersihkan sisa makanan dan kotoran ikan yang mengendap di sela-sela pasir atau batu. Area dasar ini adalah tempat utama menumpuknya zat organik yang memicu lonjakan amonia.",
+      "tags": [
+        "Siphon",
+        "Substrat",
+        "Feses Ikan"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Gosok Alga di Kaca 🧽",
+      "description": "Bersihkan alga hijau atau cokelat yang mulai menempel di dinding kaca menggunakan spons khusus atau pembersih magnetik. Lakukan pembersihan kaca ini sebelum menyedot air agar serpihan alga yang lepas ikut terbuang.",
+      "tags": [
+        "Algae Scraper",
+        "Spons Lembut",
+        "Estetika"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Bilas Busa Filter 🫧",
+      "description": "Cuci busa penyaring mekanis jika sudah terlihat kotor kecokelatan. Sangat penting untuk membilasnya menggunakan air bekas aquarium, bukan air keran, agar bakteri pengurai yang hidup di filter tidak mati akibat kaporit.",
+      "tags": [
+        "Busa Filter",
+        "Bakteri Baik",
+        "Air Aquarium"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Pangkas Tanaman Layu ✂️",
+      "description": "Jika aquarium kamu memiliki tanaman hidup (aquascape), gunting daun-daun yang mulai menguning atau membusuk. Hal ini mencegah pembusukan organik di dalam air dan merangsang pertumbuhan tunas baru yang lebih sehat.",
+      "tags": [
+        "Trimming",
+        "Aquascape",
+        "CO2 & Cahaya"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Tes Parameter Air 🧪",
+      "description": "Lakukan tes cepat mingguan untuk memantau kadar pH, Nitrit (NO2), dan Nitrat (NO3). Deteksi dini perubahan parameter air akan membantu kamu mencegah penyakit pada ikan sebelum kondisinya menjadi parah.",
+      "tags": [
+        "pH 6.5-7.5",
+        "Nitrit 0 ppm",
+        "Water Test"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\\nuntuk edukasi aquarium\\nsetiap minggu!"
+}

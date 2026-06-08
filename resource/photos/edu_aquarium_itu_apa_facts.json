@@ -1,0 +1,69 @@
+{
+  "topic": "Aquarium itu Apa?",
+  "display_name": "Ekosistem Akuarium",
+  "subtitle": "Dunia Air di Rumahmu",
+  "scientific_name": "Aquarium (Aquaria)",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Ekosistem Buatan 🌿",
+      "description": "Akuarium bukan sekadar wadah kaca berisi air dan ikan hias. Ini adalah tiruan ekosistem air mini yang dinamis, tempat biota air, tanaman, dan mikroba saling berinteraksi untuk bertahan hidup.",
+      "tags": [
+        "Biosfer Mini",
+        "Siklus Biologi",
+        "Closed System"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Siklus Nitrogen 🌀",
+      "description": "Jantung kehidupan akuarium terletak pada siklus nitrogen. Bakteri baik di dalam filter bertugas mengubah amonia beracun dari kotoran ikan menjadi nitrit, lalu menjadi nitrat yang lebih aman bagi lingkungan.",
+      "tags": [
+        "Amonia (NH3)",
+        "Bakteri Pengurai",
+        "Filter Biologis"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Parameter Air Stabil 🌡️",
+      "description": "Air akuarium membutuhkan kestabilan parameter agar biota di dalamnya tidak stres. Untuk ikan tropis, menjaga suhu ideal antara 24-28°C dan pH air yang stabil sangat krusial demi mencegah penyakit.",
+      "tags": [
+        "pH 6.5 - 7.5",
+        "Suhu 24-28°C",
+        "TDS Air"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Paru-Paru Hijau 🌱",
+      "description": "Tanaman hidup dalam akuarium berfungsi sebagai penyaring alami yang sangat efektif. Mereka menyerap zat sisa seperti nitrat dan karbon dioksida (CO2), lalu melepaskan oksigen segar untuk pernapasan ikan.",
+      "tags": [
+        "Fotosintesis",
+        "Oksigen (O2)",
+        "Aquascape"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Ginjal Akuarium 🔄",
+      "description": "Sistem filtrasi bekerja layaknya ginjal dalam tubuh makhluk hidup. Filter menyaring kotoran fisik, menetralisir racun secara biologis, dan menjaga air tetap jernih serta kaya oksigen.",
+      "tags": [
+        "Filter Mekanis",
+        "Filter Kimiawi",
+        "Water Turnover"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Pereda Stres Alami 🧠",
+      "description": "Memandangi akuarium secara ilmiah terbukti dapat menurunkan detak jantung dan mengurangi tingkat kecemasan. Menghadirkan elemen alam di dalam ruangan memberikan efek meditatif yang menenangkan jiwa.",
+      "tags": [
+        "Terapi Visual",
+        "Biophilic Design",
+        "Mental Health"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\\nuntuk edukasi aquarium\\nsetiap minggu!"
+}

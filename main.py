@@ -8,6 +8,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+import config
 from dotenv import load_dotenv
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -91,13 +92,17 @@ def cmd_post_photo(client, args):
         print(f"✅ Foto berhasil di-publish! ID: {result.get('id')}")
 
 
-def cmd_post_edu(client, args):
+def cmd_post_carousel(client, args):
     schedule_ts = None
+    slug_filter = None
     filtered = []
     i = 0
     while i < len(args):
         if args[i] == "--schedule" and i + 1 < len(args):
             schedule_ts = parse_schedule(args[i + 1])
+            i += 2
+        elif args[i] == "--slug" and i + 1 < len(args):
+            slug_filter = args[i + 1]
             i += 2
         else:
             filtered.append(args[i])
@@ -105,15 +110,15 @@ def cmd_post_edu(client, args):
 
     caption = " ".join(filtered) if filtered else ""
 
-    # Auto-detect slide edukasi terbaru
+    # Auto-detect slide terbaru
     slides = sorted(PHOTO_DIR.glob("*_slide_??.png")) + sorted(PHOTO_DIR.glob("edu_*_??.jpg"))
     if not slides:
-        print("❌ Ngga ada slide edukasi di resource/photos/")
+        print("❌ Ngga ada slide carousel di resource/photos/")
         print()
-        print("Generate dulu ya: python main.py generate-edu <topik>")
+        print("Generate dulu ya: python main.py generate-carousel <topik>")
         return
 
-    # Kelompokin berdasarkan prefix (slug sebelum _slide_N atau edu_slug_N), ambil grup terakhir
+    # Kelompokin berdasarkan prefix
     groups = {}
     for s in slides:
         stem = s.stem
@@ -122,13 +127,23 @@ def cmd_post_edu(client, args):
         else:
             prefix = stem.rsplit("_", 1)[0]
         groups.setdefault(prefix, []).append(s)
-    latest_prefix = max(groups, key=lambda k: max(groups[k], key=lambda f: f.stat().st_mtime).stat().st_mtime)
+
+    if slug_filter:
+        if slug_filter not in groups:
+            tersedia = ", ".join(sorted(groups))
+            print(f"❌ Slug '{slug_filter}' ngga ditemukan. Tersedia: {tersedia}")
+            return
+        latest_prefix = slug_filter
+    else:
+        latest_prefix = max(groups, key=lambda k: max(groups[k], key=lambda f: f.stat().st_mtime).stat().st_mtime)
+
     latest = sorted(groups[latest_prefix])
     print(f"📋 Detected {len(latest)} slide: {', '.join(f.name for f in latest)}")
 
     if not caption:
         print("💬 Caption belum dikasih. Mau pake caption apa?")
-        print("  python main.py post-edu \"caption di sini\"")
+        print("  python main.py post-carousel \"caption di sini\"")
+        print("  python main.py post-carousel --slug <nama_slug> \"caption\"")
         return
 
     print(f"📤 Upload {len(latest)} slide ke Catbox...")
@@ -280,14 +295,14 @@ def _generate_captions(video_path):
         return None
 
     print("🤖 Generate caption pake Gemini...")
+    niche = config.current_niche
     client = genai.Client(api_key=api_key)
     prompt = (
-        "Kamu adalah social media manager Instagram @aquarisamatiran (aquascape & aquarium). "
+        f"Kamu adalah social media manager Instagram {niche.handle} ({niche.niche_name}). "
         "Berdasarkan cuplikan video berikut, buat 3 opsi caption IG yang menarik, casual, "
         "pake Bahasa Indonesia + emoji + hashtag relevan. "
         "Catatan penting:\n"
-        "- Misi akun: blak-blakan soal proses & kegagalan (bukan cuma hasil rapih), "
-        "serta edukatif/inspiratif biar followers ngerasa dapet value.\n"
+        f"- Misi akun: {niche.mission_blurb}\n"
         "- Tiap caption harus mendorong diskusi di kolom komentar — ajak ngobrol, "
         "kasi pertanyaan, bikin orang mau reply.\n"
         "- Tujuan: bangun komunitas setia & follower growth organik.\n"
@@ -358,15 +373,15 @@ def _generate_photo_captions(photo_path: Path):
         return None
 
     print("🤖 Generate caption dari gambar pake Gemini...")
+    niche = config.current_niche
     client = genai.Client(api_key=api_key)
     img = PIL.Image.open(photo_path)
     prompt = (
-        "Kamu adalah social media manager Instagram @aquarisamatiran (aquascape & aquarium). "
-        "Berdasarkan foto aquascape/aquarium berikut, buat 3 opsi caption IG yang menarik, casual, "
+        f"Kamu adalah social media manager Instagram {niche.handle} ({niche.niche_name}). "
+        f"Berdasarkan {niche.photo_description} berikut, buat 3 opsi caption IG yang menarik, casual, "
         "pake Bahasa Indonesia + emoji + hashtag relevan. "
         "Catatan penting:\n"
-        "- Misi akun: blak-blakan soal proses & kegagalan (bukan cuma hasil rapih), "
-        "serta edukatif/inspiratif biar followers ngerasa dapet value.\n"
+        f"- Misi akun: {niche.mission_blurb}\n"
         "- Tiap caption harus mendorong diskusi di kolom komentar — ajak ngobrol, "
         "kasi pertanyaan, bikin orang mau reply.\n"
         "- Tujuan: bangun komunitas setia & follower growth organik.\n"
@@ -492,20 +507,24 @@ def _generate_slide_plan(topic: str, n_slides: int = 4):
         print("❌ GEMINI_API_KEY ngga ditemukan di .env")
         return None
 
+    niche = config.current_niche
+    ct = config.current_content_type
     client = genai.Client(api_key=api_key)
+    slide_structure = "\n".join(
+        f"{i+1}. {s}" for i, s in enumerate(ct.slide_structure[:n_slides])
+    )
+    desc = ct.pexels_desc or niche.pexels_image_desc
     prompt = (
-        f"Kamu adalah kreator edukasi @aquarisamatiran (aquascape & aquarium).\n"
-        f"Buat {n_slides} slide edukasi tentang \"{topic}\" buat konten Instagram carousel "
+        f"Kamu adalah kreator {niche.education_label} {niche.handle} ({niche.niche_name}).\n"
+        f"Buat {n_slides} slide {ct.label} tentang \"{topic}\" buat konten Instagram carousel "
         f"dengan gaya infografis casual.\n\n"
+        f"{ct.instruction.format(topic=topic) if '{topic}' in ct.instruction else f'{ct.instruction} tentang {topic}'}.\n\n"
         f"Struktur {n_slides} slide:\n"
-        f"1. Hook/Judul — bikin penasaran\n"
-        f"2. Asal-usul/Habitat — dari mana asalnya\n"
-        f"3. Karakter/Ciri khas — perilaku, tampilan, keunikan\n"
-        f"4. Rangkuman + CTA — kesimpulan + ajak diskusi\n\n"
+        f"{slide_structure}\n\n"
         f"Output JSON array aja, setiap objek punya:\n"
         f"- \"title\": judul slide (max 40 karakter, Bahasa Indonesia, casual)\n"
         f"- \"body\": teks penjelasan (max 120 karakter, 2-3 kalimat pendek)\n"
-        f"- \"desc\": deskripsi visual buat prompt gambar Pexels (aquascape/aquarium, ikan tropis)\n"
+        f"- \"desc\": deskripsi visual buat prompt gambar Pexels ({desc})\n"
         f"Hanya JSON, tanpa teks lain."
     )
 
@@ -596,7 +615,7 @@ def _make_edu_slide(bg_img, title, body, slide_num, total):
         y += line_h
 
     # watermark & slide number
-    draw.text((pad, H - 50), "@aquarisamatiran", fill=(255, 255, 255, 180), font=font_meta)
+    draw.text((pad, H - 50), config.IG_HANDLE, fill=(255, 255, 255, 180), font=font_meta)
     num_text = f"{slide_num}/{total}"
     n_bbox = draw.textbbox((0, 0), num_text, font=font_meta)
     n_w = n_bbox[2] - n_bbox[0]
@@ -605,40 +624,61 @@ def _make_edu_slide(bg_img, title, body, slide_num, total):
     return bg.convert("RGB")
 
 
-def _make_gradient_bg():
-    """Buat background gradien + elemen dekoratif aquascape."""
+def _make_gradient_bg(theme: str = "aquascape"):
+    """Buat background gradien sesuai tema niche."""
     W, H = 1080, 1080
     bg = PIL.Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw = PIL.ImageDraw.Draw(bg, "RGBA")
 
-    # Gradien aquascape (deep blue ke green)
-    for y in range(H):
-        t = y / H
-        r = int(10 + t * 5)
-        g = int(50 + t * 60)
-        b = int(100 + t * 40)
-        draw.line([(0, y), (W, y)], fill=(r, g, b, 255))
+    if theme == "aquascape":
+        for y in range(H):
+            t = y / H
+            r = int(10 + t * 5)
+            g = int(50 + t * 60)
+            b = int(100 + t * 40)
+            draw.line([(0, y), (W, y)], fill=(r, g, b, 255))
 
-    # Siluet tanaman di bagian bawah
-    for bx in range(0, W, 60):
-        bh = 200 + int(80 * (bx / W))
-        bw = 30 + int(15 * (bx / W) ** 0.5)
-        draw.ellipse([bx, H - bh, bx + bw, H], fill=(5, 40, 30, 200))
-        draw.ellipse([bx + 10, H - bh - 40, bx + bw + 10, H], fill=(5, 45, 35, 150))
+        for bx in range(0, W, 60):
+            bh = 200 + int(80 * (bx / W))
+            bw = 30 + int(15 * (bx / W) ** 0.5)
+            draw.ellipse([bx, H - bh, bx + bw, H], fill=(5, 40, 30, 200))
+            draw.ellipse([bx + 10, H - bh - 40, bx + bw + 10, H], fill=(5, 45, 35, 150))
 
-    # Gelembung
-    bubbles = [(120, 300, 15), (850, 200, 20), (400, 400, 10), (700, 550, 12),
-               (950, 600, 8), (200, 650, 18), (550, 150, 14)]
-    for cx, cy, r in bubbles:
-        draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(255, 255, 255, 25))
-        draw.ellipse([cx - r + 2, cy - r + 2, cx + r - 4, cy + r - 4], fill=(255, 255, 255, 15))
+        bubbles = [(120, 300, 15), (850, 200, 20), (400, 400, 10), (700, 550, 12),
+                   (950, 600, 8), (200, 650, 18), (550, 150, 14)]
+        for cx, cy, r in bubbles:
+            draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(255, 255, 255, 25))
+            draw.ellipse([cx - r + 2, cy - r + 2, cx + r - 4, cy + r - 4], fill=(255, 255, 255, 15))
 
-    # Siluet ikan kecil
-    for fx, fy in [(250, 400), (700, 350), (550, 550)]:
-        draw.ellipse([fx, fy, fx + 25, fy + 8], fill=(255, 200, 100, 40))
-        draw.polygon([(fx + 25, fy), (fx + 35, fy + 4), (fx + 25, fy + 8)], fill=(255, 200, 100, 40))
+        for fx, fy in [(250, 400), (700, 350), (550, 550)]:
+            draw.ellipse([fx, fy, fx + 25, fy + 8], fill=(255, 200, 100, 40))
+            draw.polygon([(fx + 25, fy), (fx + 35, fy + 4), (fx + 25, fy + 8)], fill=(255, 200, 100, 40))
+    else:
+        for y in range(H):
+            t = y / H
+            r = int(20 + t * 15)
+            g = int(20 + t * 15)
+            b = int(40 + t * 25)
+            draw.line([(0, y), (W, y)], fill=(r, g, b, 255))
 
     return bg
+
+
+def _pexels_search_results(query: str, per_page: int = 5) -> list[tuple[str, str]]:
+    """Search Pexels, return list of (image_url, alt_text)."""
+    import requests
+    api_key = os.getenv("PEXELS_API_KEY")
+    if not api_key:
+        return []
+    headers = {"Authorization": api_key}
+    url = f"https://api.pexels.com/v1/search?query={requests.utils.quote(query)}&per_page={per_page}&orientation=square"
+    try:
+        r = requests.get(url, headers=headers, timeout=15)
+        if r.status_code != 200:
+            return []
+        return [(p["src"]["large"], p.get("alt", "")) for p in r.json().get("photos", [])]
+    except Exception:
+        return []
 
 
 def _search_pexels_image(query: str):
@@ -682,26 +722,42 @@ def _search_pexels_image(query: str):
         return None
 
 
-def cmd_generate_edu(_client, args):
+def cmd_generate_carousel(_client, args):
     import argparse
-    parser = argparse.ArgumentParser(prog="generate-edu", add_help=False)
+    parser = argparse.ArgumentParser(prog="generate-carousel", add_help=False)
     parser.add_argument("topic", nargs="?", help="nama ikan/tanaman/topik edukasi")
+    parser.add_argument("--type", default=None, help="tipe konten (edu, story, humor, dll)")
     parser.add_argument("--facts", help="pake file facts JSON yang udah ada (skip Gemini)")
     parser.add_argument("--num-facts", type=int, default=4, help="jumlah fakta (default: 4)")
-    parser.add_argument("--force-image", help="paksa pake file foto lokal daripada Wikimedia")
+    parser.add_argument("--force-image", help="paksa pake file foto lokal daripada dari Wikimedia")
     parsed, _ = parser.parse_known_args(args)
 
+    # Set content type
+    if parsed.type:
+        ok = config.set_content_type(parsed.type)
+        if not ok:
+            return
+    ct = config.current_content_type
+
     if not parsed.topic:
-        print("Gunakan: python main.py generate-edu <topik> [--facts file.json] [--num-facts N] [--force-image foto.jpg]")
+        niche = config.current_niche
+        niche_list = ", ".join(config._NICHE_REGISTRY)
+        type_list = ", ".join(niche.content_types)
+        print("Gunakan: python main.py generate-carousel <topik> [--type TIPE] [--facts file.json] [--num-facts N] [--force-image foto.jpg] [--niche NAMA]")
         print()
-        print("  topik                — nama ikan/tanaman (contoh: Nannostomus mortenthaleri)")
+        print("  topik                — topik konten (contoh: Nannostomus mortenthaleri)")
+        print("  --type TIPE          — tipe konten")
+        print(f"                         Tersedia: {type_list}")
         print("  --facts file.json    — pake facts existing (skip Gemini)")
         print("  --num-facts N        — jumlah fakta (default: 4)")
         print("  --force-image foto   — pake foto lokal daripada dari Wikimedia")
+        print("  --niche NAMA         — pilih niche (default: aquascape)")
+        print(f"                         Tersedia: {niche_list}")
         print()
         print("Contoh:")
-        print("  python main.py generate-edu Nannostomus mortenthaleri")
-        print("  python main.py generate-edu Anubias barteri --num-facts 5")
+        print("  python main.py generate-carousel Nannostomus mortenthaleri")
+        print("  python main.py generate-carousel 'Resep Nasi Goreng' --niche food --type recipe")
+        print("  python main.py generate-carousel 'Perjalanan tank pertamaku' --type story")
         return
 
     from sources.facts_generator import generate_facts
@@ -713,7 +769,8 @@ def cmd_generate_edu(_client, args):
     from carousel.slide_cta import build_cta_slide
 
     topic = parsed.topic
-    slug = topic.lower().replace(" ", "_").replace("-", "_")[:30].rstrip("_")
+    import re
+    slug = re.sub(r'[^\w\-]', '', topic.lower().replace(" ", "_").replace("-", "_"))[:30].rstrip("_")
 
     # --- Facts ---
     if parsed.facts:
@@ -756,29 +813,90 @@ def cmd_generate_edu(_client, args):
         scientific = facts.get("scientific_name", topic)
         username = facts.get("topic", topic)
         print("🔍 Cari gambar...")
+        # 1. Wikimedia
         url = get_wikimedia_image(scientific)
+        if url:
+            subject_img = prepare_subject_image(url)
+        # 2. iNaturalist
         if url is None:
             print("   ⏩ Wikimedia kosong, coba iNaturalist...")
             url = get_inaturalist_image(scientific)
-        if url:
-            subject_img = prepare_subject_image(url)
-        if url is None:
-            print("   ⚠️  Ngga dapet gambar dari Wikimedia / iNaturalist")
+            if url:
+                subject_img = prepare_subject_image(url)
+        # 3. Pexels (buat topik konseptual)
+        if subject_img is None:
+            print("   ⏩ iNaturalist kosong, coba Pexels...")
+            pexels_img = _search_pexels_image(f"{topic}")
+            if pexels_img:
+                from sources.image_utils import apply_cartoon_effect
+                pexels_img = apply_cartoon_effect(pexels_img).convert("RGBA")
+                side = min(pexels_img.size)
+                l = (pexels_img.width - side) // 2
+                t = (pexels_img.height - side) // 2
+                canvas = PIL.Image.new("RGBA", (400, 400), (0, 0, 0, 0))
+                cropped = pexels_img.crop((l, t, l + side, t + side)).resize((400, 400), PIL.Image.LANCZOS)
+                canvas.paste(cropped, (0, 0), cropped)
+                subject_img = canvas
+        if subject_img is None:
+            print("   ⚠️  Ngga dapet gambar dari Wikimedia / iNaturalist / Pexels")
 
     if subject_img:
         print(f"   ✅ Ukuran: {subject_img.width}x{subject_img.height}px\n")
 
+    # --- Per-slide images from Pexels (no duplicates) ---
+    _pexels_used_urls = set()
+
+    def _get_pexels_subject(query: str, size: int) -> PIL.Image.Image | None:
+        """Search Pexels with dedup — skip URLs already used."""
+        nonlocal _pexels_used_urls
+        from sources.image_utils import apply_cartoon_effect
+        import requests
+        from io import BytesIO
+        import re as _re
+        clean = _re.sub(r'[^\w\s]', '', query).strip()
+        suffix = config.current_niche.pexels_query_suffix
+        search_queries = [f"{clean} {suffix}", clean] if suffix else [clean]
+        for sq in search_queries:
+            if not sq:
+                continue
+            for img_url, alt in _pexels_search_results(sq, 8):
+                if img_url in _pexels_used_urls:
+                    continue
+                _pexels_used_urls.add(img_url)
+                print(f"   📷 {alt[:60]}")
+                resp = requests.get(img_url, timeout=20)
+                if resp.status_code != 200:
+                    continue
+                pexels_img = PIL.Image.open(BytesIO(resp.content))
+                pexels_img = apply_cartoon_effect(pexels_img).convert("RGBA")
+                side = min(pexels_img.size)
+                l = (pexels_img.width - side) // 2
+                t = (pexels_img.height - side) // 2
+                canvas = PIL.Image.new("RGBA", (size, size), (0, 0, 0, 0))
+                cropped = pexels_img.crop((l, t, l + side, t + side)).resize((size, size), PIL.Image.LANCZOS)
+                canvas.paste(cropped, (0, 0), cropped)
+                return canvas
+        return None
+
     # --- Generate slides ---
     saved = []
-    slide_fns = [
-        (build_cover, (facts, subject_img)),
-    ]
-    for fact in facts["facts"]:
-        slide_fns.append((build_fact_slide, (fact, subject_img)))
-    slide_fns.append((build_cta_slide, (facts, subject_img)))
+    slide_fns_imgs = []
 
-    for i, (fn, args_tuple) in enumerate(slide_fns, 1):
-        print(f"🎨 Slide {i}/{len(slide_fns)}...")
+    # Cover — general topic image
+    cover_img = subject_img or _get_pexels_subject(topic, 400)
+    slide_fns_imgs.append((build_cover, (facts, cover_img)))
+
+    # Per fact — search Pexels based on fact title
+    for fact in facts["facts"]:
+        query = fact["title"]
+        fact_img = _get_pexels_subject(query, 300) or subject_img
+        slide_fns_imgs.append((build_fact_slide, (fact, fact_img)))
+
+    # CTA — logo aja
+    slide_fns_imgs.append((build_cta_slide, (facts, None)))
+
+    for i, (fn, args_tuple) in enumerate(slide_fns_imgs, 1):
+        print(f"🎨 Slide {i}/{len(slide_fns_imgs)}...")
         try:
             img = fn(*args_tuple)
             filename = f"{slug}_slide_{i:02d}.png"
@@ -795,7 +913,7 @@ def cmd_generate_edu(_client, args):
             print(f"   - {f}")
         print()
         print("📋 Upload & posting carousel pake:")
-        print(f"   python main.py post-edu \"<caption>\"")
+        print(f"   python main.py post-carousel \"<caption>\"")
         print()
         print("   ⚡ Auto-detect slide terbaru, nggak perlu intervensi manual!")
     else:
@@ -877,28 +995,41 @@ def _list_files(label, directory):
 
 
 def main():
+    # Parse --niche dulu sebelum dispatch (biar ga masuk ke args perintah)
+    if "--niche" in sys.argv:
+        idx = sys.argv.index("--niche")
+        if idx + 1 < len(sys.argv):
+            niche_name = sys.argv.pop(idx + 1)
+            sys.argv.pop(idx)
+            config.set_niche(niche_name)
+
     client = InstagramClient()
 
     if len(sys.argv) < 2:
+        niche_list = ", ".join(config._NICHE_REGISTRY)
         print(__doc__)
         print()
         print("Perintah:")
         print("  profile                    — lihat profil IG")
         print("  media [limit]             — lihat postingan terbaru")
         print('  post-photo <url> [caption]  — posting foto')
-        print("  post-edu [caption]         — posting carousel slide edukasi (auto-detect)")
+        print("  post-carousel [caption]    — posting carousel slides")
+        print("                  --slug SLUG pilih slide tertentu")
         print('  prepare-reel <vid> <music> — [Skill 1] edit video + ganti audio')
         print('  stage-reel <video>         — [Skill 2] upload Catbox + generate caption')
         print('  post-reel <url> [caption]  — [Skill 3] posting reel ke IG')
         print('  stage-photo <foto>         — [Foto] upload Catbox + generate caption')
         print('  generate-caption <video>   — (opsional) caption aja tanpa upload')
-        print("  generate-edu <topik>       — generate carousel edukasi (facts Gemini + gambar Wikimedia)")
+        print("  generate-carousel <topik>  — generate carousel slides (facts Gemini + gambar)")
         print("  comments <media_id>        — lihat komen")
         print('  reply <comment_id> <msg>   — balas komen')
         print("  insights [media_id]        — lihat insights")
         print("  search-hashtag <tag>       — cari hashtag")
         print("  delete-post <media_id>     — hapus post dari IG + referensi published/")
         print("  file-map                   — tampilkan mapping URL → file lokal")
+        print()
+        print("Opsi global:")
+        print(f"  --niche NAMA               pilih niche. Tersedia: {niche_list}")
         return
 
     cmd = sys.argv[1]
@@ -908,7 +1039,7 @@ def main():
         "profile": cmd_profile,
         "media": cmd_media,
         "post-photo": cmd_post_photo,
-        "post-edu": cmd_post_edu,
+        "post-carousel": cmd_post_carousel,
         "post-reel": cmd_post_reel,
         "comments": cmd_comments,
         "reply": cmd_reply,
@@ -918,7 +1049,7 @@ def main():
         "stage-reel": cmd_stage_reel,
         "stage-photo": cmd_stage_photo,
         "generate-caption": cmd_generate_caption,
-        "generate-edu": cmd_generate_edu,
+        "generate-carousel": cmd_generate_carousel,
         "delete-post": cmd_delete_post,
         "file-map": cmd_file_map,
     }

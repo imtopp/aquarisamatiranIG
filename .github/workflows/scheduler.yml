@@ -38,10 +38,26 @@ jobs:
         run: |
           python .github/workflows/runner.py
 
-      - name: Commit update schedule
+      - name: Commit update schedule + bio
         run: |
           git config user.name "aquarisamatiran-bot"
           git config user.email "bot@aquarisamatiran"
-          git add schedule.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "📅 Update schedule status"
+          git add schedule.json bio/index.html
+          git diff --quiet && git diff --staged --quiet || git commit -m "📅 Update schedule + bio status"
           git push
+
+      - name: Push bio page ke aquarisamatiran-pages
+        env:
+          PAGES_PAT: ${{ secrets.PAGES_PAT }}
+        run: |
+          if [ -z "$PAGES_PAT" ]; then
+            echo "⚠️ PAGES_PAT not set — skip push ke pages repo"
+            exit 0
+          fi
+          git clone "https://x-access-token:${PAGES_PAT}@github.com/imtopp/aquarisamatiran-pages.git" pages_repo
+          cp bio/index.html pages_repo/index.html
+          cd pages_repo
+          git config user.name "aquarisamatiran-bot"
+          git config user.email "bot@aquarisamatiran"
+          git add index.html
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🔄 Auto-update bio page from scheduler" && git push)

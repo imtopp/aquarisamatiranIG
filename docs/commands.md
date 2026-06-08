@@ -15,18 +15,19 @@ stage-photo <foto>             — upload Catbox + Gemini analisis foto → 3 ca
 post-photo <url> [caption]     — posting foto ke IG
 ```
 
-## Edu Carousel Workflow (2 langkah)
+## Carousel Workflow (2 langkah)
 
 ```
-generate-edu <topik>           — Gemini facts + Wikimedia/iNaturalist image → 4-6 slide .png
-post-edu [caption]             — auto-detect slide terbaru → Catbox → carousel IG
+generate-carousel <topik>      — Gemini facts + gambar → slide .png
+post-carousel [caption]        — auto-detect slide terbaru → Catbox → carousel IG
 ```
 
-Opsi tambahan `generate-edu`:
+Opsi tambahan `generate-carousel`:
 ```
   --facts file.json       pake facts existing (skip Gemini)
   --num-facts N           jumlah fakta (default: 4)
-  --force-image foto.jpg  pake foto lokal daripada Wikimedia
+  --force-image foto.jpg  pake foto lokal daripada gambar online
+  --niche NAMA            pilih niche (aquascape, food, fashion, tech)
 ```
 
 ## Utility

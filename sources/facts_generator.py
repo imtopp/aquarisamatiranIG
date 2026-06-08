@@ -8,11 +8,40 @@ from google import genai
 import config
 
 
+def _build_json_schema(niche: config.NicheProfile, ct: config.ContentType, num_facts: int) -> str:
+    """Bangun schema JSON sesuai ContentType (scientific_name optional)."""
+    schema_parts = [
+        '{',
+        '  "topic": "...",',
+        '  "display_name": "...",',
+        '  "subtitle": "<tagline menarik max 5 kata>",',
+    ]
+    if ct.has_scientific_name or (not ct.has_scientific_name and niche.has_scientific_name and ct == niche.content_types.get("edu", ct)):
+        schema_parts.append('  "scientific_name": "...",')
+    if ct.json_schema_extra:
+        schema_parts.append(f'  {ct.json_schema_extra},')
+    schema_parts.append('  "facts": [')
+    schema_parts.append('    {')
+    schema_parts.append('      "number": "01",')
+    schema_parts.append('      "title": "<judul + 1 emoji>",')
+    schema_parts.append('      "description": "<2-3 kalimat informatif dan engaging>",')
+    schema_parts.append('      "tags": ["<tag1>", "<tag2>", "<tag3>"]')
+    schema_parts.append('    }')
+    schema_parts.append(f'    // ... total {num_facts} fakta')
+    schema_parts.append('  ],')
+    schema_parts.append(f'  "cta_text": "{niche.cta_template.format(handle=niche.handle, topic=niche.education_label)}"')
+    schema_parts.append('}')
+    return '\n'.join(schema_parts)
+
+
 def generate_facts(topic: str, num_facts: int = 4) -> dict:
     if not config.GEMINI_API_KEY:
         raise ValueError("GEMINI_API_KEY ngga ditemukan di .env")
 
-    slug = topic.lower().replace(" ", "_").replace("-", "_")
+    niche = config.current_niche
+    ct = config.current_content_type
+
+    slug = re.sub(r'[^\w\-]', '', topic.lower().replace(" ", "_").replace("-", "_"))
     cache_path = config.PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
 
     if cache_path.exists():
@@ -23,34 +52,26 @@ def generate_facts(topic: str, num_facts: int = 4) -> dict:
         print("   Regenerate...")
 
     client = genai.Client(api_key=config.GEMINI_API_KEY)
+    schema = _build_json_schema(niche, ct, num_facts)
+
+    extra = f"\n{ct.prompt_extra}" if ct.prompt_extra else ""
+    tags = ct.tags_hint or niche.tags_hint
+    inst = ct.instruction.format(topic=topic) if "{topic}" in ct.instruction else f"{ct.instruction} tentang {topic}"
+
     prompt = (
-        "Kamu adalah ahli aquaristik yang menulis konten edukasi Instagram "
-        f"dalam Bahasa Indonesia untuk akun {config.IG_HANDLE}. "
-        "Tulis fakta yang akurat, menarik, dan mudah dipahami pemula. "
+        f"Kamu adalah {niche.expert_role} yang menulis konten {niche.education_label} Instagram "
+        f"dalam Bahasa Indonesia untuk akun {niche.handle}. "
+        "Tulis konten yang akurat, menarik, dan mudah dipahami pemula. "
         "Selalu respond hanya dengan JSON valid, tanpa markdown backtick, tanpa teks lain.\n\n"
-        f"Buat konten edukasi aquarium tentang: {topic}\n\n"
+        f"{inst}\n\n"
         "Hasilkan JSON dengan format PERSIS ini:\n"
-        "{\n"
-        '  "topic": "...",\n'
-        '  "display_name": "...",\n'
-        '  "subtitle": "<tagline menarik max 5 kata>",\n'
-        '  "scientific_name": "...",\n'
-        '  "facts": [\n'
-        "    {\n"
-        '      "number": "01",\n'
-        '      "title": "<judul + 1 emoji>",\n'
-        '      "description": "<2-3 kalimat informatif dan engaging>",\n'
-        '      "tags": ["<tag1>", "<tag2>", "<tag3>"]\n'
-        "    }\n"
-        f"    // ... total {num_facts} fakta\n"
-        "  ],\n"
-        '  "cta_text": "Follow @aquarisamatiran\\\\nuntuk edukasi aquarium\\\\nsetiap minggu!"\n'
-        "}\n\n"
+        f"{schema}\n\n"
         "Pastikan:\n"
-        "- Fakta akurat secara ilmiah\n"
-        "- Tags berisi info teknis singkat (pH, suhu, ukuran, dll)\n"
+        f"- {ct.label}: informatif dan engaging\n"
+        f"- Tags berisi info singkat tapi bermakna ({tags})\n"
         "- Bahasa Indonesia yang natural dan engaging\n"
         "- Subtitle unik dan memorable"
+        f"{extra}"
     )
 
     for attempt in range(3):
@@ -70,10 +91,10 @@ def generate_facts(topic: str, num_facts: int = 4) -> dict:
             if not isinstance(data["facts"], list) or len(data["facts"]) == 0:
                 raise ValueError("Facts harus list minimal 1")
 
-            data.setdefault("scientific_name", topic)
+            data.setdefault("scientific_name", topic if ct.has_scientific_name or niche.has_scientific_name else "")
             data.setdefault("subtitle", "")
             data.setdefault("cta_text",
-                            f"Follow {config.IG_HANDLE}\nuntuk edukasi aquarium\nsetiap minggu!")
+                            niche.cta_template.format(handle=niche.handle, topic=niche.education_label))
 
             cache_path.parent.mkdir(parents=True, exist_ok=True)
             cache_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")

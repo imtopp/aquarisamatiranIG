@@ -1,13 +1,13 @@
-# Workflow: Edu Carousel
+# Workflow: Carousel Slides
 
-2 langkah untuk generate + posting carousel edukasi infografis ke Instagram.
+2 langkah untuk generate + posting carousel infografis ke Instagram.
 
 ## Flow
 
 ```
                      ┌──────────────────────────────────┐
-                     │  python main.py generate-edu     │
-                     │  "Nama Ikan/Tanaman"             │
+                     │  python main.py generate-carousel│
+                     │  "Nama Topik"                    │
                      └──────────────┬───────────────────┘
                                     │
                     ┌───────────────┴───────────────┐
@@ -24,19 +24,19 @@
                     └───────────────┬───────────────┘
                                     │
                     ┌───────────────┴───────────────┐
-                    │  Step 3: Generate 6 slide PNG │
+                    │  Step 3: Generate slide PNG   │
                     │  • Slide 1: Cover + ilustrasi │
-                    │  • Slide 2-5: Fakta (masing2) │
-                    │  • Slide 6: CTA follow        │
+                    │  • Slide 2-N: Fakta (masing2) │
+                    │  • Slide N: CTA follow        │
                     │  → resource/photos/*_slide_NN.png│
                     └───────────────┬───────────────┘
                                     │
                                     ▼
                     ┌──────────────────────────────┐
-                    │  python main.py post-edu     │
+                    │  python main.py post-carousel│
                     │  "caption"                    │
                     │  → auto-detect slide terbaru │
-                    │  → upload 6 slide ke Catbox  │
+                    │  → upload slide ke Catbox     │
                     │  → carousel container → IG   │
                     └──────────────────────────────┘
 ```
@@ -46,12 +46,12 @@
 Generate facts dari Gemini + cari gambar otomatis dari Wikipedia/iNaturalist.
 
 ```bash
-python main.py generate-edu <topik> [--num-facts N] [--facts file.json] [--force-image foto.jpg]
+python main.py generate-carousel <topik> [--num-facts N] [--facts file.json] [--force-image foto.jpg]
 ```
 
 | Argumen | Wajib? | Fungsi |
 |---------|--------|--------|
-| `topik` | ✅ | Nama ikan/tanaman (contoh: Pseudomugil Luminatus) |
+| `topik` | ✅ | Nama topik (contoh: Pseudomugil Luminatus, Resep Nasi Goreng) |
 | `--num-facts N` | ❌ | Jumlah fakta (default: 4) |
 | `--facts file.json` | ❌ | Skip Gemini, pake facts JSON existing |
 | `--force-image foto.jpg` | ❌ | Skip Wikimedia, pake foto lokal |
@@ -60,29 +60,29 @@ python main.py generate-edu <topik> [--num-facts N] [--facts file.json] [--force
 
 1. **Gemini API** → generate facts (scientific name, subtitle, 4 fakta, tags, CTA)
 2. **Cache** → simpan ke `resource/photos/{slug}_facts.json`
-3. **Cari gambar** → Wikimedia API by scientific name → fallback iNaturalist
+3. **Cari gambar** → Wikimedia API → fallback iNaturalist → Pexels
 4. **Cartoon effect** → download → crop 1:1 → smooth filter + saturasi naik → 400x400
-5. **Generate 6 slide** → Pillow overlay gradient + teks infografis
+5. **Generate slide** → Pillow overlay gradient + teks infografis
 
 ### Opsi hemat Gemini quota:
 
 ```bash
 # Pake facts + foto lokal (0 Gemini call)
-python main.py generate-edu "Anubias" --facts facts_anubias.json --force-image anubias.jpg
+python main.py generate-carousel "Anubias" --facts facts_anubias.json --force-image anubias.jpg
 ```
 
-Output: `resource/photos/{slug}_slide_01.png` sampai `_slide_06.png`
+Output: `resource/photos/{slug}_slide_01.png` sampai `_slide_NN.png`
 
 ## Step 2 — Post Carousel
 
 Upload slide ke Catbox + publish ke Instagram.
 
 ```bash
-python main.py post-edu "caption"
+python main.py post-carousel "caption"
 ```
 
 - **Auto-detect** slide terbaru dari `resource/photos/*_slide_??.png`
-- Upload 6 slide ke Catbox
+- Upload slide ke Catbox
 - Container 2-step: create item containers → CAROUSEL container → publish
 - Nggak perlu ketik filename manual!
 
@@ -90,20 +90,17 @@ python main.py post-edu "caption"
 
 ```
 resource/photos/
-├── {slug}_facts.json        ← cache facts Gemini
-├── {slug}_slide_01.png      ← Cover (ilustrasi + judul + tagline)
-├── {slug}_slide_02.png      ← Fakta 1 (nomor + judul + deskripsi + tags)
-├── {slug}_slide_03.png      ← Fakta 2
-├── {slug}_slide_04.png      ← Fakta 3
-├── {slug}_slide_05.png      ← Fakta 4
-└── {slug}_slide_06.png      ← CTA (Like/Save/Share + follow)
+├── {slug}_facts.json            ← cache facts Gemini
+├── {slug}_slide_01.png          ← Cover (ilustrasi + judul + tagline)
+├── {slug}_slide_02.png          ← Fakta 1 (nomor + judul + deskripsi + tags)
+├── {slug}_slide_NN.png          ← CTA (Like/Save/Share + follow)
 ```
 
 ## Design System
 
 - **Ukuran**: 1080×1080px (Instagram square carousel)
 - **Format**: PNG
-- **Background**: Gradient `#0D1B2A` → `#1B2E45` (biru laut gelap)
+- **Background**: Gradient sesuai tema niche
 - **Font**: Nunito (ExtraBold untuk judul, Regular untuk body)
   - Download otomatis dari Google Fonts saat pertama jalan
   - Fallback: Segoe UI (Windows)
@@ -129,13 +126,13 @@ resource/photos/
 - Nama display besar (accent2, bold) di bawah subtitle
 - Teaser "N Fakta Menarik" di bawah
 
-**Slide 2-5 — Fakta**
+**Slide 2-N — Fakta**
 - Nomor fakta besar (accent2) di kiri atas
 - Ilustrasi objek 300x300 di kanan tengah
 - Judul fakta (bold) + separator + deskripsi di kiri
 - Tag pills (info teknis) di bawah
 
-**Slide 6 — CTA**
+**Slide N — CTA**
 - Ilustrasi objek 280x280 di tengah atas
 - "Suka konten ini?" + Like / Save / Share
 - `@aquarisamatiran` besar (accent, bold)
@@ -146,19 +143,27 @@ resource/photos/
 ### Dari awal (Gemini + Wikipedia)
 
 ```bash
-python main.py generate-edu "Nannostomus mortenthaleri"
-# → Generate facts + cari gambar → 6 slide PNG
+python main.py generate-carousel "Nannostomus mortenthaleri"
+# → Generate facts + cari gambar → slide PNG
 
-python main.py post-edu "Ikan pencil merah ini bikin aku..."
+python main.py post-carousel "Ikan pencil merah ini bikin aku..."
 ```
 
 ### Pake data existing (hemat quota)
 
 ```bash
-python main.py generate-edu "Pseudomugil Luminatus" \
+python main.py generate-carousel "Pseudomugil Luminatus" \
   --facts edu_pseudomugil_lum_facts.json \
   --force-image IMG_20260314_183345.jpg
-# → Skip Gemini + Wikipedia → 6 slide PNG
+# → Skip Gemini + Wikipedia → slide PNG
 
-python main.py post-edu "Caption sesuai keinginan"
+python main.py post-carousel "Caption sesuai keinginan"
+```
+
+### Pake niche lain
+
+```bash
+python main.py generate-carousel "Resep Nasi Goreng" --niche food
+
+python main.py post-carousel "Nasi goreng favoritku..."
 ```

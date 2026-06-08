@@ -7,6 +7,7 @@
     "done": true
   },
   {
+    "curriculum": "#06",
     "time": "2026-06-07 19:55",
     "type": "carousel",
     "urls": [
@@ -22,6 +23,7 @@
     "result_id": "17892612393504750"
   },
   {
+    "curriculum": "#01",
     "time": "2026-06-08 19:00",
     "type": "carousel",
     "urls": [
@@ -39,6 +41,7 @@
     "result_id": "17882725962597921"
   },
   {
+    "curriculum": "#02",
     "time": "2026-06-10 19:00",
     "type": "carousel",
     "urls": [
@@ -55,6 +58,7 @@
     "done": false
   },
   {
+    "curriculum": "#03",
     "time": "2026-06-10 19:00",
     "type": "carousel",
     "urls": [
@@ -70,6 +74,7 @@
     "result_id": "18329549080271215"
   },
   {
+    "curriculum": "#04",
     "time": "2026-06-12 19:00",
     "type": "carousel",
     "urls": [
@@ -86,6 +91,7 @@
     "done": false
   },
   {
+    "curriculum": "#05",
     "time": "2026-06-14 09:00",
     "type": "carousel",
     "urls": [

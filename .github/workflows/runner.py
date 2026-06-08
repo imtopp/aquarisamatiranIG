@@ -11,6 +11,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from ig_client import InstagramClient
+from update_bio import update_bio
 
 WIB = timezone(timedelta(hours=7))
 SCHEDULE_PATH = Path("schedule.json")
@@ -92,6 +93,7 @@ def main():
             save_schedule(schedule)
             print(f"   ✅ ID: {result.get('id')}")
             print(f"   📝 schedule.json diupdate")
+            update_bio(schedule)
 
         except Exception as e:
             print(f"   ❌ Gagal: {e}")

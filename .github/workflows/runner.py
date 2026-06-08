@@ -48,11 +48,12 @@ def main():
     else:
         target = [p for p in schedule if not p.get("done")]
 
+    client = InstagramClient()
+
     if not target:
         print("✅ Semua postingan udah selesai")
+        update_bio(schedule)
         return
-
-    client = InstagramClient()
 
     for post in target:
         ptype = post.get("type", "?")

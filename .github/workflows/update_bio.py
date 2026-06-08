@@ -37,14 +37,15 @@ def build_card_statuses(schedule):
             continue
         card_num = int(m.group(1))
 
+        permalink = entry.get("permalink", "")
         if entry.get("done"):
-            statuses[card_num] = ("tag-live", "✅ Live")
+            statuses[card_num] = ("tag-live", "✅ Live", permalink)
         else:
             dt = parse_time(entry.get("time"))
             if dt and dt > datetime.now(WIB):
-                statuses[card_num] = ("tag-soon", f"📅 {fmt_date(dt)}")
+                statuses[card_num] = ("tag-soon", f"📅 {fmt_date(dt)}", permalink)
             else:
-                statuses[card_num] = ("tag-live", "✅ Live") if dt else ("tag-empty", "🔜")
+                statuses[card_num] = ("tag-live", "✅ Live", permalink) if dt else ("tag-empty", "🔜", permalink)
     return statuses
 
 
@@ -58,7 +59,7 @@ def update_bio(schedule=None):
         return False
 
     html = BIO_PATH.read_text(encoding="utf-8")
-    for card_num, (tag_cls, tag_text) in statuses.items():
+    for card_num, (tag_cls, tag_text, permalink) in statuses.items():
         pattern = (
             r'(<div class="card[^"]*">\s*<div class="num">'
             + str(card_num)
@@ -71,6 +72,13 @@ def update_bio(schedule=None):
         else:
             print(f"  ⚠️  Card #{card_num} ngga ketemu di HTML")
         html = new_html
+
+        # Update href kalo ada permalink
+        if permalink:
+            href_pattern = r'(<a class="card-link" href=")[^"]+(".*?<div class="num">' + str(card_num) + r')'
+            html, href_count = re.subn(href_pattern, r'\1' + permalink + r'\2', html, count=1, flags=re.DOTALL)
+            if href_count:
+                print(f"  🔗 Card #{card_num} → {permalink}")
 
     BIO_PATH.write_text(html, encoding="utf-8")
     print(f"  ✅ bio/index.html diupdate ({len(statuses)} card)")

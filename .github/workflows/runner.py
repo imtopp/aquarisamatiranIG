@@ -91,8 +91,15 @@ def main():
 
             post["done"] = True
             post["result_id"] = result.get("id", "")
+            try:
+                media_info = client.get_media_by_id(post["result_id"])
+                post["permalink"] = media_info.get("permalink", "")
+            except Exception:
+                post["permalink"] = ""
             save_schedule(schedule)
             print(f"   ✅ ID: {result.get('id')}")
+            if post.get("permalink"):
+                print(f"   🔗 {post['permalink']}")
             print(f"   📝 schedule.json diupdate")
             update_bio(schedule)
 

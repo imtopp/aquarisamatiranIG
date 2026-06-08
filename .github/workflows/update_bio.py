@@ -73,13 +73,18 @@ def update_bio(schedule=None):
             print(f"  ⚠️  Card #{card_num} ngga ketemu di HTML")
         html = new_html
 
-        # Update href kalo ada permalink
+        # Update href kalo ada permalink — go backward from card num div
         if permalink:
-            # Match specifically the <a> that wraps this card (not any previous <a>)
-            href_pattern = r'(<a class="card-link" href=")[^"]+("[^>]*><div class="card[^"]*".*?<div class="num">' + str(card_num) + r')'
-            html, href_count = re.subn(href_pattern, r'\1' + permalink + r'\2', html, count=1, flags=re.DOTALL)
-            if href_count:
-                print(f"  🔗 Card #{card_num} → {permalink}")
+            num_tag = f'<div class="num">{card_num}</div>'
+            num_pos = html.find(num_tag)
+            if num_pos >= 0:
+                a_start = html.rfind('<a class="card-link" href="', 0, num_pos)
+                if a_start >= 0:
+                    href_start = a_start + len('<a class="card-link" href="')
+                    href_end = html.find('"', href_start)
+                    old_href = html[href_start:href_end]
+                    html = html[:href_start] + permalink + html[href_end:]
+                    print(f"  🔗 Card #{card_num}: {old_href[:50]} → {permalink}")
 
     BIO_PATH.write_text(html, encoding="utf-8")
     print(f"  ✅ bio/index.html diupdate ({len(statuses)} card)")

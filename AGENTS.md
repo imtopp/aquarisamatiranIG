@@ -49,6 +49,14 @@ PEXELS_API_KEY=...
 - All files, references, and config must reside within this repo directory.
 - Use `.venv\Scripts\python.exe` for all Python commands.
 
+## Seasons
+
+| Season | Title | Topics |
+|--------|-------|--------|
+| 1 | Perjalanan dari Nol Sampai Pro | #01–#22 (4 level) |
+
+Setiap topic di `curriculum_content.json` punya field `"season"` buat grouping.
+
 ## Caption Writing Rule
 
 When writing captions:

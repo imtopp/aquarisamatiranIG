@@ -223,6 +223,7 @@ Menunjukkin kalau proses itu berharga — nggak perlu jadi expert dulu buat mula
 | 7783398 | Weekday 19:00 WIB | Mon-Thu | 19:00 |
 | 7783399 | Jumat 15:00 WIB | Fri | 15:00 |
 | 7783400 | Weekend 09:00 WIB | Sat-Sun | 09:00 |
+| 7783402 | Lunch 12:00 WIB | Mon-Fri | 12:00 |
 
 Nix akan auto-pilih jadwal ini berdasarkan hari posting. Entries di `schedule.json` harus punya `time` yang sesuai dengan jam cron grup-nya.
 

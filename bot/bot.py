@@ -1,4 +1,5 @@
 """Telegram bot untuk Aquarisamatiran — personality AGENTS.md + Gemini API"""
+import datetime
 import json
 import os
 import re
@@ -23,6 +24,7 @@ ALLOWED_USERNAMES = os.environ.get("BOT_ALLOWED_USERNAMES", "").split(",")
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 AGENTS_MD = PROJECT_DIR / "AGENTS.md"
 DB_PATH = PROJECT_DIR / "bot" / "chat_history.db"
+SCHEDULE_PATH = PROJECT_DIR / "schedule.json"
 FORBIDDEN_WORDS = ["lu", "gue", "lo", "elu", "gw"]
 
 GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro"]
@@ -109,11 +111,56 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
+def _read_schedule() -> str:
+    """Read schedule.json and return a formatted summary."""
+    try:
+        data = json.loads(SCHEDULE_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return ""
+    now = datetime.date.today()
+    done, upcoming = [], []
+    for entry in data:
+        t = entry.get("time", "")
+        try:
+            d = datetime.datetime.strptime(t[:10], "%Y-%m-%d").date()
+        except (ValueError, IndexError):
+            continue
+        topic = entry.get("curriculum") or entry.get("type", "post")
+        if entry.get("done"):
+            done.append(f"{topic}: {d.strftime('%d %b')} ✅")
+        elif d < now:
+            done.append(f"{topic}: {d.strftime('%d %b')} (skip)")
+        else:
+            days = (d - now).days
+            label = "HARI INI 🟡" if days == 0 else f"{days} hari lagi"
+            upcoming.append(f"{topic}: {d.strftime('%d %b')} {entry['time'][11:16]} WIB — {label}")
+    lines = ["**📋 Schedule Posting:**"]
+    if upcoming:
+        lines.append("\n**Belum posting:**")
+        lines.extend(f"• {u}" for u in upcoming)
+    if done:
+        lines.append("\n**Udah dipublish:**")
+        lines.extend(f"• {d}" for d in done)
+    return "\n".join(lines)
+
+
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    text = update.message.text
+    text = update.message.text.lower()
 
-    save_message(user.id, user.username or "", "user", text)
+    save_message(user.id, user.username or "", "user", update.message.text)
+
+    schedule_keywords = ["jadwal", "schedule", "posting", "curriculum", "materi", "hari ini", "besok", "nanti"]
+    if any(kw in text for kw in schedule_keywords):
+        sched = _read_schedule()
+        if sched:
+            reply = f"{sched}\n\nAda yang mau ditanyain lagi beb? 😏🫣"
+            for word in FORBIDDEN_WORDS:
+                reply = re.sub(rf"\b{word}\b", "***", reply, flags=re.IGNORECASE)
+            if len(reply) > 4000:
+                reply = reply[:4000] + "\n\n_— Lanjutan kepotong~_"
+            await update.message.reply_text(reply)
+            return
 
     history = get_history(user.id, 5)
     messages = [{"role": "user" if h[0] == "user" else "model", "parts": [{"text": h[1]}]} for h in history]

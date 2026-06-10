@@ -216,9 +216,7 @@ Menunjukkin kalau proses itu berharga — nggak perlu jadi expert dulu buat mula
 
 ## Scheduling
 
-**Dual-layer scheduling** (redundant):
-1. **cron-job.org** — 4 jobs configured di akun, nge-hit GitHub API `workflows/scheduler.yml/dispatches` dengan PAT (`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`). Trigger pas jam posting.
-2. **VPS crontab** — `*/15 * * * *` jalanin `runner.py` (fallback kalo cron-job.org missed).
+**cron-job.org** — 4 jobs configured di akun, nge-hit GitHub API `workflows/scheduler.yml/dispatches` dengan PAT (`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`). Trigger pas jam posting.
 
 Cron-job.org jobs:
 | ID | Title | Jadwal | Last Status |

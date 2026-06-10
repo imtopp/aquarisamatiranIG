@@ -24,7 +24,5 @@ jobs:
             tmux send-keys -t bot C-c 2>/dev/null;
             sleep 1;
             tmux send-keys -t bot '.venv/bin/python bot/bot.py' Enter;
-            # Setup cron scheduler — jalanin runner.py tiap 15 menit
-            (crontab -l 2>/dev/null | grep -v runner.py; echo '*/15 * * * * cd /home/topp/projects/aquarisamatiran && .venv/bin/python .github/workflows/runner.py >> /home/topp/projects/aquarisamatiran/cron.log 2>&1') | crontab -;
-            echo '✅ Deploy + cron selesai'
+            echo '✅ Deploy selesai'
           "

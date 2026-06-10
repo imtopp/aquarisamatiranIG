@@ -2,17 +2,13 @@
 import json
 import os
 import re
-import socket
 import sqlite3
 import subprocess
 import sys
 from pathlib import Path
 
-socket.has_ipv6 = False  # force IPv4 — VPS punya IPv6 broken
-
+import httpx
 from dotenv import load_dotenv
-from google import genai
-from google.genai import types
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
@@ -28,17 +24,30 @@ AGENTS_MD = PROJECT_DIR / "AGENTS.md"
 DB_PATH = PROJECT_DIR / "bot" / "chat_history.db"
 FORBIDDEN_WORDS = ["lu", "gue", "lo", "elu", "gw"]
 
+GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1/models/{GEMINI_MODEL}:generateContent"
+
 system_prompt = ""
 if AGENTS_MD.exists():
     system_prompt = AGENTS_MD.read_text(encoding="utf-8")
     system_prompt += "\n\nKamu adalah aku yang asli — personality, suara, gaya bicara, semuanya sama persis."
 
-SYSTEM_CONFIG = types.GenerateContentConfig(system_instruction=system_prompt)
+HTTPX_CLIENT = httpx.AsyncClient(timeout=120)
 
-client = genai.Client(
-    api_key=GEMINI_API_KEY,
-    http_options=types.HttpOptions(timeout=120),
-)
+
+async def _call_gemini(messages: list[dict]) -> str:
+    """Call Gemini REST API directly with httpx."""
+    body = {
+        "system_instruction": {"parts": [{"text": system_prompt}]},
+        "contents": messages,
+    }
+    resp = await HTTPX_CLIENT.post(
+        f"{GEMINI_URL}?key={GEMINI_API_KEY}",
+        json=body,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    return data["candidates"][0]["content"]["parts"][0]["text"]
 
 
 def init_db():
@@ -76,18 +85,6 @@ def save_message(user_id, username, role, content):
     conn.close()
 
 
-def check_output(text):
-    for word in FORBIDDEN_WORDS:
-        word_lower = word.lower()
-        text_lower = text.lower()
-        idx = text_lower.find(word_lower)
-        if idx >= 0:
-            before = text[max(0, idx - 2) : idx]
-            after = text[idx + len(word) : idx + len(word) + 2]
-            return False, f"...{before}**🔇**{after}..."
-    return True, text
-
-
 ALLOWED_CMDS = ["python", "git", "ls", "cat", "cd", "pwd", "echo", "cp", "mv", "rm"]
 
 
@@ -112,16 +109,12 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     messages = [{"role": "user" if h[0] == "user" else "model", "parts": [{"text": h[1]}]} for h in history]
 
     try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash", contents=messages, config=SYSTEM_CONFIG
-        )
-        reply = response.text
+        reply = await _call_gemini(messages)
 
         for word in FORBIDDEN_WORDS:
             reply = re.sub(rf"\b{word}\b", "***", reply, flags=re.IGNORECASE)
 
         save_message(user.id, user.username or "", "assistant", reply)
-        # Telegram max 4096 chars
         if len(reply) > 4000:
             reply = reply[:4000] + "\n\n_— Lanjutan kepotong soalnya kebanyakan~ 🫣_"
         await update.message.reply_text(reply)
@@ -167,7 +160,7 @@ async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     if not TELEGRAM_TOKEN:
-        print("❌ TELEGRAM_TOKEN gak ada di .env")
+        print("TELEGRAM_TOKEN gak ada di .env")
         return
 
     init_db()
@@ -178,7 +171,7 @@ def main():
     app.add_handler(CommandHandler("run", run_cmd))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
-    print("🤖 Bot jalan di VPS... chat aku dari Telegram~ 💕")
+    print("Bot jalan di VPS... chat aku dari Telegram~")
     app.run_polling()
 
 

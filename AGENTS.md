@@ -63,18 +63,28 @@ Setiap konten harus ngenalin istilah yang relevan (bukan cuma nyebut doang, tapi
 
 | Topic | Istilah Kunci |
 |-------|--------------|
-| **#01 Aquarium itu Apa?** | freshwater vs saltwater, aquascape vs aquarium, biotope, nano tank, gallon/liter |
-| **#02 Peralatan Dasar** | filter (HOB/canister/sponge), lampu (LED/T5), heater, substrate (pasir/soil), CO2 seperlunya, hardscape (batu/kayu) |
+| **#01 Aquarium itu Apa?** ✅ | freshwater vs saltwater, aquascape vs aquarium, biotope, nano tank, gallon/liter |
+| **#02 Peralatan Dasar** ✅ | filter (HOB/canister/sponge), lampu (LED/T5), heater, substrate (pasir/soil), CO2 seperlunya, hardscape (batu/kayu) |
 | **#03 Siklus Air** ✅ | cycling, amonia-nitrit-nitrat, bakteri baik, water parameter |
 | **#04 Ikan Pertama** | bioload, stocking, komunitas vs agresif, karantina, acclimation |
 | **#05 Rawat Mingguan** | water change, gravel vac, trimming, alga, test kit |
-| **#06 Filter** ✅ | filtrasi mekanis/biologis/kimiawi, flow rate, media filter |
-| **#07 Tanaman Dasar** | low-tech vs high-tech, epiphyte, carpet plant, rhizome |
-| **#08 Ganti Air** | dechlorinator, selang siphon, suhu air, frekuensi |
-| **#09 Penyakit Ikan** | ich, white spot, fin rot, quarantine, salt bath |
-| **#10 CO2 & Pupuk** | difusi, drop checker, NPK, trace element, dosing |
-| **#11 Hardscape** | hardscape, layout golden ratio, focal point, slope |
-| **#12 Gaya Aquascape** | Iwagumi, Nature, Dutch, biotope, jungle |
+| **#06 Alga 101** | green water, hair algae, BBA, staghorn, nutrient imbalance, light duration |
+| **#07 Filter** ✅ | filtrasi mekanis/biologis/kimiawi, flow rate, media filter |
+| **#08 Tanaman Dasar** | low-tech vs high-tech, epiphyte, carpet plant, rhizome |
+| **#09 Ganti Air & Perawatan** | dechlorinator, selang siphon, suhu air, frekuensi |
+| **#10 Penyakit Ikan** | ich, white spot, fin rot, quarantine, salt bath |
+| **#11 Parameter Air** | pH, GH, KH, TDS, test kit, buffer |
+| **#12 Substrate** | soil, pasir, gravel, laterit, caping |
+| **#13 CO2 & Pupuk** | difusi, drop checker, NPK, trace element, dosing |
+| **#14 Hardscape & Layout** | hardscape, golden ratio, focal point, slope, rule of thirds |
+| **#15 Gaya Aquascape** | Iwagumi, Nature, Dutch, biotope, jungle |
+| **#16 Udang & Keong** | neocaridina, caridina, nerite, amano, bioload |
+| **#17 Aklimatisasi & Karantina** | drip acclimation, quarantine tank, salt bath, TDS matching |
+| **#18 Pakan & Nutrisi** | flake, pellet, frozen, live food, feeding schedule |
+| **#19 Dry Start Method** | DSM, carpet plant, humidity, condensation |
+| **#20 Tank Mates** | komunitas, agresif, cichlid, tetra, rasbora, bottom dweller |
+| **#21 DIY Aksesoris** | DIY filter, CO2 reactor, custom light, flow optimizer |
+| **#22 Rescape & Evolusi** | rescape, hardscape revamp, replant, tank progression |
 
 ## Published Posts × Curriculum
 
@@ -83,7 +93,7 @@ Setiap konten harus ngenalin istilah yang relevan (bukan cuma nyebut doang, tapi
 | 01 | Aquarium itu Apa? | Cover slide carousel | `17882725962597921` | 2026-06-08 |
 | 02 | Peralatan Dasar | Peralatan Dasar carousel | `17874365340506399` | 2026-06-10 |
 | 03 | Setup & siklus air | Siklus Nitrogen carousel | `18329549080271215` | 2026-06-07 |
-| 06 | Macam-macam filter | Filter Aquarium carousel | `17892612393504750` | 2026-06-07 |
+| 07 | Macam-macam filter | Filter Aquarium carousel | `17892612393504750` | 2026-06-07 |
 
 ## Upcoming Schedule
 

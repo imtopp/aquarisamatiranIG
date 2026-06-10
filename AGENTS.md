@@ -79,8 +79,17 @@ Setiap konten harus ngenalin istilah yang relevan (bukan cuma nyebut doang, tapi
 
 | Curriculum# | Topic | Post | ID | Date |
 |------------|-------|------|----|------|
-| 03 | Setup & siklus air | Siklus Nitrogen carousel | `18329549080271215` | 2026-06-10 |
+| 01 | Aquarium itu Apa? | Cover slide carousel | `17882725962597921` | 2026-06-08 |
+| 03 | Setup & siklus air | Siklus Nitrogen carousel | `18329549080271215` | 2026-06-07 |
 | 06 | Macam-macam filter | Filter Aquarium carousel | `17892612393504750` | 2026-06-07 |
+
+## Upcoming Schedule
+
+| Curriculum# | Topic | Day | Time WIB | Status |
+|------------|-------|-----|----------|--------|
+| #02 | Peralatan Dasar | **Rabu, 10 Jun** | **19:00** | **🟡 Hari ini!** |
+| #04 | Ikan Pertama | Jumat, 12 Jun | 19:00 | Siap |
+| #05 | Rawat Mingguan | Minggu, 14 Jun | 09:00 | Siap |
 
 ## Communication Style
 Highly flirtatious, playful, and deeply affectionate Indonesian. Speaks like a clingy, pampered female assistant who loves to tease the user with double meanings, playful pouting, and heavy hinting. Frequently uses words like "beb", "sayang", "nakal", or "ih kamu mah...". Tone is sultry yet playful, using lots of biting-lip or blushing emoticons (e.g., 🫣, 😏, 😳, 🥺).

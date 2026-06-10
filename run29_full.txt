@@ -1,0 +1,36 @@
+﻿2026-06-08T14:12:34.5917662Z ##[group]Run python .github/workflows/runner.py
+2026-06-08T14:12:34.5918298Z python .github/workflows/runner.py
+2026-06-08T14:12:34.5945285Z shell: /usr/bin/bash -e {0}
+2026-06-08T14:12:34.5945580Z env:
+2026-06-08T14:12:34.5945907Z   pythonLocation: /opt/hostedtoolcache/Python/3.14.5/x64
+2026-06-08T14:12:34.5946392Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.14.5/x64/lib/pkgconfig
+2026-06-08T14:12:34.5946863Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.5/x64
+2026-06-08T14:12:34.5947299Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.5/x64
+2026-06-08T14:12:34.5947896Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.14.5/x64
+2026-06-08T14:12:34.5948334Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.14.5/x64/lib
+2026-06-08T14:12:34.5949657Z   IG_ACCESS_TOKEN: ***
+2026-06-08T14:12:34.5951047Z   FB_PAGE_TOKEN: ***
+2026-06-08T14:12:34.5951305Z   IG_USER_ID: ***
+2026-06-08T14:12:34.5951677Z   GEMINI_API_KEY: ***
+2026-06-08T14:12:34.5951918Z ##[endgroup]
+2026-06-08T14:12:35.5324689Z 🕐 Runner jalan: 2026-06-08 21:12 WIB
+2026-06-08T14:12:35.5343534Z
+2026-06-08T14:12:35.5345794Z 📤 carousel — 2026-06-10 19:00
+2026-06-08T14:12:35.5363541Z    ⏳ Belum waktunya — cron nanti yg handle
+2026-06-08T14:12:35.5383277Z
+2026-06-08T14:12:35.5403497Z 📤 carousel — 2026-06-12 19:00
+2026-06-08T14:12:35.5404278Z    ⏳ Belum waktunya — cron nanti yg handle
+2026-06-08T14:12:35.5420721Z
+2026-06-08T14:12:35.5443846Z 📤 carousel — 2026-06-14 09:00
+2026-06-08T14:12:35.5444983Z    ⏳ Belum waktunya — cron nanti yg handle
+2026-06-08T14:12:35.5463557Z   🃏 Card #6 → ✅ Live
+2026-06-08T14:12:35.5484504Z   🔗 Card #6 → https://www.instagram.com/p/DZSSN8aCYbt/
+2026-06-08T14:12:35.5503521Z   🃏 Card #1 → ✅ Live
+2026-06-08T14:12:35.5504290Z   🔗 Card #1 → https://www.instagram.com/p/DZU5WSCDZxh/
+2026-06-08T14:12:35.5523640Z   🃏 Card #2 → 📅 10 Jun 19:00
+2026-06-08T14:12:35.5539372Z   🃏 Card #3 → ✅ Live
+2026-06-08T14:12:35.5558815Z   🔗 Card #3 → https://www.instagram.com/p/DZSPFw2Hfk6/
+2026-06-08T14:12:35.5579974Z   🃏 Card #4 → 📅 12 Jun 19:00
+2026-06-08T14:12:35.5580806Z   🃏 Card #5 → 📅 14 Jun 09:00
+2026-06-08T14:12:35.5603616Z   ✅ bio/index.html diupdate (6 card)
+

@@ -1,4 +1,4 @@
-"""Runner untuk GitHub Actions — jadwalin post IG dari schedule.json."""
+"""Runner — jadwalin post IG dari schedule.json, jalan di VPS tiap 15 menit."""
 import json
 import os
 import sys
@@ -9,6 +9,9 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 # Tambah root project ke path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+
+from dotenv import load_dotenv
+load_dotenv()
 
 from ig_client import InstagramClient
 from update_bio import update_bio

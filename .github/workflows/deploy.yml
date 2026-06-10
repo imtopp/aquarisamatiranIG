@@ -24,5 +24,7 @@ jobs:
             tmux send-keys -t bot C-c 2>/dev/null;
             sleep 1;
             tmux send-keys -t bot '.venv/bin/python bot/bot.py' Enter;
+            # Hapus crontab lama (kalo ada) — skrg pake cron-job.org aja
+            crontab -l 2>/dev/null | grep -v runner.py | crontab - 2>/dev/null || true;
             echo '✅ Deploy selesai'
           "

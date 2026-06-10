@@ -37,10 +37,10 @@ HTTPX_CLIENT = httpx.AsyncClient(timeout=120)
 
 async def _call_gemini(messages: list[dict]) -> str:
     """Call Gemini REST API directly with httpx."""
-    body = {
-        "system_instruction": {"parts": [{"text": system_prompt}]},
-        "contents": messages,
-    }
+    # v1 REST API doesn't support system_instruction — prepend to first user message
+    if messages and messages[0].get("role") == "user":
+        messages[0]["parts"][0]["text"] = f"{system_prompt}\n\n{messages[0]['parts'][0]['text']}"
+    body = {"contents": messages}
     resp = await HTTPX_CLIENT.post(
         f"{GEMINI_URL}?key={GEMINI_API_KEY}",
         json=body,

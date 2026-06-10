@@ -68,7 +68,7 @@ Setiap konten harus ngenalin istilah yang relevan (bukan cuma nyebut doang, tapi
 | **#03 Siklus Air** ✅ | cycling, amonia-nitrit-nitrat, bakteri baik, water parameter |
 | **#04 Ikan Pertama** | bioload, stocking, komunitas vs agresif, karantina, acclimation |
 | **#05 Rawat Mingguan** | water change, gravel vac, trimming, alga, test kit |
-| **#06 Alga 101** | green water, hair algae, BBA, staghorn, nutrient imbalance, light duration |
+| **#06 Alga: Musuh atau Guru?** | green water, hair algae, BBA, staghorn, nutrient imbalance, light duration |
 | **#07 Filter** ✅ | filtrasi mekanis/biologis/kimiawi, flow rate, media filter |
 | **#08 Tanaman Dasar** | low-tech vs high-tech, epiphyte, carpet plant, rhizome |
 | **#09 Ganti Air & Perawatan** | dechlorinator, selang siphon, suhu air, frekuensi |

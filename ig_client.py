@@ -139,8 +139,21 @@ class InstagramClient:
             time.sleep(interval)
         raise InstagramError(f"Container {container_id} timeout setelah {timeout}s")
 
-    def _publish(self, container_id: str) -> dict:
-        return self._post(f"{self.ig_user_id}/media_publish", {"creation_id": container_id})
+    def _publish(self, container_id: str, retries: int = 3, delay: int = 5) -> dict:
+        last_error = None
+        for attempt in range(1, retries + 1):
+            try:
+                return self._post(f"{self.ig_user_id}/media_publish", {"creation_id": container_id})
+            except InstagramError as e:
+                last_error = e
+                err_msg = str(e)
+                if "Media ID is not available" in err_msg or "media is not ready" in err_msg:
+                    if attempt < retries:
+                        print(f"   ⏳ Media belum siap, coba lagi ({attempt}/{retries}) dalam {delay}s...")
+                        time.sleep(delay)
+                        continue
+                raise
+        raise last_error  # type: ignore[misc]
 
     def post_photo(self, image_url: str, caption: str = "", scheduled_publish_time: int | None = None) -> dict:
         container_id = self._create_container("IMAGE", image_url, caption, scheduled_publish_time=scheduled_publish_time)
@@ -178,6 +191,9 @@ class InstagramClient:
 
         if scheduled_publish_time is not None:
             return {"id": carousel_id, "scheduled": True, "scheduled_publish_time": scheduled_publish_time}
+
+        # Tunggu container ready sebelum publish
+        self._wait_for_container(carousel_id, timeout=60, interval=3)
         return self._publish(carousel_id)
 
     def post_video(self, video_url: str, caption: str = "", wait: bool = True, scheduled_publish_time: int | None = None) -> dict:

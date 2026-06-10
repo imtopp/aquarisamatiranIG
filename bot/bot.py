@@ -170,7 +170,17 @@ def _match_curriculum_topic(text: str, topics: dict) -> str | None:
 
 def _format_curriculum_context(num: str, topic: dict) -> str:
     """Bentuk context string dari data curriculum untuk di-inject ke prompt Gemini."""
+    status_map = {"live": "✅ Sudah dipublish", "scheduled": "📅 Terjadwal", "planned": "🔜 Belum dibuat"}
+    status = topic.get("status", "planned")
+    status_line = status_map.get(status, status)
+    extra = ""
+    if topic.get("scheduled_time"):
+        extra = f" — pada {topic['scheduled_time']} WIB"
+    elif topic.get("permalink"):
+        extra = f" — link: {topic['permalink']}"
+
     lines = [f"--- KONTEN KURIKULUM #{num}: {topic.get('title', '')} ---"]
+    lines.append(f"Status: {status_line}{extra}")
     if topic.get("display_name"):
         lines.append(f"Judul konten: {topic['display_name']}")
     if topic.get("subtitle"):
@@ -179,7 +189,7 @@ def _format_curriculum_context(num: str, topic: dict) -> str:
         lines.append(f"Caption posting:\n{topic['caption']}")
     if topic.get("keywords"):
         lines.append(f"Istilah kunci: {', '.join(topic['keywords'])}")
-    if topic.get("permalink"):
+    if topic.get("permalink") and status == "live":
         lines.append(f"Link post: {topic['permalink']}")
     slides = topic.get("slides", [])
     if slides:
@@ -199,7 +209,11 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     save_message(user.id, user.username or "", "user", update.message.text)
 
-    schedule_keywords = ["jadwal", "schedule", "posting", "curriculum", "materi", "hari ini", "besok", "nanti"]
+    # Cek apakah user nanya topik kurikulum tertentu (sebelum schedule check)
+    curriculum_topics = _load_curriculum()
+    matched = _match_curriculum_topic(text, curriculum_topics)
+
+    schedule_keywords = ["jadwal", "schedule", "posting", "hari ini", "besok", "nanti"]
     if any(kw in text for kw in schedule_keywords):
         sched = _read_schedule()
         if sched:
@@ -211,9 +225,6 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(reply)
             return
 
-    # Inject curriculum context jika user nanya topik tertentu
-    curriculum_topics = _load_curriculum()
-    matched = _match_curriculum_topic(text, curriculum_topics)
     curriculum_inject = ""
     if matched and matched in curriculum_topics:
         curriculum_inject = _format_curriculum_context(matched, curriculum_topics[matched])

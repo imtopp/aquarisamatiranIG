@@ -1,6 +1,7 @@
 """Telegram bot untuk Aquarisamatiran — personality AGENTS.md + Gemini API"""
 import json
 import os
+import re
 import sqlite3
 import subprocess
 import sys
@@ -111,7 +112,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply = response.text
 
         for word in FORBIDDEN_WORDS:
-            reply = reply.replace(word, "***")
+            reply = re.sub(rf"\b{word}\b", "***", reply, flags=re.IGNORECASE)
 
         save_message(user.id, user.username or "", "assistant", reply)
         # Telegram max 4096 chars

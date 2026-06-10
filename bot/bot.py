@@ -110,10 +110,8 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         reply = response.text
 
-        clean, censored = check_output(reply)
-        if not clean:
-            reply = reply.replace(FORBIDDEN_WORDS, "***")
-            reply += f"\n\n_— Ups, keceplosan~ udah aku sensor 🫣_"
+        for word in FORBIDDEN_WORDS:
+            reply = reply.replace(word, "***")
 
         save_message(user.id, user.username or "", "assistant", reply)
         # Telegram max 4096 chars

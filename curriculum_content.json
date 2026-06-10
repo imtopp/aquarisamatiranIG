@@ -1,757 +1,737 @@
 {
-  "version": 3,
+  "version": 4,
   "seasons": {
     "1": {
       "title": "Perjalanan dari Nol Sampai Pro",
-      "subtitle": "Belajar aquarium step by step — mulai dari nol banget sampai bisa aquascape advanced",
+      "subtitle": "Belajar aquarium step by step ΓÇö mulai dari nol banget sampai bisa aquascape advanced",
       "level_labels": {
-        "1": "Pemula Absolut — dari yang belum tau apa-apa",
-        "2": "Mulai Pede — udah punya tank? saatnya naik level!",
-        "3": "Naik Kelas — saatnya eksperimen",
-        "4": "Advanced — master class"
+        "1": "Pemula Absolut ΓÇö dari yang belum tau apa-apa",
+        "2": "Mulai Pede ΓÇö udah punya tank? saatnya naik level!",
+        "3": "Naik Kelas ΓÇö saatnya eksperimen",
+        "4": "Advanced ΓÇö master class"
       }
     }
   },
   "topics": {
-    "01": {
-      "season": 1,
-      "slug": "aquarium-itu-apa",
-      "title": "Aquarium itu Apa?",
-      "display_name": "Ekosistem Akuarium",
-      "subtitle": "Dunia Air di Rumahmu",
-      "scientific_name": "Aquarium (Aquaria)",
-      "level": 1,
-      "status": "live",
-      "permalink": "https://www.instagram.com/p/DZU5WSCDZxh/",
-      "result_id": "17882725962597921",
-      "caption": "Sebenernya aquarium tuh apa sih? 🫣\n\nBanyak yang kira aquarium cuma 'wadah ikan hias' — padahal lebih dari itu! Ini ekosistem mini buatan sendiri di rumah 🏡🌊\n\nDi sini aku jelasin dari dasar banget:\n🔹 Ekosistem buatan — aquarium vs aquascape\n🔹 Siklus nitrogen — jantungnya aquarium\n🔹 Parameter air — kenapa penting\n🔹 Tanaman + filter — paru-paru & ginjal tank kita\n\nBuat kamu yang masih ragu mulai — yuk bareng belajar dari nol! 🌱",
-      "keywords": [
-        "freshwater vs saltwater",
-        "aquascape vs aquarium",
-        "biotope",
-        "nano tank",
-        "gallon/liter"
-      ],
-      "slides": [
-        {
-          "type": "cover",
-          "title": "Ekosistem Akuarium",
-          "subtitle": "Dunia Air di Rumahmu",
-          "teaser": "6 Fakta Menarik yang Wajib Kamu Tahu!"
-        },
-        {
-          "type": "fact",
-          "number": 1,
-          "title": "Ekosistem Buatan 🌿",
-          "description": "Akuarium bukan sekadar wadah kaca berisi air dan ikan hias. Ini adalah tiruan ekosistem air mini yang dinamis, tempat biota air, tanaman, dan mikroba saling berinteraksi untuk bertahan hidup.",
-          "tags": [
-            "Biosfer Mini",
-            "Siklus Biologi",
-            "Closed System"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 2,
-          "title": "Siklus Nitrogen 🌀",
-          "description": "Jantung kehidupan akuarium terletak pada siklus nitrogen. Bakteri baik di dalam filter bertugas mengubah amonia beracun dari kotoran ikan menjadi nitrit, lalu menjadi nitrat yang lebih aman bagi lingkungan.",
-          "tags": [
-            "Amonia (NH3)",
-            "Bakteri Pengurai",
-            "Filter Biologis"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 3,
-          "title": "Parameter Air Stabil 🌡️",
-          "description": "Air akuarium membutuhkan kestabilan parameter agar biota di dalamnya tidak stres. Untuk ikan tropis, menjaga suhu ideal antara 24-28°C dan pH air yang stabil sangat krusial demi mencegah penyakit.",
-          "tags": [
-            "pH 6.5 - 7.5",
-            "Suhu 24-28°C",
-            "TDS Air"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 4,
-          "title": "Paru-Paru Hijau 🌱",
-          "description": "Tanaman hidup dalam akuarium berfungsi sebagai penyaring alami yang sangat efektif. Mereka menyerap zat sisa seperti nitrat dan karbon dioksida (CO2), lalu melepaskan oksigen segar untuk pernapasan ikan.",
-          "tags": [
-            "Fotosintesis",
-            "Oksigen (O2)",
-            "Aquascape"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 5,
-          "title": "Ginjal Akuarium 🔄",
-          "description": "Sistem filtrasi bekerja layaknya ginjal dalam tubuh makhluk hidup. Filter menyaring kotoran fisik, menetralisir racun secara biologis, dan menjaga air tetap jernih serta kaya oksigen.",
-          "tags": [
-            "Filter Mekanis",
-            "Filter Kimiawi",
-            "Water Turnover"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 6,
-          "title": "Pereda Stres Alami 🧠",
-          "description": "Memandangi akuarium secara ilmiah terbukti dapat menurunkan detak jantung dan mengurangi tingkat kecemasan. Menghadirkan elemen alam di dalam ruangan memberikan efek meditatif yang menenangkan jiwa.",
-          "tags": [
-            "Terapi Visual",
-            "Biophilic Design",
-            "Mental Health"
-          ]
-        }
-      ]
-    },
-    "02": {
-      "slug": "peralatan-dasar",
-      "title": "Peralatan Dasar Aquarium",
-      "display_name": "Peralatan Dasar Aquarium",
-      "subtitle": "Mulai Hobi Tanpa Bingung!",
-      "scientific_name": "Sistem Pendukung Kehidupan Akuatik",
-      "level": 1,
-      "status": "live",
-      "permalink": "https://www.instagram.com/p/DZaDnSJDRAG/",
-      "result_id": "17874365340506399",
-      "caption": "Mau mulai aquarium tapi bingung alat-alatnya apa aja? 🫠\n\nTenang, ini breakdown peralatan dasar yang WAJIB kamu tau sebelum mulai belanja! 🛒\n\nYang dibahas:\n🌀 Filter — jantung aquarium (HOB, canister, atau sponge?)\n💡 Lampu — matahari buatan buat tanaman (LED / T5)\n🌡️ Heater — biar suhu stabil, ikan gak kaget\n🪨 Substrat — pasir atau soil? beda fungsi!\n🫧 Aerator — oksigen tambahan\n🧪 Water Conditioner — penetral air keran\n\nUdah pernah baca post filter aquarium? Di situ aku jelasin detail soal filtrasi — cocok buat nemenin kamu milih filter yang pas! 😉",
-      "keywords": [
-        "filter",
-        "HOB/canister/sponge",
-        "lampu LED/T5",
-        "heater",
-        "substrate pasir/soil",
-        "CO2",
-        "hardscape batu/kayu"
-      ],
-      "slides": [
-        {
-          "type": "cover",
-          "title": "Peralatan Dasar Aquarium",
-          "subtitle": "Mulai Hobi Tanpa Bingung!",
-          "teaser": "6 Fakta Menarik"
-        },
-        {
-          "type": "fact",
-          "number": 1,
-          "title": "Filter: Jantung Aquarium 🌀",
-          "description": "Filter bukan sekadar menjernihkan air, melainkan tempat tumbuh bakteri baik yang mengurai amonia beracun dari kotoran ikan. Pastikan kapasitas putaran airnya (flow rate) minimal 3-5 kali lipat dari total volume aquariummu.",
-          "tags": [
-            "Filtrasi",
-            "Bakteri Baik",
-            "Sirkulasi Air"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 2,
-          "title": "Lampu: Matahari Buatan 💡",
-          "description": "Lampu LED sangat penting untuk merangsang fotosintesis tanaman air dan memunculkan warna alami ikan. Batasi durasi pencahayaan cukup 6-8 jam sehari untuk mencegah ledakan alga (blooming alga) di dalam tank.",
-          "tags": [
-            "Spektrum LED",
-            "Fotosintesis",
-            "Timer 6-8 Jam"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 3,
-          "title": "Heater: Penjaga Suhu 🌡️",
-          "description": "Ikan hias adalah hewan berdarah dingin yang sensitif terhadap perubahan suhu drastis. Heater otomatis membantu menjaga suhu air tetap stabil di kisaran ideal 24-28°C agar ikan tidak mudah stres dan terserang penyakit.",
-          "tags": [
-            "Suhu 24-28°C",
-            "Termostat",
-            "Cegah White Spot"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 4,
-          "title": "Substrat: Rumah Bakteri 🪨",
-          "description": "Pasir, kerikil, atau soil bukan cuma hiasan estetik, tapi juga media jangkar akar tanaman dan rumah bagi bakteri pengurai. Pilih jenis substrat inert yang tidak mengubah parameter pH air secara ekstrem.",
-          "tags": [
-            "Pasir & Soil",
-            "Media Bakteri",
-            "pH Buffer"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 5,
-          "title": "Aerator: Penyuplai Oksigen 🫧",
-          "description": "Gelembung dari aerator membantu memecah permukaan air untuk memfasilitasi pertukaran gas. Proses ini sangat vital untuk meningkatkan kadar oksigen terlarut (O2) sekaligus membuang karbon dioksida (CO2) sisa respirasi.",
-          "tags": [
-            "Oksigen Terlarut",
-            "Pertukaran Gas",
-            "Pompa Udara"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 6,
-          "title": "Water Conditioner: Penetral Air 🧪",
-          "description": "Air keran umumnya mengandung klorin dan logam berat yang berbahaya bagi insang ikan. Penggunaan water conditioner saat siklus ganti air sangat wajib untuk menetralkan racun tersebut secara instan.",
-          "tags": [
-            "Anti-Klorin",
-            "Detoksifikasi",
-            "Water Change"
-          ]
-        }
-      ],
-      "season": 1
-    },
-    "03": {
-      "slug": "siklus-nitrogen",
-      "title": "Setup & Siklus Air",
-      "display_name": "Rahasia Air Bening & Sehat",
-      "subtitle": "Jantung Kehidupan Ekosistem Air",
-      "scientific_name": "Biogeochemical Nitrogen Cycle",
-      "level": 1,
-      "status": "live",
-      "permalink": "https://www.instagram.com/p/DZSPFw2Hfk6/",
-      "result_id": "18329549080271215",
-      "caption": "Rahasia air bening & sehat di aquascape ada di siklus nitrogen! 💧\n\nBanyak pemula gagal karena buru-buru masukin ikan tanpa nunggu cycling selesai — dan ini sering bikin ikan stres bahkan mati 😢\n\nDi carousel ini aku jelasin step by step:\n1. Amonia ☠️ sumber racun pertama\n2. Nitrosomonas 👾 pahlawan pengurai\n3. Nitrobacter 🛡️ penyelamat tanaman\n4. Ganti air 🪣 penutup siklus\n\nKalian waktu cycling dulu berapa lama? Ada yang pernah gagal karena buru-buru? Cerita dong di komentar! 👇",
-      "keywords": [
-        "cycling",
-        "amonia-nitrit-nitrat",
-        "bakteri baik",
-        "water parameter"
-      ],
-      "slides": [
-        {
-          "type": "cover",
-          "title": "Rahasia Air Bening & Sehat",
-          "subtitle": "Jantung Kehidupan Ekosistem Air",
-          "teaser": ""
-        },
-        {
-          "type": "fact",
-          "number": 1,
-          "title": "Amonia si Racun Tersembunyi ☠️",
-          "description": "Kotoran ikan, sisa pakan, dan daun tanaman yang membusuk akan menghasilkan amonia yang sangat beracun. Jika dibiarkan menumpuk, senyawa ini bisa membuat ikan stres hingga mati dalam waktu singkat.",
-          "tags": [
-            "Amonia (NH3)",
-            "pH > 7 Lebih Toksik",
-            "Target: 0 ppm"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 2,
-          "title": "Nitrosomonas Mulai Beraksi 👾",
-          "description": "Bakteri baik bernama Nitrosomonas akan mengonsumsi amonia dan mengubahnya menjadi nitrit. Walau kadar racunnya sedikit lebih rendah dari amonia, nitrit tetap sangat berbahaya bagi sistem pernapasan ikan.",
-          "tags": [
-            "Nitrit (NO2)",
-            "Butuh Oksigen",
-            "Suhu: 25-30°C"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 3,
-          "title": "Nitrobacter Sang Penyelamat 🛡️",
-          "description": "Pahlawan berikutnya adalah bakteri Nitrobacter yang bertugas mengubah nitrit menjadi nitrat. Nitrat ini jauh lebih aman dan merupakan nutrisi utama yang sangat disukai oleh tanaman aquascape kamu.",
-          "tags": [
-            "Nitrat (NO3)",
-            "Nutrisi Tanaman",
-            "Target: <20 ppm"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 4,
-          "title": "Ganti Air Penutup Siklus 🪣",
-          "description": "Meski nitrat relatif aman, akumulasi yang terlalu tinggi bisa memicu ledakan alga. Melakukan pergantian air (water change) berkala sebesar 30% per minggu adalah kunci menjaga keseimbangan ekosistem.",
-          "tags": [
-            "Water Change 30%",
-            "Kontrol Alga",
-            "Rutin Mingguan"
-          ]
-        }
-      ],
-      "season": 1
-    },
-    "04": {
-      "slug": "ikan-pertama",
-      "title": "Ikan Pertama",
-      "display_name": "Panduan Ikan Pertama Pemula",
-      "subtitle": "Anti Gagal, Ikan Pasti Hidup!",
-      "scientific_name": "Poeciliidae & Cyprinidae",
-      "level": 1,
-      "status": "scheduled",
-      "scheduled_time": "2026-06-12 19:00",
-      "caption": "Pengen beli ikan tapi bingung mulai dari mana? 😩\n\nNah ini dia panduan milih ikan pertama biar gak nyesel — karena percaya deh, asal-asalan masukin ikan itu resep bencana 😭 (udah pernah, tau rasanya wkwk)\n\nYang dibahas:\n💪 Pilih spesies tangguh — jangan langsung yang mahal & rare\n📏 Cek ukuran dewasa — ikan kecil lucu? bisa gede 30cm lho!\n🐟 Karakter ikan — ada yg preman, ada yg kalem\n👥 Suka sendiri atau butuh teman?\n🍽️ Pakan yang praktis\n🌊 Zona renang — si atas, tengah, bawah\n\nUdah selesai siklus airnya? Cek dulu post siklus nitrogen aku ya biar aman! 🌱",
-      "keywords": [
-        "bioload",
-        "stocking",
-        "komunitas vs agresif",
-        "karantina",
-        "acclimation"
-      ],
-      "slides": [
-        {
-          "type": "cover",
-          "title": "Panduan Ikan Pertama Pemula",
-          "subtitle": "Anti Gagal, Ikan Pasti Hidup!",
-          "teaser": ""
-        },
-        {
-          "type": "fact",
-          "number": 1,
-          "title": "Pilih Spesies Tangguh 💪",
-          "description": "Sebagai pemula, pilihlah ikan yang toleran terhadap fluktuasi parameter air yang sering terjadi di aquarium baru. Ikan seperti Guppy, Platy, atau Zebra Danio sangat cocok karena mereka tidak mudah stres dan cepat beradaptasi.",
-          "tags": [
-            "pH 7.0-8.0",
-            "Suhu 22-28°C",
-            "Hardy Fish"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 2,
-          "title": "Cek Ukuran Dewasa 📏",
-          "description": "Jangan terkecoh dengan ukuran ikan yang masih kecil saat di toko. Pastikan kamu tahu ukuran maksimal ikan saat dewasa agar aquarium tidak kelebihan muatan (overcrowded) yang bisa memicu penyakit.",
-          "tags": [
-            "Max 5-7 cm",
-            "Tank min. 30L",
-            "Size Limit"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 3,
-          "title": "Pahami Karakternya 🐟",
-          "description": "Pilihlah ikan dengan karakter damai (peaceful) agar bisa hidup berdampingan dengan spesies lain nantinya. Hindari membeli ikan predator atau yang sangat teritorial sebagai ikan pertama di tank komunitas.",
-          "tags": [
-            "Peaceful",
-            "Community Tank",
-            "Non-Agresif"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 4,
-          "title": "Butuh Teman atau Sendiri? 👥",
-          "description": "Beberapa ikan seperti Neon Tetra wajib dipelihara dalam kelompok (minimal 6 ekor) agar tidak stres dan mati. Jika ingin memelihara satu ekor saja, ikan Cupang (Betta) adalah pilihan soliter yang sangat tangguh.",
-          "tags": [
-            "Schooling: 6+",
-            "Betta: Soliter",
-            "Social Fish"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 5,
-          "title": "Pakan yang Praktis 🍽️",
-          "description": "Pilihlah ikan omnivora yang rakus dan mau memakan pakan kering berupa pelet atau serpihan (flakes). Menghindari ikan yang hanya mau makan pakan hidup akan sangat memudahkan perawatan harianmu.",
-          "tags": [
-            "Pellet/Flakes",
-            "Omnivora",
-            "Easy Feeding"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 6,
-          "title": "Zona Renang Ikan 🌊",
-          "description": "Ikan yang aktif berenang di bagian tengah hingga permukaan air akan membuat aquarium barumu terlihat lebih hidup. Kombinasikan dengan ikan pembersih dasar seperti Corydoras agar seluruh zona aquarium terisi.",
-          "tags": [
-            "Mid-Top Dweller",
-            "Bottom Feeder",
-            "Active Swimmer"
-          ]
-        }
-      ],
-      "season": 1
-    },
-    "05": {
-      "slug": "rawat-mingguan",
-      "title": "Rawat Mingguan",
-      "display_name": "Perawatan Mingguan Aquarium",
-      "subtitle": "Air Jernih, Ikan Happy!",
-      "scientific_name": "Aquatic Ecosystem Homeostasis",
-      "level": 1,
-      "status": "scheduled",
-      "scheduled_time": "2026-06-14 09:00",
-      "caption": "Rutinitas mingguan yang wajib kamu lakuin biar aquarium tetap sehat! 🗓️🌿\n\nGak perlu ribet kok, cuma 6 langkah simpel:\n🪣 Ganti air 20-30%\n🧹 Siphon kotoran dasar\n🧽 Gosok alga di kaca\n🫧 Bilas busa filter\n✂️ Pangkas tanaman layu\n🧪 Tes parameter air\n\nUdah bahas filter di post Filter Aquarium? Ini penting banget biar kamu tau gimana cara rawat filternya! 😉",
-      "keywords": [
-        "water change",
-        "gravel vac",
-        "trimming",
-        "alga",
-        "test kit"
-      ],
-      "slides": [
-        {
-          "type": "cover",
-          "title": "Perawatan Mingguan Aquarium",
-          "subtitle": "Air Jernih, Ikan Happy!",
-          "teaser": ""
-        },
-        {
-          "type": "fact",
-          "number": 1,
-          "title": "Ganti Air 20-30% 🪣",
-          "description": "Jangan menguras seluruh air aquarium kamu! Cukup ganti sekitar 20-30% air setiap minggu untuk membuang racun amonia tanpa merusak koloni bakteri baik. Pastikan air baru sudah diendapkan atau diberi kondisioner air anti-klorin.",
-          "tags": [
-            "Water Change",
-            "Klorin Free",
-            "Suhu Stabil"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 2,
-          "title": "Siphon Kotoran Dasar 🧹",
-          "description": "Gunakan selang siphon (penyedot) untuk membersihkan sisa makanan dan kotoran ikan yang mengendap di sela-sela pasir atau batu. Area dasar ini adalah tempat utama menumpuknya zat organik yang memicu lonjakan amonia.",
-          "tags": [
-            "Siphon",
-            "Substrat",
-            "Feses Ikan"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 3,
-          "title": "Gosok Alga di Kaca 🧽",
-          "description": "Bersihkan alga hijau atau cokelat yang mulai menempel di dinding kaca menggunakan spons khusus atau pembersih magnetik. Lakukan pembersihan kaca ini sebelum menyedot air agar serpihan alga yang lepas ikut terbuang.",
-          "tags": [
-            "Algae Scraper",
-            "Spons Lembut",
-            "Estetika"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 4,
-          "title": "Bilas Busa Filter 🫧",
-          "description": "Cuci busa penyaring mekanis jika sudah terlihat kotor kecokelatan. Sangat penting untuk membilasnya menggunakan air bekas aquarium, bukan air keran, agar bakteri pengurai yang hidup di filter tidak mati akibat kaporit.",
-          "tags": [
-            "Busa Filter",
-            "Bakteri Baik",
-            "Air Aquarium"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 5,
-          "title": "Pangkas Tanaman Layu ✂️",
-          "description": "Jika aquarium kamu memiliki tanaman hidup (aquascape), gunting daun-daun yang mulai menguning atau membusuk. Hal ini mencegah pembusukan organik di dalam air dan merangsang pertumbuhan tunas baru yang lebih sehat.",
-          "tags": [
-            "Trimming",
-            "Aquascape",
-            "CO2 & Cahaya"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 6,
-          "title": "Tes Parameter Air 🧪",
-          "description": "Lakukan tes cepat mingguan untuk memantau kadar pH, Nitrit (NO2), dan Nitrat (NO3). Deteksi dini perubahan parameter air akan membantu kamu mencegah penyakit pada ikan sebelum kondisinya menjadi parah.",
-          "tags": [
-            "pH 6.5-7.5",
-            "Nitrit 0 ppm",
-            "Water Test"
-          ]
-        }
-      ],
-      "season": 1
-    },
-    "06": {
-      "slug": "alga-musuh-atau-guru",
-      "title": "Alga: Musuh atau Guru?",
-      "display_name": "Musuh atau Guru?",
-      "subtitle": "Kenali, Cegah, Atasi",
-      "level": 1,
-      "status": "planned",
-      "keywords": [
-        "green water",
-        "hair algae",
-        "BBA",
-        "staghorn",
-        "nutrient imbalance",
-        "light duration"
-      ],
-      "season": 1
-    },
-    "07": {
-      "slug": "filter-aquarium",
-      "title": "Macam-macam Filter",
-      "display_name": "Sistem Filtrasi",
-      "subtitle": "Jantung Kehidupan Ekosistem Air",
-      "scientific_name": "Mechanical & Biological Filtration",
-      "level": 2,
-      "status": "live",
-      "permalink": "https://www.instagram.com/p/DZSSN8aCYbt/",
-      "result_id": "17892612393504750",
-      "caption": "Jantung aquarium kamu ada di sini! 💧\n\nBanyak pemula yang beli filter asal-asalan tanpa tahu cara kerjanya — padahal filter itu kunci air bening & ikan sehat! 🐟\n\nDi carousel ini aku jelasin:\n1️⃣ 3 Jurus Jernih — mekanis, biologis, kimiawi\n2️⃣ Rumah Bakteri Baik — kenapa media filter itu penting\n3️⃣ Aturan Putaran Air — flow rate yang pas buat tankmu\n4️⃣ Jangan Asal Cuci — cara bersihin filter yang benar\n\nKalian pake filter apa di tank? Canister, HOB, atau sponge? Share di komentar ya! 👇",
-      "keywords": [
-        "filtrasi mekanis/biologis/kimiawi",
-        "flow rate",
-        "media filter"
-      ],
-      "slides": [
-        {
-          "type": "cover",
-          "title": "Sistem Filtrasi",
-          "subtitle": "Jantung Kehidupan Ekosistem Air",
-          "teaser": ""
-        },
-        {
-          "type": "fact",
-          "number": 1,
-          "title": "3 Jurus Jernih! 💧",
-          "description": "Filter bekerja dengan tiga metode: mekanis menyaring kotoran padat, biologis mengandalkan bakteri pengurai racun, dan kimiawi menyerap zat berbahaya. Kombinasi ketiganya adalah kunci air aquarium sebening kristal.",
-          "tags": [
-            "Mekanis",
-            "Biologis",
-            "Kimiawi"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 2,
-          "title": "Rumah Bakteri Baik 🦠",
-          "description": "Media biologis seperti ceramic ring atau batu apung adalah tempat tinggal bakteri pengurai. Bakteri ini sangat penting untuk mengubah amonia beracun dari kotoran ikan menjadi senyawa nitrat yang jauh lebih aman.",
-          "tags": [
-            "Amonia",
-            "Nitrifikasi",
-            "Bio-media"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 3,
-          "title": "Aturan Putaran Air 🔄",
-          "description": "Idealnya, pilihlah filter dengan kapasitas pompa (flow rate) minimal 4 hingga 8 kali volume air aquariummu per jam. Jika aquariummu berisi 50 liter air, gunakan filter dengan rating minimal 200 hingga 400 Liter Per Jam (LPH).",
-          "tags": [
-            "Flow Rate",
-            "LPH",
-            "Volume"
-          ]
-        },
-        {
-          "type": "fact",
-          "number": 4,
-          "title": "Jangan Asal Cuci! 🧼",
-          "description": "Saat membersihkan media filter biologis, gunakan selalu air bekas aquarium, bukan air keran langsung. Kandungan klorin pada air keran bisa membunuh seluruh koloni bakteri baik yang sudah terbentuk.",
-          "tags": [
-            "Klorin",
-            "Perawatan",
-            "Bakteri"
-          ]
-        }
-      ],
-      "season": 1
-    },
-    "08": {
-      "slug": "tanaman-dasar",
-      "title": "Tanaman Dasar",
-      "level": 2,
-      "status": "planned",
-      "keywords": [
-        "low-tech vs high-tech",
-        "epiphyte",
-        "carpet plant",
-        "rhizome"
-      ],
-      "season": 1
-    },
-    "09": {
-      "slug": "ganti-air",
-      "title": "Ganti Air & Perawatan",
-      "level": 2,
-      "status": "planned",
-      "keywords": [
-        "dechlorinator",
-        "selang siphon",
-        "suhu air",
-        "frekuensi"
-      ],
-      "season": 1
-    },
-    "10": {
-      "slug": "penyakit-ikan",
-      "title": "Penyakit Ikan",
-      "level": 2,
-      "status": "planned",
-      "keywords": [
-        "ich",
-        "white spot",
-        "fin rot",
-        "quarantine",
-        "salt bath"
-      ],
-      "season": 1
-    },
-    "11": {
-      "slug": "parameter-air",
-      "title": "Parameter Air",
-      "level": 2,
-      "status": "planned",
-      "keywords": [
-        "pH",
-        "GH",
-        "KH",
-        "TDS",
-        "test kit",
-        "buffer"
-      ],
-      "season": 1
-    },
-    "12": {
-      "slug": "substrate",
-      "title": "Substrate Deep Dive",
-      "level": 2,
-      "status": "planned",
-      "keywords": [
-        "soil",
-        "pasir",
-        "gravel",
-        "laterit",
-        "caping"
-      ],
-      "season": 1
-    },
-    "13": {
-      "slug": "co2-dan-pupuk",
-      "title": "CO2 & Pupuk",
-      "level": 3,
-      "status": "planned",
-      "keywords": [
-        "difusi",
-        "drop checker",
-        "NPK",
-        "trace element",
-        "dosing"
-      ],
-      "season": 1
-    },
-    "14": {
-      "slug": "hardscape",
-      "title": "Hardscape & Layout",
-      "level": 3,
-      "status": "planned",
-      "keywords": [
-        "hardscape",
-        "golden ratio",
-        "focal point",
-        "slope",
-        "rule of thirds"
-      ],
-      "season": 1
-    },
-    "15": {
-      "slug": "gaya-aquascape",
-      "title": "Gaya Aquascape",
-      "level": 3,
-      "status": "planned",
-      "keywords": [
-        "Iwagumi",
-        "Nature",
-        "Dutch",
-        "biotope",
-        "jungle"
-      ],
-      "season": 1
-    },
-    "16": {
-      "slug": "udang-dan-keong",
-      "title": "Udang & Keong",
-      "level": 3,
-      "status": "planned",
-      "keywords": [
-        "neocaridina",
-        "caridina",
-        "nerite",
-        "amano",
-        "bioload"
-      ],
-      "season": 1
-    },
-    "17": {
-      "slug": "aklimatisasi-karantina",
-      "title": "Aklimatisasi & Karantina",
-      "level": 3,
-      "status": "planned",
-      "keywords": [
-        "drip acclimation",
-        "quarantine tank",
-        "salt bath",
-        "TDS matching"
-      ],
-      "season": 1
-    },
-    "18": {
-      "slug": "pakan-nutrisi",
-      "title": "Pakan & Nutrisi",
-      "level": 3,
-      "status": "planned",
-      "keywords": [
-        "flake",
-        "pellet",
-        "frozen",
-        "live food",
-        "feeding schedule"
-      ],
-      "season": 1
-    },
-    "19": {
-      "slug": "dry-start-method",
-      "title": "Dry Start Method",
-      "level": 4,
-      "status": "planned",
-      "keywords": [
-        "DSM",
-        "carpet plant",
-        "humidity",
-        "condensation"
-      ],
-      "season": 1
-    },
-    "20": {
-      "slug": "tank-mates",
-      "title": "Tank Mates",
-      "level": 4,
-      "status": "planned",
-      "keywords": [
-        "komunitas",
-        "agresif",
-        "cichlid",
-        "tetra",
-        "rasbora",
-        "bottom dweller"
-      ],
-      "season": 1
-    },
-    "21": {
-      "slug": "diy-aksesoris",
-      "title": "DIY Aksesoris",
-      "level": 4,
-      "status": "planned",
-      "keywords": [
-        "DIY filter",
-        "CO2 reactor",
-        "custom light",
-        "flow optimizer"
-      ],
-      "season": 1
-    },
-    "22": {
-      "slug": "rescape-evolusi",
-      "title": "Rescape & Evolusi",
-      "level": 4,
-      "status": "planned",
-      "keywords": [
-        "rescape",
-        "hardscape revamp",
-        "replant",
-        "tank progression"
-      ],
-      "season": 1
+    "1": {
+      "01": {
+        "slug": "aquarium-itu-apa",
+        "title": "Aquarium itu Apa?",
+        "display_name": "Ekosistem Akuarium",
+        "subtitle": "Dunia Air di Rumahmu",
+        "scientific_name": "Aquarium (Aquaria)",
+        "level": 1,
+        "status": "live",
+        "permalink": "https://www.instagram.com/p/DZU5WSCDZxh/",
+        "result_id": "17882725962597921",
+        "caption": "Sebenernya aquarium tuh apa sih? ≡ƒ½ú\n\nBanyak yang kira aquarium cuma 'wadah ikan hias' ΓÇö padahal lebih dari itu! Ini ekosistem mini buatan sendiri di rumah ≡ƒÅí≡ƒîè\n\nDi sini aku jelasin dari dasar banget:\n≡ƒö╣ Ekosistem buatan ΓÇö aquarium vs aquascape\n≡ƒö╣ Siklus nitrogen ΓÇö jantungnya aquarium\n≡ƒö╣ Parameter air ΓÇö kenapa penting\n≡ƒö╣ Tanaman + filter ΓÇö paru-paru & ginjal tank kita\n\nBuat kamu yang masih ragu mulai ΓÇö yuk bareng belajar dari nol! ≡ƒî▒",
+        "keywords": [
+          "freshwater vs saltwater",
+          "aquascape vs aquarium",
+          "biotope",
+          "nano tank",
+          "gallon/liter"
+        ],
+        "slides": [
+          {
+            "type": "cover",
+            "title": "Ekosistem Akuarium",
+            "subtitle": "Dunia Air di Rumahmu",
+            "teaser": "6 Fakta Menarik yang Wajib Kamu Tahu!"
+          },
+          {
+            "type": "fact",
+            "number": 1,
+            "title": "Ekosistem Buatan ≡ƒî┐",
+            "description": "Akuarium bukan sekadar wadah kaca berisi air dan ikan hias. Ini adalah tiruan ekosistem air mini yang dinamis, tempat biota air, tanaman, dan mikroba saling berinteraksi untuk bertahan hidup.",
+            "tags": [
+              "Biosfer Mini",
+              "Siklus Biologi",
+              "Closed System"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 2,
+            "title": "Siklus Nitrogen ≡ƒîÇ",
+            "description": "Jantung kehidupan akuarium terletak pada siklus nitrogen. Bakteri baik di dalam filter bertugas mengubah amonia beracun dari kotoran ikan menjadi nitrit, lalu menjadi nitrat yang lebih aman bagi lingkungan.",
+            "tags": [
+              "Amonia (NH3)",
+              "Bakteri Pengurai",
+              "Filter Biologis"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 3,
+            "title": "Parameter Air Stabil ≡ƒîí∩╕Å",
+            "description": "Air akuarium membutuhkan kestabilan parameter agar biota di dalamnya tidak stres. Untuk ikan tropis, menjaga suhu ideal antara 24-28┬░C dan pH air yang stabil sangat krusial demi mencegah penyakit.",
+            "tags": [
+              "pH 6.5 - 7.5",
+              "Suhu 24-28┬░C",
+              "TDS Air"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 4,
+            "title": "Paru-Paru Hijau ≡ƒî▒",
+            "description": "Tanaman hidup dalam akuarium berfungsi sebagai penyaring alami yang sangat efektif. Mereka menyerap zat sisa seperti nitrat dan karbon dioksida (CO2), lalu melepaskan oksigen segar untuk pernapasan ikan.",
+            "tags": [
+              "Fotosintesis",
+              "Oksigen (O2)",
+              "Aquascape"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 5,
+            "title": "Ginjal Akuarium ≡ƒöä",
+            "description": "Sistem filtrasi bekerja layaknya ginjal dalam tubuh makhluk hidup. Filter menyaring kotoran fisik, menetralisir racun secara biologis, dan menjaga air tetap jernih serta kaya oksigen.",
+            "tags": [
+              "Filter Mekanis",
+              "Filter Kimiawi",
+              "Water Turnover"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 6,
+            "title": "Pereda Stres Alami ≡ƒºá",
+            "description": "Memandangi akuarium secara ilmiah terbukti dapat menurunkan detak jantung dan mengurangi tingkat kecemasan. Menghadirkan elemen alam di dalam ruangan memberikan efek meditatif yang menenangkan jiwa.",
+            "tags": [
+              "Terapi Visual",
+              "Biophilic Design",
+              "Mental Health"
+            ]
+          }
+        ]
+      },
+      "02": {
+        "slug": "peralatan-dasar",
+        "title": "Peralatan Dasar Aquarium",
+        "display_name": "Peralatan Dasar Aquarium",
+        "subtitle": "Mulai Hobi Tanpa Bingung!",
+        "scientific_name": "Sistem Pendukung Kehidupan Akuatik",
+        "level": 1,
+        "status": "live",
+        "permalink": "https://www.instagram.com/p/DZaDnSJDRAG/",
+        "result_id": "17874365340506399",
+        "caption": "Mau mulai aquarium tapi bingung alat-alatnya apa aja? ≡ƒ½á\n\nTenang, ini breakdown peralatan dasar yang WAJIB kamu tau sebelum mulai belanja! ≡ƒ¢Æ\n\nYang dibahas:\n≡ƒîÇ Filter ΓÇö jantung aquarium (HOB, canister, atau sponge?)\n≡ƒÆí Lampu ΓÇö matahari buatan buat tanaman (LED / T5)\n≡ƒîí∩╕Å Heater ΓÇö biar suhu stabil, ikan gak kaget\n≡ƒ¬¿ Substrat ΓÇö pasir atau soil? beda fungsi!\n≡ƒ½º Aerator ΓÇö oksigen tambahan\n≡ƒº¬ Water Conditioner ΓÇö penetral air keran\n\nUdah pernah baca post filter aquarium? Di situ aku jelasin detail soal filtrasi ΓÇö cocok buat nemenin kamu milih filter yang pas! ≡ƒÿë",
+        "keywords": [
+          "filter",
+          "HOB/canister/sponge",
+          "lampu LED/T5",
+          "heater",
+          "substrate pasir/soil",
+          "CO2",
+          "hardscape batu/kayu"
+        ],
+        "slides": [
+          {
+            "type": "cover",
+            "title": "Peralatan Dasar Aquarium",
+            "subtitle": "Mulai Hobi Tanpa Bingung!",
+            "teaser": "6 Fakta Menarik"
+          },
+          {
+            "type": "fact",
+            "number": 1,
+            "title": "Filter: Jantung Aquarium ≡ƒîÇ",
+            "description": "Filter bukan sekadar menjernihkan air, melainkan tempat tumbuh bakteri baik yang mengurai amonia beracun dari kotoran ikan. Pastikan kapasitas putaran airnya (flow rate) minimal 3-5 kali lipat dari total volume aquariummu.",
+            "tags": [
+              "Filtrasi",
+              "Bakteri Baik",
+              "Sirkulasi Air"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 2,
+            "title": "Lampu: Matahari Buatan ≡ƒÆí",
+            "description": "Lampu LED sangat penting untuk merangsang fotosintesis tanaman air dan memunculkan warna alami ikan. Batasi durasi pencahayaan cukup 6-8 jam sehari untuk mencegah ledakan alga (blooming alga) di dalam tank.",
+            "tags": [
+              "Spektrum LED",
+              "Fotosintesis",
+              "Timer 6-8 Jam"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 3,
+            "title": "Heater: Penjaga Suhu ≡ƒîí∩╕Å",
+            "description": "Ikan hias adalah hewan berdarah dingin yang sensitif terhadap perubahan suhu drastis. Heater otomatis membantu menjaga suhu air tetap stabil di kisaran ideal 24-28┬░C agar ikan tidak mudah stres dan terserang penyakit.",
+            "tags": [
+              "Suhu 24-28┬░C",
+              "Termostat",
+              "Cegah White Spot"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 4,
+            "title": "Substrat: Rumah Bakteri ≡ƒ¬¿",
+            "description": "Pasir, kerikil, atau soil bukan cuma hiasan estetik, tapi juga media jangkar akar tanaman dan rumah bagi bakteri pengurai. Pilih jenis substrat inert yang tidak mengubah parameter pH air secara ekstrem.",
+            "tags": [
+              "Pasir & Soil",
+              "Media Bakteri",
+              "pH Buffer"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 5,
+            "title": "Aerator: Penyuplai Oksigen ≡ƒ½º",
+            "description": "Gelembung dari aerator membantu memecah permukaan air untuk memfasilitasi pertukaran gas. Proses ini sangat vital untuk meningkatkan kadar oksigen terlarut (O2) sekaligus membuang karbon dioksida (CO2) sisa respirasi.",
+            "tags": [
+              "Oksigen Terlarut",
+              "Pertukaran Gas",
+              "Pompa Udara"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 6,
+            "title": "Water Conditioner: Penetral Air ≡ƒº¬",
+            "description": "Air keran umumnya mengandung klorin dan logam berat yang berbahaya bagi insang ikan. Penggunaan water conditioner saat siklus ganti air sangat wajib untuk menetralkan racun tersebut secara instan.",
+            "tags": [
+              "Anti-Klorin",
+              "Detoksifikasi",
+              "Water Change"
+            ]
+          }
+        ]
+      },
+      "03": {
+        "slug": "siklus-nitrogen",
+        "title": "Setup & Siklus Air",
+        "display_name": "Rahasia Air Bening & Sehat",
+        "subtitle": "Jantung Kehidupan Ekosistem Air",
+        "scientific_name": "Biogeochemical Nitrogen Cycle",
+        "level": 1,
+        "status": "live",
+        "permalink": "https://www.instagram.com/p/DZSPFw2Hfk6/",
+        "result_id": "18329549080271215",
+        "caption": "Rahasia air bening & sehat di aquascape ada di siklus nitrogen! ≡ƒÆº\n\nBanyak pemula gagal karena buru-buru masukin ikan tanpa nunggu cycling selesai ΓÇö dan ini sering bikin ikan stres bahkan mati ≡ƒÿó\n\nDi carousel ini aku jelasin step by step:\n1. Amonia Γÿá∩╕Å sumber racun pertama\n2. Nitrosomonas ≡ƒæ╛ pahlawan pengurai\n3. Nitrobacter ≡ƒ¢í∩╕Å penyelamat tanaman\n4. Ganti air ≡ƒ¬ú penutup siklus\n\nKalian waktu cycling dulu berapa lama? Ada yang pernah gagal karena buru-buru? Cerita dong di komentar! ≡ƒæç",
+        "keywords": [
+          "cycling",
+          "amonia-nitrit-nitrat",
+          "bakteri baik",
+          "water parameter"
+        ],
+        "slides": [
+          {
+            "type": "cover",
+            "title": "Rahasia Air Bening & Sehat",
+            "subtitle": "Jantung Kehidupan Ekosistem Air",
+            "teaser": ""
+          },
+          {
+            "type": "fact",
+            "number": 1,
+            "title": "Amonia si Racun Tersembunyi Γÿá∩╕Å",
+            "description": "Kotoran ikan, sisa pakan, dan daun tanaman yang membusuk akan menghasilkan amonia yang sangat beracun. Jika dibiarkan menumpuk, senyawa ini bisa membuat ikan stres hingga mati dalam waktu singkat.",
+            "tags": [
+              "Amonia (NH3)",
+              "pH > 7 Lebih Toksik",
+              "Target: 0 ppm"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 2,
+            "title": "Nitrosomonas Mulai Beraksi ≡ƒæ╛",
+            "description": "Bakteri baik bernama Nitrosomonas akan mengonsumsi amonia dan mengubahnya menjadi nitrit. Walau kadar racunnya sedikit lebih rendah dari amonia, nitrit tetap sangat berbahaya bagi sistem pernapasan ikan.",
+            "tags": [
+              "Nitrit (NO2)",
+              "Butuh Oksigen",
+              "Suhu: 25-30┬░C"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 3,
+            "title": "Nitrobacter Sang Penyelamat ≡ƒ¢í∩╕Å",
+            "description": "Pahlawan berikutnya adalah bakteri Nitrobacter yang bertugas mengubah nitrit menjadi nitrat. Nitrat ini jauh lebih aman dan merupakan nutrisi utama yang sangat disukai oleh tanaman aquascape kamu.",
+            "tags": [
+              "Nitrat (NO3)",
+              "Nutrisi Tanaman",
+              "Target: <20 ppm"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 4,
+            "title": "Ganti Air Penutup Siklus ≡ƒ¬ú",
+            "description": "Meski nitrat relatif aman, akumulasi yang terlalu tinggi bisa memicu ledakan alga. Melakukan pergantian air (water change) berkala sebesar 30% per minggu adalah kunci menjaga keseimbangan ekosistem.",
+            "tags": [
+              "Water Change 30%",
+              "Kontrol Alga",
+              "Rutin Mingguan"
+            ]
+          }
+        ]
+      },
+      "04": {
+        "slug": "ikan-pertama",
+        "title": "Ikan Pertama",
+        "display_name": "Panduan Ikan Pertama Pemula",
+        "subtitle": "Anti Gagal, Ikan Pasti Hidup!",
+        "scientific_name": "Poeciliidae & Cyprinidae",
+        "level": 1,
+        "status": "scheduled",
+        "scheduled_time": "2026-06-12 19:00",
+        "caption": "Pengen beli ikan tapi bingung mulai dari mana? ≡ƒÿ⌐\n\nNah ini dia panduan milih ikan pertama biar gak nyesel ΓÇö karena percaya deh, asal-asalan masukin ikan itu resep bencana ≡ƒÿ¡ (udah pernah, tau rasanya wkwk)\n\nYang dibahas:\n≡ƒÆ¬ Pilih spesies tangguh ΓÇö jangan langsung yang mahal & rare\n≡ƒôÅ Cek ukuran dewasa ΓÇö ikan kecil lucu? bisa gede 30cm lho!\n≡ƒÉƒ Karakter ikan ΓÇö ada yg preman, ada yg kalem\n≡ƒæÑ Suka sendiri atau butuh teman?\n≡ƒì╜∩╕Å Pakan yang praktis\n≡ƒîè Zona renang ΓÇö si atas, tengah, bawah\n\nUdah selesai siklus airnya? Cek dulu post siklus nitrogen aku ya biar aman! ≡ƒî▒",
+        "keywords": [
+          "bioload",
+          "stocking",
+          "komunitas vs agresif",
+          "karantina",
+          "acclimation"
+        ],
+        "slides": [
+          {
+            "type": "cover",
+            "title": "Panduan Ikan Pertama Pemula",
+            "subtitle": "Anti Gagal, Ikan Pasti Hidup!",
+            "teaser": ""
+          },
+          {
+            "type": "fact",
+            "number": 1,
+            "title": "Pilih Spesies Tangguh ≡ƒÆ¬",
+            "description": "Sebagai pemula, pilihlah ikan yang toleran terhadap fluktuasi parameter air yang sering terjadi di aquarium baru. Ikan seperti Guppy, Platy, atau Zebra Danio sangat cocok karena mereka tidak mudah stres dan cepat beradaptasi.",
+            "tags": [
+              "pH 7.0-8.0",
+              "Suhu 22-28┬░C",
+              "Hardy Fish"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 2,
+            "title": "Cek Ukuran Dewasa ≡ƒôÅ",
+            "description": "Jangan terkecoh dengan ukuran ikan yang masih kecil saat di toko. Pastikan kamu tahu ukuran maksimal ikan saat dewasa agar aquarium tidak kelebihan muatan (overcrowded) yang bisa memicu penyakit.",
+            "tags": [
+              "Max 5-7 cm",
+              "Tank min. 30L",
+              "Size Limit"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 3,
+            "title": "Pahami Karakternya ≡ƒÉƒ",
+            "description": "Pilihlah ikan dengan karakter damai (peaceful) agar bisa hidup berdampingan dengan spesies lain nantinya. Hindari membeli ikan predator atau yang sangat teritorial sebagai ikan pertama di tank komunitas.",
+            "tags": [
+              "Peaceful",
+              "Community Tank",
+              "Non-Agresif"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 4,
+            "title": "Butuh Teman atau Sendiri? ≡ƒæÑ",
+            "description": "Beberapa ikan seperti Neon Tetra wajib dipelihara dalam kelompok (minimal 6 ekor) agar tidak stres dan mati. Jika ingin memelihara satu ekor saja, ikan Cupang (Betta) adalah pilihan soliter yang sangat tangguh.",
+            "tags": [
+              "Schooling: 6+",
+              "Betta: Soliter",
+              "Social Fish"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 5,
+            "title": "Pakan yang Praktis ≡ƒì╜∩╕Å",
+            "description": "Pilihlah ikan omnivora yang rakus dan mau memakan pakan kering berupa pelet atau serpihan (flakes). Menghindari ikan yang hanya mau makan pakan hidup akan sangat memudahkan perawatan harianmu.",
+            "tags": [
+              "Pellet/Flakes",
+              "Omnivora",
+              "Easy Feeding"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 6,
+            "title": "Zona Renang Ikan ≡ƒîè",
+            "description": "Ikan yang aktif berenang di bagian tengah hingga permukaan air akan membuat aquarium barumu terlihat lebih hidup. Kombinasikan dengan ikan pembersih dasar seperti Corydoras agar seluruh zona aquarium terisi.",
+            "tags": [
+              "Mid-Top Dweller",
+              "Bottom Feeder",
+              "Active Swimmer"
+            ]
+          }
+        ]
+      },
+      "05": {
+        "slug": "rawat-mingguan",
+        "title": "Rawat Mingguan",
+        "display_name": "Perawatan Mingguan Aquarium",
+        "subtitle": "Air Jernih, Ikan Happy!",
+        "scientific_name": "Aquatic Ecosystem Homeostasis",
+        "level": 1,
+        "status": "scheduled",
+        "scheduled_time": "2026-06-14 09:00",
+        "caption": "Rutinitas mingguan yang wajib kamu lakuin biar aquarium tetap sehat! ≡ƒùô∩╕Å≡ƒî┐\n\nGak perlu ribet kok, cuma 6 langkah simpel:\n≡ƒ¬ú Ganti air 20-30%\n≡ƒº╣ Siphon kotoran dasar\n≡ƒº╜ Gosok alga di kaca\n≡ƒ½º Bilas busa filter\nΓ£é∩╕Å Pangkas tanaman layu\n≡ƒº¬ Tes parameter air\n\nUdah bahas filter di post Filter Aquarium? Ini penting banget biar kamu tau gimana cara rawat filternya! ≡ƒÿë",
+        "keywords": [
+          "water change",
+          "gravel vac",
+          "trimming",
+          "alga",
+          "test kit"
+        ],
+        "slides": [
+          {
+            "type": "cover",
+            "title": "Perawatan Mingguan Aquarium",
+            "subtitle": "Air Jernih, Ikan Happy!",
+            "teaser": ""
+          },
+          {
+            "type": "fact",
+            "number": 1,
+            "title": "Ganti Air 20-30% ≡ƒ¬ú",
+            "description": "Jangan menguras seluruh air aquarium kamu! Cukup ganti sekitar 20-30% air setiap minggu untuk membuang racun amonia tanpa merusak koloni bakteri baik. Pastikan air baru sudah diendapkan atau diberi kondisioner air anti-klorin.",
+            "tags": [
+              "Water Change",
+              "Klorin Free",
+              "Suhu Stabil"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 2,
+            "title": "Siphon Kotoran Dasar ≡ƒº╣",
+            "description": "Gunakan selang siphon (penyedot) untuk membersihkan sisa makanan dan kotoran ikan yang mengendap di sela-sela pasir atau batu. Area dasar ini adalah tempat utama menumpuknya zat organik yang memicu lonjakan amonia.",
+            "tags": [
+              "Siphon",
+              "Substrat",
+              "Feses Ikan"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 3,
+            "title": "Gosok Alga di Kaca ≡ƒº╜",
+            "description": "Bersihkan alga hijau atau cokelat yang mulai menempel di dinding kaca menggunakan spons khusus atau pembersih magnetik. Lakukan pembersihan kaca ini sebelum menyedot air agar serpihan alga yang lepas ikut terbuang.",
+            "tags": [
+              "Algae Scraper",
+              "Spons Lembut",
+              "Estetika"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 4,
+            "title": "Bilas Busa Filter ≡ƒ½º",
+            "description": "Cuci busa penyaring mekanis jika sudah terlihat kotor kecokelatan. Sangat penting untuk membilasnya menggunakan air bekas aquarium, bukan air keran, agar bakteri pengurai yang hidup di filter tidak mati akibat kaporit.",
+            "tags": [
+              "Busa Filter",
+              "Bakteri Baik",
+              "Air Aquarium"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 5,
+            "title": "Pangkas Tanaman Layu Γ£é∩╕Å",
+            "description": "Jika aquarium kamu memiliki tanaman hidup (aquascape), gunting daun-daun yang mulai menguning atau membusuk. Hal ini mencegah pembusukan organik di dalam air dan merangsang pertumbuhan tunas baru yang lebih sehat.",
+            "tags": [
+              "Trimming",
+              "Aquascape",
+              "CO2 & Cahaya"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 6,
+            "title": "Tes Parameter Air ≡ƒº¬",
+            "description": "Lakukan tes cepat mingguan untuk memantau kadar pH, Nitrit (NO2), dan Nitrat (NO3). Deteksi dini perubahan parameter air akan membantu kamu mencegah penyakit pada ikan sebelum kondisinya menjadi parah.",
+            "tags": [
+              "pH 6.5-7.5",
+              "Nitrit 0 ppm",
+              "Water Test"
+            ]
+          }
+        ]
+      },
+      "06": {
+        "slug": "alga-musuh-atau-guru",
+        "title": "Alga: Musuh atau Guru?",
+        "display_name": "Musuh atau Guru?",
+        "subtitle": "Kenali, Cegah, Atasi",
+        "level": 1,
+        "status": "planned",
+        "keywords": [
+          "green water",
+          "hair algae",
+          "BBA",
+          "staghorn",
+          "nutrient imbalance",
+          "light duration"
+        ]
+      },
+      "07": {
+        "slug": "filter-aquarium",
+        "title": "Macam-macam Filter",
+        "display_name": "Sistem Filtrasi",
+        "subtitle": "Jantung Kehidupan Ekosistem Air",
+        "scientific_name": "Mechanical & Biological Filtration",
+        "level": 2,
+        "status": "live",
+        "permalink": "https://www.instagram.com/p/DZSSN8aCYbt/",
+        "result_id": "17892612393504750",
+        "caption": "Jantung aquarium kamu ada di sini! ≡ƒÆº\n\nBanyak pemula yang beli filter asal-asalan tanpa tahu cara kerjanya ΓÇö padahal filter itu kunci air bening & ikan sehat! ≡ƒÉƒ\n\nDi carousel ini aku jelasin:\n1∩╕ÅΓâú 3 Jurus Jernih ΓÇö mekanis, biologis, kimiawi\n2∩╕ÅΓâú Rumah Bakteri Baik ΓÇö kenapa media filter itu penting\n3∩╕ÅΓâú Aturan Putaran Air ΓÇö flow rate yang pas buat tankmu\n4∩╕ÅΓâú Jangan Asal Cuci ΓÇö cara bersihin filter yang benar\n\nKalian pake filter apa di tank? Canister, HOB, atau sponge? Share di komentar ya! ≡ƒæç",
+        "keywords": [
+          "filtrasi mekanis/biologis/kimiawi",
+          "flow rate",
+          "media filter"
+        ],
+        "slides": [
+          {
+            "type": "cover",
+            "title": "Sistem Filtrasi",
+            "subtitle": "Jantung Kehidupan Ekosistem Air",
+            "teaser": ""
+          },
+          {
+            "type": "fact",
+            "number": 1,
+            "title": "3 Jurus Jernih! ≡ƒÆº",
+            "description": "Filter bekerja dengan tiga metode: mekanis menyaring kotoran padat, biologis mengandalkan bakteri pengurai racun, dan kimiawi menyerap zat berbahaya. Kombinasi ketiganya adalah kunci air aquarium sebening kristal.",
+            "tags": [
+              "Mekanis",
+              "Biologis",
+              "Kimiawi"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 2,
+            "title": "Rumah Bakteri Baik ≡ƒªá",
+            "description": "Media biologis seperti ceramic ring atau batu apung adalah tempat tinggal bakteri pengurai. Bakteri ini sangat penting untuk mengubah amonia beracun dari kotoran ikan menjadi senyawa nitrat yang jauh lebih aman.",
+            "tags": [
+              "Amonia",
+              "Nitrifikasi",
+              "Bio-media"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 3,
+            "title": "Aturan Putaran Air ≡ƒöä",
+            "description": "Idealnya, pilihlah filter dengan kapasitas pompa (flow rate) minimal 4 hingga 8 kali volume air aquariummu per jam. Jika aquariummu berisi 50 liter air, gunakan filter dengan rating minimal 200 hingga 400 Liter Per Jam (LPH).",
+            "tags": [
+              "Flow Rate",
+              "LPH",
+              "Volume"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 4,
+            "title": "Jangan Asal Cuci! ≡ƒº╝",
+            "description": "Saat membersihkan media filter biologis, gunakan selalu air bekas aquarium, bukan air keran langsung. Kandungan klorin pada air keran bisa membunuh seluruh koloni bakteri baik yang sudah terbentuk.",
+            "tags": [
+              "Klorin",
+              "Perawatan",
+              "Bakteri"
+            ]
+          }
+        ]
+      },
+      "08": {
+        "slug": "tanaman-dasar",
+        "title": "Tanaman Dasar",
+        "level": 2,
+        "status": "planned",
+        "keywords": [
+          "low-tech vs high-tech",
+          "epiphyte",
+          "carpet plant",
+          "rhizome"
+        ]
+      },
+      "09": {
+        "slug": "ganti-air",
+        "title": "Ganti Air & Perawatan",
+        "level": 2,
+        "status": "planned",
+        "keywords": [
+          "dechlorinator",
+          "selang siphon",
+          "suhu air",
+          "frekuensi"
+        ]
+      },
+      "10": {
+        "slug": "penyakit-ikan",
+        "title": "Penyakit Ikan",
+        "level": 2,
+        "status": "planned",
+        "keywords": [
+          "ich",
+          "white spot",
+          "fin rot",
+          "quarantine",
+          "salt bath"
+        ]
+      },
+      "11": {
+        "slug": "parameter-air",
+        "title": "Parameter Air",
+        "level": 2,
+        "status": "planned",
+        "keywords": [
+          "pH",
+          "GH",
+          "KH",
+          "TDS",
+          "test kit",
+          "buffer"
+        ]
+      },
+      "12": {
+        "slug": "substrate",
+        "title": "Substrate Deep Dive",
+        "level": 2,
+        "status": "planned",
+        "keywords": [
+          "soil",
+          "pasir",
+          "gravel",
+          "laterit",
+          "caping"
+        ]
+      },
+      "13": {
+        "slug": "co2-dan-pupuk",
+        "title": "CO2 & Pupuk",
+        "level": 3,
+        "status": "planned",
+        "keywords": [
+          "difusi",
+          "drop checker",
+          "NPK",
+          "trace element",
+          "dosing"
+        ]
+      },
+      "14": {
+        "slug": "hardscape",
+        "title": "Hardscape & Layout",
+        "level": 3,
+        "status": "planned",
+        "keywords": [
+          "hardscape",
+          "golden ratio",
+          "focal point",
+          "slope",
+          "rule of thirds"
+        ]
+      },
+      "15": {
+        "slug": "gaya-aquascape",
+        "title": "Gaya Aquascape",
+        "level": 3,
+        "status": "planned",
+        "keywords": [
+          "Iwagumi",
+          "Nature",
+          "Dutch",
+          "biotope",
+          "jungle"
+        ]
+      },
+      "16": {
+        "slug": "udang-dan-keong",
+        "title": "Udang & Keong",
+        "level": 3,
+        "status": "planned",
+        "keywords": [
+          "neocaridina",
+          "caridina",
+          "nerite",
+          "amano",
+          "bioload"
+        ]
+      },
+      "17": {
+        "slug": "aklimatisasi-karantina",
+        "title": "Aklimatisasi & Karantina",
+        "level": 3,
+        "status": "planned",
+        "keywords": [
+          "drip acclimation",
+          "quarantine tank",
+          "salt bath",
+          "TDS matching"
+        ]
+      },
+      "18": {
+        "slug": "pakan-nutrisi",
+        "title": "Pakan & Nutrisi",
+        "level": 3,
+        "status": "planned",
+        "keywords": [
+          "flake",
+          "pellet",
+          "frozen",
+          "live food",
+          "feeding schedule"
+        ]
+      },
+      "19": {
+        "slug": "dry-start-method",
+        "title": "Dry Start Method",
+        "level": 4,
+        "status": "planned",
+        "keywords": [
+          "DSM",
+          "carpet plant",
+          "humidity",
+          "condensation"
+        ]
+      },
+      "20": {
+        "slug": "tank-mates",
+        "title": "Tank Mates",
+        "level": 4,
+        "status": "planned",
+        "keywords": [
+          "komunitas",
+          "agresif",
+          "cichlid",
+          "tetra",
+          "rasbora",
+          "bottom dweller"
+        ]
+      },
+      "21": {
+        "slug": "diy-aksesoris",
+        "title": "DIY Aksesoris",
+        "level": 4,
+        "status": "planned",
+        "keywords": [
+          "DIY filter",
+          "CO2 reactor",
+          "custom light",
+          "flow optimizer"
+        ]
+      },
+      "22": {
+        "slug": "rescape-evolusi",
+        "title": "Rescape & Evolusi",
+        "level": 4,
+        "status": "planned",
+        "keywords": [
+          "rescape",
+          "hardscape revamp",
+          "replant",
+          "tank progression"
+        ]
+      }
     }
   }
 }

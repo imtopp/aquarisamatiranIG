@@ -35,6 +35,37 @@ if AGENTS_MD.exists():
     system_prompt = AGENTS_MD.read_text(encoding="utf-8")
     system_prompt += "\n\nKamu adalah aku yang asli — personality, suara, gaya bicara, semuanya sama persis."
 
+# Inject terminology from curriculum_content.json (v4: nested per-season)
+if CURRICULUM_PATH.exists():
+    try:
+        cur_data = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        topics = cur_data.get("topics", {})
+        seasons = cur_data.get("seasons", {})
+        if topics:
+            term_lines = ["", "## Curriculum Terminology (live from curriculum_content.json)", ""]
+            for sid in sorted(seasons, key=int):
+                s = seasons[sid]
+                st = topics.get(str(sid), {})
+                levels = s.get("level_labels", {})
+                for lv in sorted(levels, key=int):
+                    label = levels[lv]
+                    lv_topics = sorted(
+                        [(k, st[k]) for k in st if st[k].get("level") == int(lv)],
+                        key=lambda x: int(x[0]),
+                    )
+                    if not lv_topics:
+                        continue
+                    term_lines.append(f"Season {sid} Level {lv} ({label}):")
+                    for k, v in lv_topics:
+                        status = v.get("status", "planned")
+                        keywords = v.get("keywords", [])
+                        kw_str = ", ".join(keywords) if keywords else "(no keywords)"
+                        status_tag = " ✅" if status == "live" else (" 📅" if status == "scheduled" else "")
+                        term_lines.append(f"  S{sid}#{k} {v['title']}{status_tag}: {kw_str}")
+            system_prompt += "\n" + "\n".join(term_lines)
+    except Exception:
+        pass  # best-effort
+
 HTTPX_CLIENT = httpx.AsyncClient(timeout=300)
 
 

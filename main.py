@@ -18,6 +18,7 @@ load_dotenv()
 
 from ig_client import InstagramClient, parse_schedule
 from edit_media import replace_audio, compress_video, upload_file, copy_to_published, VIDEO_DIR, MUSIC_DIR, PHOTO_DIR, OUTPUT_DIR, PUBLISHED_DIR, MAX_UPLOAD_MB
+from curriculum_manager import cmd_curriculum
 
 import PIL.Image
 import PIL.ImageDraw
@@ -1085,6 +1086,7 @@ def main():
         print("  search-hashtag <tag>       — cari hashtag")
         print("  delete-post <media_id>     — hapus post dari IG + referensi published/")
         print("  file-map                   — tampilkan mapping URL → file lokal")
+        print("  curriculum                 — kelola kurikulum (add/edit/delete season, level, topic, sync)")
         print()
         print("Opsi global:")
         print(f"  --niche NAMA               pilih niche. Tersedia: {niche_list}")
@@ -1110,6 +1112,7 @@ def main():
         "generate-carousel": cmd_generate_carousel,
         "delete-post": cmd_delete_post,
         "file-map": cmd_file_map,
+        "curriculum": cmd_curriculum,
     }
 
     fn = cmds.get(cmd)

@@ -213,3 +213,9 @@ Menunjukkin kalau proses itu berharga — nggak perlu jadi expert dulu buat mula
 - Nomor topic **per-season** (season 2 mulai lagi dari #01)
 - `python main.py curriculum sync` → regenerate `curriculum.md`, `schedule.json`, `bio/index.html`
 - Bot Telegram baca terminology langsung dari `curriculum_content.json` (gak perlu sync ke AGENTS.md)
+
+## Instagram API Limitations
+
+- **Carousel scheduling (`--schedule`)** ❌ — error "User must be on whitelist". IG Graph API gak ngizinin carousel scheduling tanpa approval khusus. **Jangan pernah pake `--schedule`** di `post-carousel`.
+- **Photo/reel scheduling (`--schedule`)** ✅ — masih bisa.
+- **Workaround carousel:** Upload slide ke Catbox (via `post-carousel` tanpa `--schedule`, atau manual), masukin `urls` ke `schedule.json`, biar VPS runner yang posting langsung pas jamnya (dengan `post_carousel` tanpa parameter schedule).

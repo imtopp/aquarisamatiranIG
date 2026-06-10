@@ -69,21 +69,43 @@ def cmd_media(client, args):
 
 def cmd_post_photo(client, args):
     schedule_ts = None
+    schedule_mode = None
+    schedule_time_str = None
+    slug = None
     filtered = []
     i = 0
     while i < len(args):
-        if args[i] == "--schedule" and i + 1 < len(args):
-            schedule_ts = parse_schedule(args[i + 1])
+        if args[i] == "--schedule" and i + 2 < len(args) and args[i + 1] in ("ig", "cron"):
+            schedule_mode = args[i + 1]
+            schedule_time_str = args[i + 2]
+            schedule_ts = parse_schedule(schedule_time_str)
+            i += 3
+        elif args[i] == "--schedule" and i + 1 < len(args):
+            schedule_mode = "ig"
+            schedule_time_str = args[i + 1]
+            schedule_ts = parse_schedule(schedule_time_str)
+            i += 2
+        elif args[i] == "--slug" and i + 1 < len(args):
+            slug = args[i + 1]
             i += 2
         else:
             filtered.append(args[i])
             i += 1
 
     if len(filtered) < 1:
-        print("Gunakan: python main.py post-photo <image_url> [caption] [--schedule \"Mon 19:00\"]")
+        print("Gunakan: python main.py post-photo <image_url> [caption] [--schedule ig|cron \"Mon 19:00\"]")
         return
+
     url = filtered[0]
     caption = " ".join(filtered[1:]) if len(filtered) > 1 else ""
+
+    if schedule_mode == "cron":
+        from datetime import datetime
+        dt = datetime.fromtimestamp(schedule_ts)
+        _add_schedule_entry(slug or "photo", "photo", url, caption, dt.strftime("%Y-%m-%d %H:%M"))
+        print(f"\n📅 Foto masuk antrian schedule.json: {dt.strftime('%Y-%m-%d %H:%M')}")
+        return
+
     result = client.post_photo(url, caption, scheduled_publish_time=schedule_ts)
     if result.get("scheduled"):
         from datetime import datetime
@@ -93,15 +115,68 @@ def cmd_post_photo(client, args):
         print(f"✅ Foto berhasil di-publish! ID: {result.get('id')}")
 
 
+def _find_curriculum_key_by_slug(slug: str) -> str | None:
+    """Cari #XX dari curriculum_content.json berdasarkan slug."""
+    cpath = Path("curriculum_content.json")
+    if not cpath.exists():
+        return None
+    try:
+        cc = json.loads(cpath.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    for sid, st in cc.get("topics", {}).items():
+        for num, topic in st.items():
+            if topic.get("slug") == slug or topic.get("slug", "").replace("-", "_") == slug:
+                return f"#{num}"
+    return None
+
+
+def _add_schedule_entry(slug: str, ptype: str, urls_or_url: str | list[str],
+                         caption: str, time_str: str):
+    """Tambah entry ke schedule.json."""
+    import json
+    spath = Path("schedule.json")
+    schedule = json.loads(spath.read_text(encoding="utf-8")) if spath.exists() else []
+    curriculum_key = _find_curriculum_key_by_slug(slug)
+    entry = {
+        "curriculum": curriculum_key,
+        "time": time_str,
+        "type": ptype,
+        "caption": caption,
+        "done": False,
+        "season": 1,
+    }
+    if ptype == "carousel":
+        entry["urls"] = list(urls_or_url) if isinstance(urls_or_url, list) else [urls_or_url]
+    else:
+        entry["url"] = str(urls_or_url)
+    schedule.append(entry)
+    spath.write_text(json.dumps(schedule, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"   📝 schedule.json: {curriculum_key or slug} ({ptype}) dijadwalkan {time_str}")
+
+
 def cmd_post_carousel(client, args):
     schedule_ts = None
     slug_filter = None
+    upload_only = False
+    schedule_mode = None  # None = langsung, "ig" = IG schedule, "cron" = schedule.json
+    schedule_time_str = None
     filtered = []
     i = 0
     while i < len(args):
-        if args[i] == "--schedule" and i + 1 < len(args):
-            schedule_ts = parse_schedule(args[i + 1])
+        if args[i] == "--schedule" and i + 2 < len(args) and args[i + 1] in ("ig", "cron"):
+            schedule_mode = args[i + 1]
+            schedule_time_str = args[i + 2]
+            schedule_ts = parse_schedule(schedule_time_str)
+            i += 3
+        elif args[i] == "--schedule" and i + 1 < len(args):
+            schedule_mode = "ig"
+            schedule_time_str = args[i + 1]
+            schedule_ts = parse_schedule(schedule_time_str)
             i += 2
+        elif args[i] == "--upload-only":
+            upload_only = True
+            i += 1
         elif args[i] == "--slug" and i + 1 < len(args):
             slug_filter = args[i + 1]
             i += 2
@@ -156,22 +231,42 @@ def cmd_post_carousel(client, args):
         urls.append(url)
         print(f"   ✅ {url}")
 
-    result = client.post_carousel(urls, caption, scheduled_publish_time=schedule_ts)
-    media_id = result.get("id")
-    if result.get("scheduled"):
+    if upload_only:
+        print()
+        print(f"📌 Upload-only mode — ngga dipublish ke IG")
+        print(f"   URLs siap: {urls[0]} ... ({len(urls)} file)")
+        _update_curriculum_content(latest_prefix, facts=None)
+        return
+
+    if schedule_mode == "cron":
         from datetime import datetime
-        dt = datetime.fromtimestamp(result["scheduled_publish_time"])
-        print(f"📅 Carousel terjadwal: {dt.strftime('%A, %d %b %Y jam %H:%M')} | ID: {media_id}")
-    else:
-        print(f"✅ Carousel berhasil di-publish! ID: {media_id}")
+        dt = datetime.fromtimestamp(schedule_ts)
+        time_str = dt.strftime("%Y-%m-%d %H:%M")
+        _add_schedule_entry(latest_prefix, "carousel", urls, caption, time_str)
+        _update_curriculum_content(latest_prefix, status="scheduled")
+        print(f"\n📅 Carousel masuk antrian schedule.json: {time_str}")
+        return
+
+    # IG langsung
+    if schedule_ts and schedule_mode == "ig":
+        print(f"   ⚠️  Carousel scheduling via IG butuh whitelist — fallback ke cron mode")
+        from datetime import datetime
+        dt = datetime.fromtimestamp(schedule_ts)
+        _add_schedule_entry(latest_prefix, "carousel", urls, caption, dt.strftime("%Y-%m-%d %H:%M"))
+        _update_curriculum_content(latest_prefix, status="scheduled")
+        print(f"\n📅 Carousel masuk antrian schedule.json: {dt.strftime('%Y-%m-%d %H:%M')}")
+        return
+
+    result = client.post_carousel(urls, caption, scheduled_publish_time=None)
+    media_id = result.get("id")
+    print(f"✅ Carousel berhasil di-publish! ID: {media_id}")
 
     # Simpan ke published/
     for p in latest:
         _save_to_published(p, media_id, group_slug=latest_prefix)
 
     # Update curriculum_content.json
-    status_val = "scheduled" if result.get("scheduled") else "live"
-    _update_curriculum_content(latest_prefix, result_id=media_id, status=status_val)
+    _update_curriculum_content(latest_prefix, result_id=media_id, status="live")
 
 
 _UPLOAD_MAP = Path("resource") / ".uploaded.json"
@@ -191,21 +286,42 @@ def _save_map(url: str, local_path: str):
 
 def cmd_post_reel(client, args):
     schedule_ts = None
+    schedule_mode = None
+    schedule_time_str = None
+    slug = None
     filtered = []
     i = 0
     while i < len(args):
-        if args[i] == "--schedule" and i + 1 < len(args):
-            schedule_ts = parse_schedule(args[i + 1])
+        if args[i] == "--schedule" and i + 2 < len(args) and args[i + 1] in ("ig", "cron"):
+            schedule_mode = args[i + 1]
+            schedule_time_str = args[i + 2]
+            schedule_ts = parse_schedule(schedule_time_str)
+            i += 3
+        elif args[i] == "--schedule" and i + 1 < len(args):
+            schedule_mode = "ig"
+            schedule_time_str = args[i + 1]
+            schedule_ts = parse_schedule(schedule_time_str)
+            i += 2
+        elif args[i] == "--slug" and i + 1 < len(args):
+            slug = args[i + 1]
             i += 2
         else:
             filtered.append(args[i])
             i += 1
 
     if len(filtered) < 1:
-        print("Gunakan: python main.py post-reel <video_url> [caption] [--schedule \"Mon 19:00\"]")
+        print("Gunakan: python main.py post-reel <video_url> [caption] [--schedule ig|cron \"Mon 19:00\"]")
         return
     url = filtered[0]
     caption = " ".join(filtered[1:]) if len(filtered) > 1 else ""
+
+    if schedule_mode == "cron":
+        from datetime import datetime
+        dt = datetime.fromtimestamp(schedule_ts)
+        _add_schedule_entry(slug or "reel", "reel", url, caption, dt.strftime("%Y-%m-%d %H:%M"))
+        print(f"\n📅 Reel masuk antrian schedule.json: {dt.strftime('%Y-%m-%d %H:%M')}")
+        return
+
     result = client.post_reel(url, caption, scheduled_publish_time=schedule_ts)
     if result.get("scheduled"):
         from datetime import datetime
@@ -1079,11 +1195,15 @@ def main():
         print("  profile                    — lihat profil IG")
         print("  media [limit]             — lihat postingan terbaru")
         print('  post-photo <url> [caption]  — posting foto')
+        print('                  --schedule ig|cron "Mon 19:00"')
         print("  post-carousel [caption]    — posting carousel slides")
         print("                  --slug SLUG pilih slide tertentu")
+        print("                  --upload-only upload Catbox aja, gak posting")
+        print('                  --schedule cron "Mon 19:00" masuk antrian')
         print('  prepare-reel <vid> <music> — [Skill 1] edit video + ganti audio')
         print('  stage-reel <video>         — [Skill 2] upload Catbox + generate caption')
         print('  post-reel <url> [caption]  — [Skill 3] posting reel ke IG')
+        print('                  --schedule ig|cron "Mon 19:00"')
         print('  stage-photo <foto>         — [Foto] upload Catbox + generate caption')
         print('  generate-caption <video>   — (opsional) caption aja tanpa upload')
         print("  generate-carousel <topik>  — generate carousel slides (facts Gemini + gambar)")

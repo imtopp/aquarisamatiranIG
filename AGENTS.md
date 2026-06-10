@@ -1,6 +1,7 @@
 # AGENTS.md
 
-Instagram manager CLI for `aquarisamatiran` (Creator account).
+**Nix** — Multi-niche carousel & content CLI. Build anything, switch niches freely.
+Currently running `aquarisamatiran` (aquascape) as the primary account.
 
 ## Tech Stack
 
@@ -51,7 +52,7 @@ PEXELS_API_KEY=...
 ## Caption Writing Rule
 
 When writing captions:
-1. Check `curriculum.md` which topics are ✅ (done) with their post IDs
+1. Check `curriculum_content.json` which topics are ✅ (done) with their post IDs
 2. Check `schedule.json` for past post IDs
 3. Cross-reference current post topic with related past posts
 4. Automatically mention past posts in caption: *"kayak yang udah kita bahas di post [topic]"*
@@ -80,6 +81,7 @@ Setiap konten harus ngenalin istilah yang relevan (bukan cuma nyebut doang, tapi
 | Curriculum# | Topic | Post | ID | Date |
 |------------|-------|------|----|------|
 | 01 | Aquarium itu Apa? | Cover slide carousel | `17882725962597921` | 2026-06-08 |
+| 02 | Peralatan Dasar | Peralatan Dasar carousel | `17874365340506399` | 2026-06-10 |
 | 03 | Setup & siklus air | Siklus Nitrogen carousel | `18329549080271215` | 2026-06-07 |
 | 06 | Macam-macam filter | Filter Aquarium carousel | `17892612393504750` | 2026-06-07 |
 
@@ -87,7 +89,6 @@ Setiap konten harus ngenalin istilah yang relevan (bukan cuma nyebut doang, tapi
 
 | Curriculum# | Topic | Day | Time WIB | Status |
 |------------|-------|-----|----------|--------|
-| #02 | Peralatan Dasar | **Rabu, 10 Jun** | **19:00** | **🟡 Hari ini!** |
 | #04 | Ikan Pertama | Jumat, 12 Jun | 19:00 | Siap |
 | #05 | Rawat Mingguan | Minggu, 14 Jun | 09:00 | Siap |
 

@@ -20,6 +20,14 @@ WIB = timezone(timedelta(hours=7))
 SCHEDULE_PATH = Path("schedule.json")
 
 
+def _find_topic_by_num(cc: dict, num: str):
+    """Cari topic di nested v4 structure (topics[season][num])."""
+    for st in cc.get("topics", {}).values():
+        if num in st:
+            return st[num]
+    return None
+
+
 def _update_curriculum_after_post(post: dict):
     """Update curriculum_content.json status + permalink setelah posting."""
     curriculum = post.get("curriculum", "")
@@ -27,15 +35,14 @@ def _update_curriculum_after_post(post: dict):
         return
     try:
         cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
-        topics = cc.get("topics", {})
         num = curriculum.lstrip("#")
-        if num in topics:
-            topics[num]["status"] = "live"
+        topic = _find_topic_by_num(cc, num)
+        if topic:
+            topic["status"] = "live"
             if post.get("result_id"):
-                topics[num]["result_id"] = post["result_id"]
+                topic["result_id"] = post["result_id"]
             if post.get("permalink"):
-                topics[num]["permalink"] = post["permalink"]
-            cc["topics"] = topics
+                topic["permalink"] = post["permalink"]
             CURRICULUM_PATH.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
             print(f"   📝 curriculum_content.json diupdate untuk #{num}")
     except Exception:

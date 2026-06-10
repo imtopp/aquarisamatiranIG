@@ -1,0 +1,69 @@
+{
+  "topic": "Alga: Musuh atau Guru?",
+  "display_name": "Alga: Si Hijau, Musuh Atau Guru?",
+  "subtitle": "Si Hijau, Apa Kabarmu?",
+  "scientific_name": "Beragam Kelompok Organisme Fotosintetik",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Apa Itu Alga? 🤔",
+      "description": "Alga sering disalahartikan sebagai tanaman, padahal mereka adalah kelompok organisme fotosintetik yang sangat beragam. Mereka punya klorofil dan menghasilkan energi dari cahaya matahari, sama seperti tanaman air.",
+      "tags": [
+        "Fotosintetik",
+        "OrganismeDiverse",
+        "BukanTanaman"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Peran Baik Alga 🌱",
+      "description": "Jangan selalu dianggap hama! Alga kecil bisa jadi sumber makanan alami bagi ikan atau udang tertentu. Selain itu, mereka juga membantu memproduksi oksigen, lho, yang penting untuk ekosistem akuariummu.",
+      "tags": [
+        "SumberPakan",
+        "ProdusenOksigen",
+        "EkosistemSehat"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Saat Alga Berlebih 🚫",
+      "description": "Masalah muncul saat populasi alga meledak atau \"alga bloom\". Ini bikin akuarium jadi jelek, menutupi tanaman asli, bahkan bisa mengurangi oksigen di malam hari atau saat mati, mengganggu keseimbangan.",
+      "tags": [
+        "AlgaBloom",
+        "EstetikaBuruk",
+        "GangguKeseimbangan"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Penyebab Ledakan Alga 📈",
+      "description": "Ledakan alga seringkali sinyal ada yang tidak beres. Penyebab utamanya adalah kelebihan nutrisi (dari sisa pakan atau kotoran) dan intensitas cahaya yang terlalu tinggi atau durasi menyala terlalu lama.",
+      "tags": [
+        "KelebihanNutrisi",
+        "CahayaBerlebih",
+        "NitratFosfat"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Mengontrol Alga Bijak ✅",
+      "description": "Kunci mengendalikan alga bukan membasmi total, tapi menjaga keseimbangan. Atur durasi pencahayaan (maks 6-8 jam), kurangi pakan berlebih, rutin ganti air, dan tanam lebih banyak tanaman air kompetitor.",
+      "tags": [
+        "MaintenanceRutin",
+        "CahayaTeratur",
+        "TanamanKompetitor"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Alga Sebagai Guru 🧑‍🏫",
+      "description": "Daripada dimusuhi, anggap alga sebagai indikator. Banyaknya alga berarti akuariummu mungkin punya masalah nutrisi atau cahaya yang perlu diperbaiki. Ini adalah kesempatan untuk belajar dan membuat tank-mu lebih baik!",
+      "tags": [
+        "IndikatorKesehatan",
+        "PelajariTank",
+        "PerbaikiMasalah"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

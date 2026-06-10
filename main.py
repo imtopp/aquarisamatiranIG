@@ -929,7 +929,7 @@ def cmd_generate_carousel(_client, args):
 def _update_curriculum_content(slug: str, facts: dict | None = None,
                                 result_id: str | None = None, permalink: str | None = None,
                                 status: str | None = None):
-    """Update curriculum_content.json with generated facts or post result."""
+    """Update curriculum_content.json with generated facts or post result (v4 nested)."""
     import json
     cpath = Path("curriculum_content.json")
     if not cpath.exists():
@@ -938,21 +938,29 @@ def _update_curriculum_content(slug: str, facts: dict | None = None,
         cc = json.loads(cpath.read_text(encoding="utf-8"))
     except Exception:
         return
-    topics = cc.get("topics", {})
-    matched = None
-    for num, topic in topics.items():
-        if topic.get("slug") == slug:
-            matched = num
-            break
-    if matched is None:
-        for num, topic in topics.items():
-            if topic.get("slug", "").replace("-", "_") == slug:
-                matched = num
+    all_topics = cc.get("topics", {})
+
+    matched_sid = None
+    matched_num = None
+    for sid, st in all_topics.items():
+        for num, topic in st.items():
+            if topic.get("slug") == slug:
+                matched_sid, matched_num = sid, num
                 break
-    if matched is None:
+        if matched_sid:
+            break
+    if not matched_sid:
+        for sid, st in all_topics.items():
+            for num, topic in st.items():
+                if topic.get("slug", "").replace("-", "_") == slug:
+                    matched_sid, matched_num = sid, num
+                    break
+            if matched_sid:
+                break
+    if not matched_sid:
         return
 
-    topic = topics[matched]
+    topic = all_topics[matched_sid][matched_num]
     if facts:
         topic["display_name"] = facts.get("display_name", topic.get("display_name", ""))
         topic["subtitle"] = facts.get("subtitle", "")
@@ -974,9 +982,8 @@ def _update_curriculum_content(slug: str, facts: dict | None = None,
         topic["permalink"] = permalink
     if status:
         topic["status"] = status
-    cc["topics"][matched] = topic
     cpath.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"📝 curriculum_content.json diupdate untuk #{matched}")
+    print(f"📝 curriculum_content.json diupdate untuk #{matched_num}")
 
 
 def _save_to_published(file_paths, media_id: str, group_slug: str | None = None):

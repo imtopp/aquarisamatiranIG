@@ -459,10 +459,10 @@
       "06": {
         "slug": "alga-musuh-atau-guru",
         "title": "Alga: Musuh atau Guru?",
-        "display_name": "Musuh atau Guru?",
-        "subtitle": "Kenali, Cegah, Atasi",
+        "display_name": "Alga: Si Hijau, Musuh Atau Guru?",
+        "subtitle": "Si Hijau, Apa Kabarmu?",
         "level": 1,
-        "status": "planned",
+        "status": "scheduled",
         "keywords": [
           "green water",
           "hair algae",
@@ -470,7 +470,82 @@
           "staghorn",
           "nutrient imbalance",
           "light duration"
-        ]
+        ],
+        "scientific_name": "Beragam Kelompok Organisme Fotosintetik",
+        "slides": [
+          {
+            "type": "cover",
+            "title": "Alga: Si Hijau, Musuh Atau Guru?",
+            "subtitle": "Si Hijau, Apa Kabarmu?"
+          },
+          {
+            "type": "fact",
+            "number": 1,
+            "title": "Apa Itu Alga? 🤔",
+            "description": "Alga sering disalahartikan sebagai tanaman, padahal mereka adalah kelompok organisme fotosintetik yang sangat beragam. Mereka punya klorofil dan menghasilkan energi dari cahaya matahari, sama seperti tanaman air.",
+            "tags": [
+              "Fotosintetik",
+              "OrganismeDiverse",
+              "BukanTanaman"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 2,
+            "title": "Peran Baik Alga 🌱",
+            "description": "Jangan selalu dianggap hama! Alga kecil bisa jadi sumber makanan alami bagi ikan atau udang tertentu. Selain itu, mereka juga membantu memproduksi oksigen, lho, yang penting untuk ekosistem akuariummu.",
+            "tags": [
+              "SumberPakan",
+              "ProdusenOksigen",
+              "EkosistemSehat"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 3,
+            "title": "Saat Alga Berlebih 🚫",
+            "description": "Masalah muncul saat populasi alga meledak atau \"alga bloom\". Ini bikin akuarium jadi jelek, menutupi tanaman asli, bahkan bisa mengurangi oksigen di malam hari atau saat mati, mengganggu keseimbangan.",
+            "tags": [
+              "AlgaBloom",
+              "EstetikaBuruk",
+              "GangguKeseimbangan"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 4,
+            "title": "Penyebab Ledakan Alga 📈",
+            "description": "Ledakan alga seringkali sinyal ada yang tidak beres. Penyebab utamanya adalah kelebihan nutrisi (dari sisa pakan atau kotoran) dan intensitas cahaya yang terlalu tinggi atau durasi menyala terlalu lama.",
+            "tags": [
+              "KelebihanNutrisi",
+              "CahayaBerlebih",
+              "NitratFosfat"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 5,
+            "title": "Mengontrol Alga Bijak ✅",
+            "description": "Kunci mengendalikan alga bukan membasmi total, tapi menjaga keseimbangan. Atur durasi pencahayaan (maks 6-8 jam), kurangi pakan berlebih, rutin ganti air, dan tanam lebih banyak tanaman air kompetitor.",
+            "tags": [
+              "MaintenanceRutin",
+              "CahayaTeratur",
+              "TanamanKompetitor"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 6,
+            "title": "Alga Sebagai Guru 🧑‍🏫",
+            "description": "Daripada dimusuhi, anggap alga sebagai indikator. Banyaknya alga berarti akuariummu mungkin punya masalah nutrisi atau cahaya yang perlu diperbaiki. Ini adalah kesempatan untuk belajar dan membuat tank-mu lebih baik!",
+            "tags": [
+              "IndikatorKesehatan",
+              "PelajariTank",
+              "PerbaikiMasalah"
+            ]
+          }
+        ],
+        "scheduled_time": "2026-06-17 19:00"
       },
       "07": {
         "slug": "filter-aquarium",

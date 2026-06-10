@@ -52,7 +52,7 @@ PEXELS_API_KEY=...
 ## Caption Writing Rule
 
 When writing captions:
-1. Check `curriculum_content.json` which topics are ✅ (done) with their post IDs
+1. Check `curriculum.md` or `curriculum_content.json` which topics are ✅ (done) with their post IDs
 2. Check `schedule.json` for past post IDs
 3. Cross-reference current post topic with related past posts
 4. Automatically mention past posts in caption: *"kayak yang udah kita bahas di post [topic]"*

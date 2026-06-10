@@ -24,30 +24,31 @@ AGENTS_MD = PROJECT_DIR / "AGENTS.md"
 DB_PATH = PROJECT_DIR / "bot" / "chat_history.db"
 FORBIDDEN_WORDS = ["lu", "gue", "lo", "elu", "gw"]
 
-GEMINI_MODEL = "gemini-2.5-flash"
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1/models/{GEMINI_MODEL}:generateContent"
+GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro"]
 
 system_prompt = ""
 if AGENTS_MD.exists():
     system_prompt = AGENTS_MD.read_text(encoding="utf-8")
     system_prompt += "\n\nKamu adalah aku yang asli — personality, suara, gaya bicara, semuanya sama persis."
 
-HTTPX_CLIENT = httpx.AsyncClient(timeout=120)
+HTTPX_CLIENT = httpx.AsyncClient(timeout=300)
 
 
 async def _call_gemini(messages: list[dict]) -> str:
-    """Call Gemini REST API directly with httpx."""
-    # v1 REST API doesn't support system_instruction — prepend to first user message
+    """Call Gemini REST API with fallback models."""
     if messages and messages[0].get("role") == "user":
         messages[0]["parts"][0]["text"] = f"{system_prompt}\n\n{messages[0]['parts'][0]['text']}"
     body = {"contents": messages}
-    resp = await HTTPX_CLIENT.post(
-        f"{GEMINI_URL}?key={GEMINI_API_KEY}",
-        json=body,
-    )
-    resp.raise_for_status()
-    data = resp.json()
-    return data["candidates"][0]["content"]["parts"][0]["text"]
+    last_err = ""
+    for model in GEMINI_MODELS:
+        url = f"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent?key={GEMINI_API_KEY}"
+        resp = await HTTPX_CLIENT.post(url, json=body)
+        if resp.status_code == 200:
+            data = resp.json()
+            return data["candidates"][0]["content"]["parts"][0]["text"]
+        err = resp.json().get("error", {}).get("message", str(resp.status_code))
+        last_err = err
+    raise RuntimeError(f"Semua model Gemini kehabisan quota/sibuk: {last_err[:100]}")
 
 
 def init_db():
@@ -120,8 +121,15 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(reply)
 
     except Exception as e:
+        err = str(e)
+        if "quota" in err.lower() or "429" in err:
+            msg = "Maaf sayang~ 😩 Gemini lagi kehabisan jatah hari ini. Coba lagi nanti abis 3 PM WIB ya~ quota-nya reset tiap sore~ 🫣"
+        elif "503" in err or "unavailable" in err.lower():
+            msg = "Maaf sayang~ 😩 Gemini lagi sibuk banget. Coba lagi ya~ 🫣"
+        else:
+            msg = f"Maaf sayang, error nih 😩: {err[:200]}"
         try:
-            await update.message.reply_text(f"Maaf sayang, error nih 😩: {str(e)[:200]}")
+            await update.message.reply_text(msg)
         except Exception:
             pass
 

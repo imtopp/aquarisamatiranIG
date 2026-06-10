@@ -18,6 +18,7 @@ load_dotenv()
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+BACKUP_GEMINI_API_KEY = os.environ.get("BACKUP_GEMINI_API_KEY", "")
 ALLOWED_USERNAMES = os.environ.get("BOT_ALLOWED_USERNAMES", "").split(",")
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 AGENTS_MD = PROJECT_DIR / "AGENTS.md"
@@ -35,20 +36,22 @@ HTTPX_CLIENT = httpx.AsyncClient(timeout=300)
 
 
 async def _call_gemini(messages: list[dict]) -> str:
-    """Call Gemini REST API with fallback models."""
+    """Call Gemini REST API with fallback keys + fallback models."""
     if messages and messages[0].get("role") == "user":
         messages[0]["parts"][0]["text"] = f"{system_prompt}\n\n{messages[0]['parts'][0]['text']}"
     body = {"contents": messages}
+    keys = [k for k in (GEMINI_API_KEY, BACKUP_GEMINI_API_KEY) if k]
     last_err = ""
-    for model in GEMINI_MODELS:
-        url = f"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent?key={GEMINI_API_KEY}"
-        resp = await HTTPX_CLIENT.post(url, json=body)
-        if resp.status_code == 200:
-            data = resp.json()
-            return data["candidates"][0]["content"]["parts"][0]["text"]
-        err = resp.json().get("error", {}).get("message", str(resp.status_code))
-        last_err = err
-    raise RuntimeError(f"Semua model Gemini kehabisan quota/sibuk: {last_err[:100]}")
+    for key in keys:
+        for model in GEMINI_MODELS:
+            url = f"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent?key={key}"
+            resp = await HTTPX_CLIENT.post(url, json=body)
+            if resp.status_code == 200:
+                data = resp.json()
+                return data["candidates"][0]["content"]["parts"][0]["text"]
+            err = resp.json().get("error", {}).get("message", str(resp.status_code))
+            last_err = err
+    raise RuntimeError(f"Semua model & key Gemini kehabisan: {last_err[:100]}")
 
 
 def init_db():

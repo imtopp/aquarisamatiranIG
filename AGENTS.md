@@ -216,15 +216,15 @@ Menunjukkin kalau proses itu berharga — nggak perlu jadi expert dulu buat mula
 
 ## Scheduling
 
-**cron-job.org** — 4 jobs configured di akun, nge-hit GitHub API `workflows/scheduler.yml/dispatches` dengan PAT (`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`). Trigger pas jam posting.
+**cron-job.org** — nge-hit GitHub API `workflows/scheduler.yml/dispatches` dengan PAT (`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`). Trigger pas jam posting. Judul generik karena isi ditentukan `schedule.json`. Ada 3 grup cron:
 
-Cron-job.org jobs:
-| ID | Title | Jadwal | Last Status |
-|----|-------|--------|-------------|
-| 7765579 | Senin Reel 19:00 WIB | Mon 20:24 | ✅ pernah sukses |
-| 7765580 | Rabu Carousel 19:00 WIB | Wed 19:00 | ✅ pernah sukses |
-| 7765581 | Jumat Reel 19:00 WIB | Fri 19:00 | ⏳ belum |
-| 7765582 | Minggu Foto 09:00 WIB | Sun 09:00 | ⏳ belum |
+| ID | Title | wdays | Jam WIB |
+|----|-------|-------|---------|
+| 7783398 | Weekday 19:00 WIB | Mon-Thu | 19:00 |
+| 7783399 | Jumat 15:00 WIB | Fri | 15:00 |
+| 7783400 | Weekend 09:00 WIB | Sat-Sun | 09:00 |
+
+Nix akan auto-pilih jadwal ini berdasarkan hari posting. Entries di `schedule.json` harus punya `time` yang sesuai dengan jam cron grup-nya.
 
 ## Instagram API Limitations
 

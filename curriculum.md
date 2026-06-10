@@ -1,42 +1,50 @@
 # 📚 Kurikulum Aquarisamatiran
 
-Belajar aquarium dari nol sampai pro — step by step, pake bahasa awam.
+Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 
 ---
 
 ## 🟢 Level 1: Pemula Absolut
 
-| # | Topik | Status | Tgl Post | ID Post | Catatan |
-|---|-------|--------|----------|---------|---------|
-| 01 | Aquarium itu apa? Jenis-jenis, budget, mitos | ✅ | 2026-06-08 | `17882725962597921` | Cover slide carousel |
-| 02 | Peralatan dasar: wadah, filter, lampu, dll | ✅ | 2026-06-10 | `17874365340506399` | Peralatan Dasar carousel |
-| 03 | Setup & siklus air dari awal | ✅ | 2026-06-07 | `18329549080271215` | Siklus Nitrogen carousel |
-| 04 | Ikan pertama yang kuat & murah | ⬜ | 2026-06-12 | — | — |
-| 05 | Cara rawat mingguan: kasih makan, ganti air | ⬜ | 2026-06-14 | — | — |
+| # | Topik | Tgl Post | Status |
+|---|-------|----------|--------|
+| 01 | Aquarium itu Apa? — jenis, budget, mitos | 2026-06-08 | ✅ |
+| 02 | Peralatan Dasar — wadah, filter, lampu, dll | 2026-06-10 | ✅ |
+| 03 | Setup & Siklus Air | 2026-06-07 | ✅ |
+| 04 | Ikan Pertama — jenis kuat & murah | 2026-06-12 | ⬜ |
+| 05 | Rawat Mingguan — kasih makan, ganti air, bersih | 2026-06-14 | ⬜ |
+| 06 | Alga 101 — jenis, penyebab, cara ngatasin | — | ⬜ |
 
 ## 🟡 Level 2: Mulai Pede
 
-| # | Topik | Status | Tgl Post | ID Post | Catatan |
-|---|-------|--------|----------|---------|---------|
-| 06 | Macam-macam filter & cara pilih | ✅ | 2026-06-07 | `17892612393504750` | Filter Aquarium carousel |
-| 07 | Tanaman dasar yang susah mati | ⬜ | — | — | — |
-| 08 | Cara ganti air yang benar & aman | ⬜ | — | — | — |
-| 09 | Penyakit ikan dasar & cara ngatasin | ⬜ | — | — | — |
-| 07 | Tanaman dasar yang susah mati | ⬜ | | | |
-| 08 | Cara ganti air yang benar & aman | ⬜ | | | |
-| 09 | Penyakit ikan dasar & cara ngatasin | ⬜ | | | |
+| # | Topik | Status |
+|---|-------|--------|
+| 07 | Macam-macam Filter | ✅ 2026-06-07 |
+| 08 | Tanaman Dasar — yang susah mati | ⬜ |
+| 09 | Ganti Air & Perawatan Detail | ⬜ |
+| 10 | Penyakit Ikan — diagnosis & obat | ⬜ |
+| 11 | Parameter Air (pH/GH/KH/TDS) — lebih dalem | ⬜ |
+| 12 | Substrate Deep Dive — soil vs pasir vs gravel | ⬜ |
 
 ## 🟠 Level 3: Naik Kelas
 
-| # | Topik | Status | Tgl Post |
-|---|-------|--------|----------|
-| 10 | CO2 & pupuk untuk tanaman | ⬜ | |
-| 11 | Hardscape: batu, kayu, layout | ⬜ | |
-| 12 | Jenis-jenis gaya aquascape | ⬜ | |
+| # | Topik | Status |
+|---|-------|--------|
+| 13 | CO2 & Pupuk — difusi, NPK, dosing | ⬜ |
+| 14 | Hardscape & Layout — golden ratio, focal point | ⬜ |
+| 15 | Gaya Aquascape — Iwagumi, Nature, Dutch | ⬜ |
+| 16 | Udang & Keong — nano tank heroes | ⬜ |
+| 17 | Aklimatisasi & Karantina — jangan cemplung! | ⬜ |
+| 18 | Pakan & Nutrisi Ikan — jenis & jadwal | ⬜ |
 
 ## 🔴 Level 4: Advanced
 
-*(coming soon)*
+| # | Topik | Status |
+|---|-------|--------|
+| 19 | Dry Start Method — carpet tanpa CO2 | ⬜ |
+| 20 | Tank Mates Compatibility — siapa cocok sama siapa | ⬜ |
+| 21 | DIY Aksesoris — filter, CO2, lampu | ⬜ |
+| 22 | Rescape & Evolusi Tank | ⬜ |
 
 ---
 

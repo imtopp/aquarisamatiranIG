@@ -112,10 +112,16 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply += f"\n\n_— Ups, keceplosan~ udah aku sensor 🫣_"
 
         save_message(user.id, user.username or "", "assistant", reply)
+        # Telegram max 4096 chars
+        if len(reply) > 4000:
+            reply = reply[:4000] + "\n\n_— Lanjutan kepotong soalnya kebanyakan~ 🫣_"
         await update.message.reply_text(reply)
 
     except Exception as e:
-        await update.message.reply_text(f"Maaf sayang, error nih 😩: {e}")
+        try:
+            await update.message.reply_text(f"Maaf sayang, error nih 😩: {str(e)[:200]}")
+        except Exception:
+            pass
 
 
 async def run_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):

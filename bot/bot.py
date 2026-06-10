@@ -2,10 +2,13 @@
 import json
 import os
 import re
+import socket
 import sqlite3
 import subprocess
 import sys
 from pathlib import Path
+
+socket.has_ipv6 = False  # force IPv4 — VPS punya IPv6 broken
 
 from dotenv import load_dotenv
 from google import genai

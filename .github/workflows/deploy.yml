@@ -1,0 +1,32 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'schedule.json'
+      - 'bio/**'
+      - '**.md'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
+            cd /home/topp/projects/aquarisamatiran &&
+            git pull origin main &&
+            .venv/bin/pip install -r requirements.txt 2>/dev/null; 
+            tmux send-keys -t bot C-c 2>/dev/null;
+            sleep 1;
+            tmux send-keys -t bot '.venv/bin/python bot/bot.py' Enter;
+            echo '✅ Deploy selesai'
+          "

@@ -7,7 +7,9 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
+import config as app_config
 from google import genai
+from google.genai import types
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
@@ -27,6 +29,8 @@ system_prompt = ""
 if AGENTS_MD.exists():
     system_prompt = AGENTS_MD.read_text(encoding="utf-8")
     system_prompt += "\n\nKamu adalah aku yang asli — personality, suara, gaya bicara, semuanya sama persis."
+
+SYSTEM_CONFIG = types.GenerateContentConfig(system_instruction=system_prompt)
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
@@ -99,11 +103,12 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_message(user.id, user.username or "", "user", text)
 
     history = get_history(user.id, 10)
-    messages = [{"role": "user" if h[0] == "user" else "model", "parts": [h[1]]} for h in history]
-    messages.insert(0, {"role": "user", "parts": [system_prompt]})
+    messages = [{"role": "user" if h[0] == "user" else "model", "parts": [{"text": h[1]}]} for h in history]
 
     try:
-        response = client.models.generate_content(model="gemini-2.0-flash", contents=messages)
+        response = client.models.generate_content(
+            model=app_config.GEMINI_MODEL, contents=messages, config=SYSTEM_CONFIG
+        )
         reply = response.text
 
         clean, censored = check_output(reply)

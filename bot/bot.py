@@ -7,7 +7,6 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
-import config as app_config
 from google import genai
 from google.genai import types
 from telegram import Update
@@ -107,7 +106,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         response = client.models.generate_content(
-            model=app_config.GEMINI_MODEL, contents=messages, config=SYSTEM_CONFIG
+            model="gemini-2.5-flash", contents=messages, config=SYSTEM_CONFIG
         )
         reply = response.text
 

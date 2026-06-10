@@ -105,7 +105,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     save_message(user.id, user.username or "", "user", text)
 
-    history = get_history(user.id, 10)
+    history = get_history(user.id, 5)
     messages = [{"role": "user" if h[0] == "user" else "model", "parts": [{"text": h[1]}]} for h in history]
 
     try:

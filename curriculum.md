@@ -13,7 +13,7 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 | 03 | Setup & Siklus Air | 2026-06-07 | ✅ |
 | 04 | Ikan Pertama — jenis kuat & murah | 2026-06-12 | ⬜ |
 | 05 | Rawat Mingguan — kasih makan, ganti air, bersih | 2026-06-14 | ⬜ |
-| 06 | Alga 101 — jenis, penyebab, cara ngatasin | — | ⬜ |
+| 06 | Alga: Musuh atau Guru? — jenis, penyebab, cara ngatasin | — | ⬜ |
 
 ## 🟡 Level 2: Mulai Pede
 

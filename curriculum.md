@@ -4,6 +4,8 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 
 ---
 
+## 🌊 Season 1: Perjalanan dari Nol Sampai Pro
+
 ## 🟢 Level 1: Pemula Absolut
 
 | # | Topik | Tgl Post | Status |

@@ -42,7 +42,7 @@ jobs:
         run: |
           git config user.name "aquarisamatiran-bot"
           git config user.email "bot@aquarisamatiran"
-          git add schedule.json bio/index.html
+          git add schedule.json curriculum_content.json bio/index.html
           git diff --quiet && git diff --staged --quiet || git commit -m "📅 Update schedule + bio status"
           git push
 

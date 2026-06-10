@@ -13,8 +13,33 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from ig_client import InstagramClient
 from update_bio import update_bio
 
+# Path ke curriculum_content.json
+CURRICULUM_PATH = Path("curriculum_content.json")
+
 WIB = timezone(timedelta(hours=7))
 SCHEDULE_PATH = Path("schedule.json")
+
+
+def _update_curriculum_after_post(post: dict):
+    """Update curriculum_content.json status + permalink setelah posting."""
+    curriculum = post.get("curriculum", "")
+    if not curriculum or not CURRICULUM_PATH.exists():
+        return
+    try:
+        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        topics = cc.get("topics", {})
+        num = curriculum.lstrip("#")
+        if num in topics:
+            topics[num]["status"] = "live"
+            if post.get("result_id"):
+                topics[num]["result_id"] = post["result_id"]
+            if post.get("permalink"):
+                topics[num]["permalink"] = post["permalink"]
+            cc["topics"] = topics
+            CURRICULUM_PATH.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
+            print(f"   📝 curriculum_content.json diupdate untuk #{num}")
+    except Exception:
+        pass
 
 
 def wib_now():
@@ -114,6 +139,7 @@ def main():
             if post.get("permalink"):
                 print(f"   🔗 {post['permalink']}")
             print(f"   📝 schedule.json diupdate")
+            _update_curriculum_after_post(post)
             update_bio(schedule)
 
         except Exception as e:

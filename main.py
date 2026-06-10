@@ -168,6 +168,10 @@ def cmd_post_carousel(client, args):
     for p in latest:
         _save_to_published(p, media_id, group_slug=latest_prefix)
 
+    # Update curriculum_content.json
+    status_val = "scheduled" if result.get("scheduled") else "live"
+    _update_curriculum_content(latest_prefix, result_id=media_id, status=status_val)
+
 
 _UPLOAD_MAP = Path("resource") / ".uploaded.json"
 
@@ -908,6 +912,7 @@ def cmd_generate_carousel(_client, args):
             print(f"   ❌ Gagal: {e}")
 
     if saved:
+        _update_curriculum_content(slug, facts)
         print(f"\n📸 {len(saved)} slide siap di resource/photos/:")
         for f in saved:
             print(f"   - {f}")
@@ -918,6 +923,59 @@ def cmd_generate_carousel(_client, args):
         print("   ⚡ Auto-detect slide terbaru, nggak perlu intervensi manual!")
     else:
         print("\n❌ Nggak ada slide yang berhasil digenerate")
+
+
+def _update_curriculum_content(slug: str, facts: dict | None = None,
+                                result_id: str | None = None, permalink: str | None = None,
+                                status: str | None = None):
+    """Update curriculum_content.json with generated facts or post result."""
+    import json
+    cpath = Path("curriculum_content.json")
+    if not cpath.exists():
+        return
+    try:
+        cc = json.loads(cpath.read_text(encoding="utf-8"))
+    except Exception:
+        return
+    topics = cc.get("topics", {})
+    matched = None
+    for num, topic in topics.items():
+        if topic.get("slug") == slug:
+            matched = num
+            break
+    if matched is None:
+        for num, topic in topics.items():
+            if topic.get("slug", "").replace("-", "_") == slug:
+                matched = num
+                break
+    if matched is None:
+        return
+
+    topic = topics[matched]
+    if facts:
+        topic["display_name"] = facts.get("display_name", topic.get("display_name", ""))
+        topic["subtitle"] = facts.get("subtitle", "")
+        topic["scientific_name"] = facts.get("scientific_name", "")
+        slides = [{"type": "cover", "title": facts.get("display_name", ""),
+                   "subtitle": facts.get("subtitle", "")}]
+        for f in facts.get("facts", []):
+            slides.append({
+                "type": "fact",
+                "number": int(f.get("number", 0)),
+                "title": f.get("title", ""),
+                "description": f.get("description", ""),
+                "tags": f.get("tags", [])
+            })
+        topic["slides"] = slides
+    if result_id:
+        topic["result_id"] = result_id
+    if permalink:
+        topic["permalink"] = permalink
+    if status:
+        topic["status"] = status
+    cc["topics"][matched] = topic
+    cpath.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"📝 curriculum_content.json diupdate untuk #{matched}")
 
 
 def _save_to_published(file_paths, media_id: str, group_slug: str | None = None):

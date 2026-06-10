@@ -32,7 +32,10 @@ if AGENTS_MD.exists():
 
 SYSTEM_CONFIG = types.GenerateContentConfig(system_instruction=system_prompt)
 
-client = genai.Client(api_key=GEMINI_API_KEY)
+client = genai.Client(
+    api_key=GEMINI_API_KEY,
+    http_options=types.HttpOptions(timeout=120),
+)
 
 
 def init_db():

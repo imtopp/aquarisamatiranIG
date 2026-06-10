@@ -22,6 +22,10 @@ build/
 .vscode/
 .idea/
 
+# Session temp files
+pages_check.txt
+run*.txt
+
 # Generated files
 resource/output/
 resource/photos/*_slide_*.png

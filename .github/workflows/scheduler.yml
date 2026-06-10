@@ -1,64 +1,21 @@
-name: Instagram Scheduler
+name: Scheduler — triggered by cron-job.org
 
 on:
-  push:
-    paths:
-      - 'schedule.json'
-  schedule:
-    - cron: '*/30 * * * *'
   workflow_dispatch:
-    inputs:
-      force_time:
-        description: 'Paksa jalan (format: YYYY-MM-DD HH:MM WIB)'
-        required: false
 
 jobs:
-  post:
+  run-scheduler:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          python-version: '3.14'
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
-      - name: Install dependencies
+      - name: Run scheduler on VPS
         run: |
-          pip install requests python-dotenv Pillow
-
-      - name: Jalankan scheduler
-        env:
-          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
-          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
-          IG_USER_ID: ${{ secrets.IG_USER_ID }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          FORCE_SCHEDULE_TIME: ${{ inputs.force_time || '' }}
-        run: |
-          python .github/workflows/runner.py
-
-      - name: Commit update schedule + bio
-        run: |
-          git config user.name "aquarisamatiran-bot"
-          git config user.email "bot@aquarisamatiran"
-          git add schedule.json curriculum_content.json bio/index.html
-          git diff --quiet && git diff --staged --quiet || git commit -m "📅 Update schedule + bio status"
-          git push
-
-      - name: Push bio page ke aquarisamatiran-pages
-        env:
-          PAGES_PAT: ${{ secrets.PAGES_PAT }}
-        run: |
-          if [ -z "$PAGES_PAT" ]; then
-            echo "⚠️ PAGES_PAT not set — skip push ke pages repo"
-            exit 0
-          fi
-          git clone "https://x-access-token:${PAGES_PAT}@github.com/imtopp/aquarisamatiran-pages.git" pages_repo
-          cp bio/index.html pages_repo/index.html
-          cd pages_repo
-          git config user.name "aquarisamatiran-bot"
-          git config user.email "bot@aquarisamatiran"
-          git add index.html
-          git diff --quiet && git diff --staged --quiet || (git commit -m "🔄 Auto-update bio page from scheduler" && git push)
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
+            cd /home/topp/projects/aquarisamatiran &&
+            echo '🕐 Scheduler triggered by cron-job.org' &&
+            .venv/bin/python .github/workflows/runner.py
+          "

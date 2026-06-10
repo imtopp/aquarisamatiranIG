@@ -214,6 +214,20 @@ Menunjukkin kalau proses itu berharga — nggak perlu jadi expert dulu buat mula
 - `python main.py curriculum sync` → regenerate `curriculum.md`, `schedule.json`, `bio/index.html`
 - Bot Telegram baca terminology langsung dari `curriculum_content.json` (gak perlu sync ke AGENTS.md)
 
+## Scheduling
+
+**Dual-layer scheduling** (redundant):
+1. **cron-job.org** — 4 jobs configured di akun, nge-hit GitHub API `workflows/scheduler.yml/dispatches` dengan PAT (`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`). Trigger pas jam posting.
+2. **VPS crontab** — `*/15 * * * *` jalanin `runner.py` (fallback kalo cron-job.org missed).
+
+Cron-job.org jobs:
+| ID | Title | Jadwal | Last Status |
+|----|-------|--------|-------------|
+| 7765579 | Senin Reel 19:00 WIB | Mon 20:24 | ✅ pernah sukses |
+| 7765580 | Rabu Carousel 19:00 WIB | Wed 19:00 | ✅ pernah sukses |
+| 7765581 | Jumat Reel 19:00 WIB | Fri 19:00 | ⏳ belum |
+| 7765582 | Minggu Foto 09:00 WIB | Sun 09:00 | ⏳ belum |
+
 ## Instagram API Limitations
 
 - **Carousel scheduling (`--schedule`)** ❌ — error "User must be on whitelist". IG Graph API gak ngizinin carousel scheduling tanpa approval khusus. **Jangan pernah pake `--schedule`** di `post-carousel`.

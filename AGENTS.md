@@ -193,3 +193,23 @@ Menunjukkin kalau proses itu berharga — nggak perlu jadi expert dulu buat mula
 - **PAGES_PAT** (GitHub secret): Fine-grained PAT (`github_pat_...`) scoped ke `aquarisamatiran-pages` + `aquarisamatiranIG`, tersimpan di Settings → Secrets → PAGES_PAT
   - Classic PAT cadangan: `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` (scope `repo`, fallback)
 - **Mapping**: `schedule.json` tiap entry punya `"curriculum": "#XX"` → dipetakan ke card number di `bio/index.html`
+
+## Deployment
+
+**Push-to-deploy:** Cukup `git push` ke `origin/main` — GitHub Actions `deploy.yml` otomatis SSH ke VPS, `git pull`, restart bot.
+- Jangan SSH manual dari lokal — VPS cuma punya public key, private key cuma di GitHub Secrets (`VPS_SSH_KEY`).
+- Kalau mau cek VPS: `gh run list --workflow=deploy.yml` atau lihat di GitHub Actions tab.
+
+## Curriculum Manager (v4 — nested per-season)
+
+`curriculum_content.json` versi 4: topics nested per-season.
+```json
+"topics": {
+  "1": { "01": {...}, "02": {...} },
+  "2": { "01": {...} }
+}
+```
+- `--season` WAJIB untuk semua operasi topic (add/edit/delete)
+- Nomor topic **per-season** (season 2 mulai lagi dari #01)
+- `python main.py curriculum sync` → regenerate `curriculum.md`, `schedule.json`, `bio/index.html`
+- Bot Telegram baca terminology langsung dari `curriculum_content.json` (gak perlu sync ke AGENTS.md)

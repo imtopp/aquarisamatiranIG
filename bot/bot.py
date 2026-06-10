@@ -25,6 +25,7 @@ PROJECT_DIR = Path(__file__).resolve().parent.parent
 AGENTS_MD = PROJECT_DIR / "AGENTS.md"
 DB_PATH = PROJECT_DIR / "bot" / "chat_history.db"
 SCHEDULE_PATH = PROJECT_DIR / "schedule.json"
+CURRICULUM_PATH = PROJECT_DIR / "curriculum_content.json"
 FORBIDDEN_WORDS = ["lu", "gue", "lo", "elu", "gw"]
 
 GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro"]
@@ -144,6 +145,54 @@ def _read_schedule() -> str:
     return "\n".join(lines)
 
 
+def _load_curriculum() -> dict:
+    try:
+        return json.loads(CURRICULUM_PATH.read_text(encoding="utf-8")).get("topics", {})
+    except Exception:
+        return {}
+
+
+def _match_curriculum_topic(text: str, topics: dict) -> str | None:
+    """Cari topic di curriculum_content yang cocok dengan pertanyaan user."""
+    text_lower = text.lower()
+    for num, topic in topics.items():
+        title_lower = topic.get("title", "").lower()
+        slug = topic.get("slug", "")
+        keywords = [k.lower().strip() for k in topic.get("keywords", [])]
+        display = topic.get("display_name", "").lower()
+        patterns = [f"#{num}", title_lower, slug.replace("-", " "), display]
+        patterns.extend(k for k in keywords if len(k) > 3)
+        for pat in patterns:
+            if pat and pat in text_lower:
+                return num
+    return None
+
+
+def _format_curriculum_context(num: str, topic: dict) -> str:
+    """Bentuk context string dari data curriculum untuk di-inject ke prompt Gemini."""
+    lines = [f"--- KONTEN KURIKULUM #{num}: {topic.get('title', '')} ---"]
+    if topic.get("display_name"):
+        lines.append(f"Judul konten: {topic['display_name']}")
+    if topic.get("subtitle"):
+        lines.append(f"Subtitle: {topic['subtitle']}")
+    if topic.get("caption"):
+        lines.append(f"Caption posting:\n{topic['caption']}")
+    if topic.get("keywords"):
+        lines.append(f"Istilah kunci: {', '.join(topic['keywords'])}")
+    if topic.get("permalink"):
+        lines.append(f"Link post: {topic['permalink']}")
+    slides = topic.get("slides", [])
+    if slides:
+        lines.append("\nIsi slide carousel:")
+        for s in slides:
+            if s.get("type") == "cover":
+                lines.append(f"- [Cover] {s.get('title')}: {s.get('subtitle')}")
+            elif s.get("type") == "fact":
+                lines.append(f"- Fakta {s['number']}: {s['title']} — {s['description']}")
+    lines.append("---")
+    return "\n".join(lines)
+
+
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = update.message.text.lower()
@@ -162,8 +211,17 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(reply)
             return
 
+    # Inject curriculum context jika user nanya topik tertentu
+    curriculum_topics = _load_curriculum()
+    matched = _match_curriculum_topic(text, curriculum_topics)
+    curriculum_inject = ""
+    if matched and matched in curriculum_topics:
+        curriculum_inject = _format_curriculum_context(matched, curriculum_topics[matched])
+
     history = get_history(user.id, 5)
     messages = [{"role": "user" if h[0] == "user" else "model", "parts": [{"text": h[1]}]} for h in history]
+    if curriculum_inject and messages and messages[0].get("role") == "user":
+        messages[0]["parts"][0]["text"] = f"{curriculum_inject}\n\n{messages[0]['parts'][0]['text']}"
 
     try:
         reply = await _call_gemini(messages)

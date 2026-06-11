@@ -69,10 +69,15 @@ if CURRICULUM_PATH.exists():
 HTTPX_CLIENT = httpx.AsyncClient(timeout=300)
 
 
+def _today_context() -> str:
+    return f"Hari ini: {datetime.datetime.now().strftime('%A, %d %B %Y %H:%M WIB')}"
+
+
 async def _call_gemini(messages: list[dict]) -> str:
     """Call Gemini REST API with fallback keys + fallback models, retry on timeout."""
-    if messages and messages[0].get("role") == "user":
-        messages[0]["parts"][0]["text"] = f"{system_prompt}\n\n{messages[0]['parts'][0]['text']}"
+    if messages and messages[-1].get("role") == "user":
+        today = _today_context()
+        messages[-1]["parts"][0]["text"] = f"{today}\n\n{system_prompt}\n\n{messages[-1]['parts'][0]['text']}"
     body = {"contents": messages}
     keys = [k for k in (GEMINI_API_KEY, BACKUP_GEMINI_API_KEY) if k]
     last_err = ""

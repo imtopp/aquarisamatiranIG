@@ -12,6 +12,7 @@ import httpx
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.request import HTTPXRequest
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -333,12 +334,8 @@ def main():
         return
 
     init_db()
-    app = (
-        Application.builder()
-        .token(TELEGRAM_TOKEN)
-        .request_kwargs({"read_timeout": 30, "connect_timeout": 30, "write_timeout": 30})
-        .build()
-    )
+    request = HTTPXRequest(connect_timeout=30, read_timeout=30, write_timeout=30)
+    app = Application.builder().token(TELEGRAM_TOKEN).request(request).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("reset", reset))

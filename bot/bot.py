@@ -29,7 +29,7 @@ SCHEDULE_PATH = PROJECT_DIR / "schedule.json"
 CURRICULUM_PATH = PROJECT_DIR / "curriculum_content.json"
 FORBIDDEN_WORDS = ["lu", "gue", "lo", "elu", "gw"]
 
-GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro"]
+GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"]
 
 system_prompt = ""
 if AGENTS_MD.exists():
@@ -94,9 +94,13 @@ async def _call_gemini(messages: list[dict]) -> str:
                 if resp.status_code == 200:
                     data = resp.json()
                     return data["candidates"][0]["content"]["parts"][0]["text"]
-                err = resp.json().get("error", {}).get("message", str(resp.status_code))
-                last_err = err
-                break
+                err_data = resp.json().get("error", {})
+                err_msg = err_data.get("message", str(resp.status_code))
+                last_err = err_msg
+                if resp.status_code == 503:
+                    break  # server sibuk, guna model lain aja, gak perlu retry
+                if resp.status_code in (429, 403):
+                    break  # quota abis / forbidden, guna key berikutnya
     raise RuntimeError(f"Semua model & key Gemini kehabisan: {last_err[:100]}")
 
 

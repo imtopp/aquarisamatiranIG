@@ -333,7 +333,12 @@ def main():
         return
 
     init_db()
-    app = Application.builder().token(TELEGRAM_TOKEN).build()
+    app = (
+        Application.builder()
+        .token(TELEGRAM_TOKEN)
+        .request_kwargs({"read_timeout": 30, "connect_timeout": 30, "write_timeout": 30})
+        .build()
+    )
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("reset", reset))

@@ -21,6 +21,7 @@ load_dotenv()
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 BACKUP_GEMINI_API_KEY = os.environ.get("BACKUP_GEMINI_API_KEY", "")
+BACKUP_GEMINI_API_KEY2 = os.environ.get("BACKUP_GEMINI_API_KEY2", "")
 ALLOWED_USERNAMES = os.environ.get("BOT_ALLOWED_USERNAMES", "").split(",")
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 AGENTS_MD = PROJECT_DIR / "AGENTS.md"
@@ -80,7 +81,7 @@ async def _call_gemini(messages: list[dict]) -> str:
         today = _today_context()
         messages[-1]["parts"][0]["text"] = f"{today}\n\n{system_prompt}\n\n{messages[-1]['parts'][0]['text']}"
     body = {"contents": messages}
-    keys = [k for k in (GEMINI_API_KEY, BACKUP_GEMINI_API_KEY) if k]
+    keys = [k for k in (GEMINI_API_KEY, BACKUP_GEMINI_API_KEY, BACKUP_GEMINI_API_KEY2) if k]
     last_err = ""
     for key in keys:
         for model in GEMINI_MODELS:

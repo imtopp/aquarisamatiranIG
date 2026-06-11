@@ -26,8 +26,7 @@ jobs:
             sleep 2;
             tmux kill-session -t bot 2>/dev/null || true;
             sleep 1;
-            tmux new-session -d -s bot;
-            tmux send-keys -t bot 'cd /home/topp/projects/aquarisamatiran && .venv/bin/python bot/bot.py' Enter;
+            tmux new-session -d -s bot -c /home/topp/projects/aquarisamatiran '.venv/bin/python bot/bot.py';
             # Hapus crontab lama (kalo ada) — skrg pake cron-job.org aja
             crontab -l 2>/dev/null | grep -v runner.py | crontab - 2>/dev/null || true;
             echo '✅ Deploy selesai'

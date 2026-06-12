@@ -968,6 +968,8 @@ def cmd_generate_carousel_pollinations(_client, args):
     print(f"   Upload: python main.py post-carousel --upload-only --slug {slug}")
     print(f"{'='*40}")
 
+
+def cmd_generate_carousel(_client, args):
     import argparse
     parser = argparse.ArgumentParser(prog="generate-carousel", add_help=False)
     parser.add_argument("topic", nargs="?", help="nama ikan/tanaman/topik edukasi")

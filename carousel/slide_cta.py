@@ -15,12 +15,15 @@ _ICON_CHARS = {
 }
 
 
-def build_cta_slide(facts: dict, subject_img: Image.Image | None, palette: dict | None = None) -> Image.Image:
+def build_cta_slide(facts: dict, subject_img: Image.Image | None, palette: dict | None = None, bg_image: Image.Image | None = None) -> Image.Image:
     W, H = config.SLIDE_SIZE
     if palette is None:
         palette = config.PALETTE
 
-    bg = draw_gradient_bg((W, H), palette["bg_dark"], palette["bg_card"])
+    if bg_image:
+        bg = bg_image.copy()
+    else:
+        bg = draw_gradient_bg((W, H), palette["bg_dark"], palette["bg_card"])
     draw = ImageDraw.Draw(bg, "RGBA")
 
     accent2 = _hex_to_rgb(palette["accent2"])

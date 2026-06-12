@@ -843,56 +843,80 @@ def _search_pexels_image(query: str):
         return None
 
 
-def _pollinations_image(prompt: str, timeout: int = 120) -> PIL.Image.Image | None:
-    """Generate image via pollinations.ai. Sequential only (1 req/IP at a time)."""
-    import httpx
-    import io
-    import urllib.parse
+# ---------------------------------------------------------------------------
+# Stable Diffusion local
+# ---------------------------------------------------------------------------
+_sd_pipe_instance = None
+
+
+def _sd_pipe():
+    global _sd_pipe_instance
+    if _sd_pipe_instance is None:
+        import time
+        from diffusers import StableDiffusionPipeline
+        import torch
+        print("   🧠 Loading SD pipeline (CPU)...")
+        t0 = time.time()
+        _sd_pipe_instance = StableDiffusionPipeline.from_pretrained(
+            "runwayml/stable-diffusion-v1-5", torch_dtype=torch.float32
+        )
+        print(f"   ✅ SD loaded in {time.time()-t0:.1f}s")
+    return _sd_pipe_instance
+
+
+def _sd_generate(prompt: str, size: tuple = (512, 512)) -> PIL.Image.Image | None:
     try:
-        url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}?width=1080&height=1080&nologo=true"
-        print(f"   🎨 Generating: {prompt[:60]}...")
-        resp = httpx.get(url, timeout=timeout)
-        if resp.status_code != 200:
-            print(f"   ❌ Pollinations error {resp.status_code}: {resp.text[:100]}")
-            return None
-        return PIL.Image.open(io.BytesIO(resp.content))
+        import time
+        pipe = _sd_pipe()
+        print(f"   🎨 SD generating: {prompt[:60]}...")
+        t0 = time.time()
+        img = pipe(prompt, num_inference_steps=20, height=size[1], width=size[0]).images[0]
+        print(f"   ✅ SD done in {time.time()-t0:.1f}s")
+        return img
     except Exception as e:
-        print(f"   ❌ Pollinations exception: {e}")
+        print(f"   ❌ SD error: {e}")
         return None
 
 
-def cmd_generate_carousel_pollinations(_client, args):
-    """
-    Trial: Generate carousel slides using pollinations.ai
-    (image + text rendered by AI, no slide builder needed)
-    """
+def _darken_bg(img: PIL.Image.Image, opacity: float = 0.55) -> PIL.Image.Image:
+    """Overlay semi-transparent dark gradient for text readability."""
+    from carousel.composer import draw_gradient_bg
+    dark = draw_gradient_bg(img.size, "#000000", "#000000")
+    dark.putalpha(int(255 * opacity))
+    img = img.convert("RGBA")
+    img = PIL.Image.alpha_composite(img, dark)
+    return img
+
+
+def cmd_generate_carousel_sd(_client, args):
+    """Generate carousel with SD backgrounds + Pillow text overlay."""
     import argparse
-    parser = argparse.ArgumentParser(prog="generate-carousel-pollinations", add_help=False)
-    parser.add_argument("topic", nargs="?", help="topik carousel")
+    import re
+    import time
+    from pathlib import Path
+    from sources.facts_generator import generate_facts
+    from carousel.slide_cover import build_cover
+    from carousel.slide_fact import build_fact_slide
+    from carousel.slide_cta import build_cta_slide
+
+    parser = argparse.ArgumentParser(prog="generate-carousel-sd", add_help=False)
+    parser.add_argument("topic", nargs="?", help="topik konten")
     parser.add_argument("--num-facts", type=int, default=4, help="jumlah fakta (default: 4)")
-    parser.add_argument("--style", default="dark blue gradient, neon green accents, modern minimalist, professional", help="gaya visual")
     parsed = parser.parse_known_args(args)[0]
 
     if not parsed.topic:
-        print("Gunakan: python main.py generate-carousel-pollinations <topik> [--num-facts N] [--style GAYA]")
+        print("Gunakan: python main.py generate-carousel-sd <topik> [--num-facts N]")
         print()
         print("  topik       — topik konten (contoh: Ikan Cupang)")
         print("  --num-facts — jumlah fakta (default: 4)")
-        print("  --style     — gaya visual (default: dark blue aquarium theme)")
         print()
         print("Contoh:")
-        print("  python main.py generate-carousel-pollinations 'Ikan Cupang'")
-        print("  python main.py generate-carousel-pollinations 'Filter Aquarium' --num-facts 5")
+        print("  python main.py generate-carousel-sd 'Ikan Cupang'")
         return
-
-    from sources.facts_generator import generate_facts
-    import re
-    import time
 
     topic = parsed.topic
     slug = re.sub(r'[^\w\-]', '', topic.lower().replace(" ", "_").replace("-", "_"))[:30].rstrip("_")
 
-    # 1. Generate facts via Gemini (struktur JSON tetep dipake)
     print(f"📝 Generate facts untuk \"{topic}\"...")
     try:
         facts = generate_facts(topic, parsed.num_facts)
@@ -906,66 +930,72 @@ def cmd_generate_carousel_pollinations(_client, args):
     for f in facts["facts"]:
         print(f"   {f['number']}. {f['title']}")
 
-    style = parsed.style
-    prompts = []
-
-    # Cover slide prompt
-    prompts.append({
-        "file": f"{slug}_poll_cover.png",
-        "prompt": (
-            f"Instagram carousel cover slide 1080x1080. "
-            f"Aquascape aquarium education theme. "
-            f"Title: '{display}'. Subtitle: '{facts.get('subtitle', '')}'. "
-            f"Style: {style}. "
-            f"Aquarisamatiran branding. Clean modern typography. No watermark. #aquascape #aquarium"
-        ),
-    })
-
-    # Fact slide prompts
-    for f in facts["facts"]:
-        prompts.append({
-            "file": f"{slug}_poll_fact_{f['number']}.png",
-            "prompt": (
-                f"Instagram carousel slide 1080x1080. "
-                f"Aquascape education. "
-                f"Fact {f['number']}: '{f['title']}'. "
-                f"Description: {f['description'][:100]}. "
-                f"Style: {style}. "
-                f"Aquarisamatiran branding. Clean typography. No watermark."
-            ),
-        })
-
-    # CTA slide prompt
-    prompts.append({
-        "file": f"{slug}_poll_cta.png",
-        "prompt": (
-            f"Instagram carousel last slide 1080x1080. "
-            f"Call to action: 'Follow @aquarisamatiran for more aquarium education'. "
-            f"Style: {style}. "
-            f"Like, comment, share icons. Aquarisamatiran branding. No watermark."
-        ),
-    })
-
-    # 2. Generate each slide via pollinations.ai (sequential)
-    print(f"\n🎨 Generate {len(prompts)} slides via pollinations.ai...")
     os.makedirs(PHOTO_DIR, exist_ok=True)
+    saved = []
 
-    for i, slide in enumerate(prompts):
-        print(f"\n[{i+1}/{len(prompts)}] {slide['file']}")
-        img = _pollinations_image(slide["prompt"])
-        if img:
-            img.save(PHOTO_DIR / slide["file"])
-            print(f"   ✅ Saved: {slide['file']} ({img.size[0]}x{img.size[1]})")
+    # Prompt builder per slide type
+    def _bg_prompt(slide_type: str, fact: dict | None = None) -> str:
+        base = "aquascape aquarium, underwater planted tank, aquatic plant, "
+        if slide_type == "cover":
+            return base + f"beautiful {topic} as main subject, vibrant colors, professional aquarium photography, soft lighting, high detail, photorealistic"
+        elif slide_type == "fact":
+            return base + f"{fact.get('title', topic)}, {fact.get('description', '')[:80] if fact else topic}, detailed macro shot, natural aquascape environment, tranquil underwater scene"
+        else:  # cta
+            return base + "peaceful aquascape with lush greenery, gentle water flow, morning light, serene underwater garden, high quality"
+
+    # --- Cover slide ---
+    print(f"\n🖼️ [1/{n_facts+2}] Cover: {display}")
+    raw = _sd_generate(_bg_prompt("cover"))
+    if raw:
+        bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
+        slide = build_cover(facts, None, bg_image=bg)
+        fname = f"{slug}_sd_cover.png"
+        slide.save(PHOTO_DIR / fname)
+        saved.append(fname)
+        print(f"   ✅ {fname}")
+    else:
+        print(f"   ⚠️  Cover gagal")
+
+    # --- Fact slides ---
+    for i, f in enumerate(facts.get("facts", [])):
+        print(f"\n🖼️ [{i+2}/{n_facts+2}] Fact {f['number']}: {f['title']}")
+        raw = _sd_generate(_bg_prompt("fact", f))
+        if raw:
+            bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
+            slide = build_fact_slide(f, None, bg_image=bg)
+            fname = f"{slug}_sd_fact_{f['number']}.png"
+            slide.save(PHOTO_DIR / fname)
+            saved.append(fname)
+            print(f"   ✅ {fname}")
         else:
-            print(f"   ⚠️  Gagal generate {slide['file']}, lanjut...")
-        if i < len(prompts) - 1:
-            wait = 15
-            print(f"   ⏳ Waiting {wait}s before next request...")
-            time.sleep(wait)
+            print(f"   ⚠️  Fact {f['number']} gagal")
+        if i < n_facts - 1:
+            print("   ⏳ Cooldown 5s before next SD gen...")
+            time.sleep(5)
+
+    # --- CTA slide ---
+    print(f"\n🖼️ [{n_facts+2}/{n_facts+2}] CTA")
+    raw = _sd_generate(_bg_prompt("cta"))
+    if raw:
+        bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
+        slide = build_cta_slide(facts, None, bg_image=bg)
+        fname = f"{slug}_sd_cta.png"
+        slide.save(PHOTO_DIR / fname)
+        saved.append(fname)
+        print(f"   ✅ {fname}")
+    else:
+        print(f"   ⚠️  CTA gagal")
 
     print(f"\n{'='*40}")
-    print(f"✅ Selesai! {len(prompts)} slide di {PHOTO_DIR}")
-    print(f"   Upload: python main.py post-carousel --upload-only --slug {slug}")
+    if saved:
+        print(f"✅ {len(saved)} slide saved di {PHOTO_DIR}:")
+        for f in saved:
+            print(f"   - {f}")
+        print()
+        print("📋 Upload via:")
+        print(f"   python main.py post-carousel --upload-only --slug {slug}")
+    else:
+        print("❌ Nggak ada slide yang berhasil digenerate")
     print(f"{'='*40}")
 
 
@@ -1333,7 +1363,8 @@ def main():
         print('  stage-photo <foto>         — [Foto] upload Catbox + generate caption')
         print('  generate-caption <video>   — (opsional) caption aja tanpa upload')
         print("  generate-carousel <topik>  — generate carousel slides (facts Gemini + gambar)")
-        print("  generate-carousel-pollinations <topik>  — [TRIAL] generate carousel via pollinations.ai (gambar + teks langsung)")
+
+        print("  generate-carousel-sd <topik>— generate carousel via Stable Diffusion lokal (background + teks)")
         print("  comments <media_id>        — lihat komen")
         print('  reply <comment_id> <msg>   — balas komen')
         print("  insights [media_id]        — lihat insights")
@@ -1364,7 +1395,7 @@ def main():
         "stage-photo": cmd_stage_photo,
         "generate-caption": cmd_generate_caption,
         "generate-carousel": cmd_generate_carousel,
-        "generate-carousel-pollinations": cmd_generate_carousel_pollinations,
+        "generate-carousel-sd": cmd_generate_carousel_sd,
         "delete-post": cmd_delete_post,
         "file-map": cmd_file_map,
         "curriculum": cmd_curriculum,

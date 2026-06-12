@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import time
 from pathlib import Path
@@ -34,8 +35,21 @@ def _build_json_schema(niche: config.NicheProfile, ct: config.ContentType, num_f
     return '\n'.join(schema_parts)
 
 
+def _gather_keys() -> list[str]:
+    keys = [config.GEMINI_API_KEY] if config.GEMINI_API_KEY else []
+    i = 1
+    while True:
+        k = os.environ.get(f"GEMINI_API_KEY_{i}")
+        if not k:
+            break
+        keys.append(k)
+        i += 1
+    return keys
+
+
 def generate_facts(topic: str, num_facts: int = 4) -> dict:
-    if not config.GEMINI_API_KEY:
+    keys = _gather_keys()
+    if not keys:
         raise ValueError("GEMINI_API_KEY ngga ditemukan di .env")
 
     niche = config.current_niche
@@ -51,7 +65,6 @@ def generate_facts(topic: str, num_facts: int = 4) -> dict:
             return json.loads(cache_path.read_text(encoding="utf-8"))
         print("   Regenerate...")
 
-    client = genai.Client(api_key=config.GEMINI_API_KEY)
     schema = _build_json_schema(niche, ct, num_facts)
 
     extra = f"\n{ct.prompt_extra}" if ct.prompt_extra else ""
@@ -75,47 +88,55 @@ def generate_facts(topic: str, num_facts: int = 4) -> dict:
     )
 
     for attempt in range(3):
-        try:
-            resp = client.models.generate_content(
-                model=config.GEMINI_MODEL, contents=[prompt]
-            )
-            text = resp.text.strip()
-            text = re.sub(r"^```(?:json)?\s*", "", text)
-            text = re.sub(r"\s*```$", "", text)
-            data = json.loads(text)
+        for key_idx, key in enumerate(keys):
+            client = genai.Client(api_key=key)
+            try:
+                resp = client.models.generate_content(
+                    model=config.GEMINI_MODEL, contents=[prompt]
+                )
+                text = resp.text.strip()
+                text = re.sub(r"^```(?:json)?\s*", "", text)
+                text = re.sub(r"\s*```$", "", text)
+                data = json.loads(text)
 
-            required = ["topic", "display_name", "facts"]
-            for field in required:
-                if field not in data:
-                    raise ValueError(f"Field '{field}' ngga ada di response Gemini")
-            if not isinstance(data["facts"], list) or len(data["facts"]) == 0:
-                raise ValueError("Facts harus list minimal 1")
+                required = ["topic", "display_name", "facts"]
+                for field in required:
+                    if field not in data:
+                        raise ValueError(f"Field '{field}' ngga ada di response Gemini")
+                if not isinstance(data["facts"], list) or len(data["facts"]) == 0:
+                    raise ValueError("Facts harus list minimal 1")
 
-            data.setdefault("scientific_name", topic if ct.has_scientific_name or niche.has_scientific_name else "")
-            data.setdefault("subtitle", "")
-            data.setdefault("cta_text",
-                            niche.cta_template.format(handle=niche.handle, topic=niche.education_label))
+                data.setdefault("scientific_name", topic if ct.has_scientific_name or niche.has_scientific_name else "")
+                data.setdefault("subtitle", "")
+                data.setdefault("cta_text",
+                                niche.cta_template.format(handle=niche.handle, topic=niche.education_label))
 
-            cache_path.parent.mkdir(parents=True, exist_ok=True)
-            cache_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-            print(f"✅ Facts tersimpan: {cache_path.name}")
-            return data
+                cache_path.parent.mkdir(parents=True, exist_ok=True)
+                cache_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+                print(f"✅ Facts tersimpan: {cache_path.name}")
+                return data
 
-        except json.JSONDecodeError:
-            print(f"   ⚠️  JSON parse gagal, coba lagi ({attempt+1}/3)...")
-            time.sleep(3)
-        except Exception as e:
-            err = str(e)
-            if "429" in err or "RESOURCE_EXHAUSTED" in err:
-                print("   ⛔ Gemini quota abis, coba lagi nanti ya")
-                raise
-            if "503" in err:
-                print(f"   ⏳ Gemini sibuk, coba lagi ({attempt+1}/3)...")
-                time.sleep(5)
-            else:
+            except json.JSONDecodeError:
+                print(f"   ⚠️  JSON parse gagal, coba lagi ({attempt+1}/3)...")
+                time.sleep(3)
+                break
+            except Exception as e:
+                err = str(e)
+                if "429" in err or "RESOURCE_EXHAUSTED" in err:
+                    print(f"   ⛔ Key {key_idx} quota abis, coba key lain...")
+                    continue
+                if "503" in err:
+                    print(f"   ⏳ Gemini sibuk (key {key_idx}), coba key lain...")
+                    continue
                 print(f"   ❌ Gagal: {e}")
-                if attempt == 2:
+                if attempt == 2 and key_idx == len(keys) - 1:
                     raise
                 time.sleep(3)
+                break
+        else:
+            print(f"   ⏳ Semua key sibuk/penuh, tunggu {5*(attempt+1)}s...")
+            time.sleep(5 * (attempt + 1))
+            continue
+        time.sleep(3)
 
     raise RuntimeError("Gagal generate facts setelah 3x percobaan")

@@ -3,19 +3,49 @@ name: Scheduler — triggered by cron-job.org
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   run-scheduler:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
+      - uses: actions/checkout@v4
         with:
-          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+          fetch-depth: 0
 
-      - name: Run scheduler on VPS
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scheduler
+        run: python .github/workflows/runner.py
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY_1: ${{ secrets.BACKUP_GEMINI_API_KEY }}
+
+      - name: Commit & push changes
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
-            cd /home/topp/projects/aquarisamatiran &&
-            echo '🕐 Scheduler triggered by cron-job.org' &&
-            .venv/bin/python .github/workflows/runner.py
-          "
+          git config user.name "Nix Bot"
+          git config user.email "nix@aquarisamatiran.dev"
+          git add schedule.json bio/index.html curriculum_content.json
+          git diff --cached --quiet || git commit -m "auto: post + update bio"
+          git push origin main
+
+      - name: Push bio to pages repo
+        run: |
+          git clone https://${{ secrets.PAGES_PAT }}@github.com/imtopp/aquarisamatiran-pages.git /tmp/pages-repo
+          cp bio/index.html /tmp/pages-repo/index.html
+          cd /tmp/pages-repo
+          git config user.name "Nix Bot"
+          git config user.email "nix@aquarisamatiran.dev"
+          git add index.html
+          git diff --cached --quiet || git commit -m "auto: update bio from scheduler"
+          git push origin main

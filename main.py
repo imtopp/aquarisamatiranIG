@@ -843,7 +843,131 @@ def _search_pexels_image(query: str):
         return None
 
 
-def cmd_generate_carousel(_client, args):
+def _pollinations_image(prompt: str, timeout: int = 120) -> PIL.Image.Image | None:
+    """Generate image via pollinations.ai. Sequential only (1 req/IP at a time)."""
+    import httpx
+    import io
+    import urllib.parse
+    try:
+        url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}?width=1080&height=1080&nologo=true"
+        print(f"   🎨 Generating: {prompt[:60]}...")
+        resp = httpx.get(url, timeout=timeout)
+        if resp.status_code != 200:
+            print(f"   ❌ Pollinations error {resp.status_code}: {resp.text[:100]}")
+            return None
+        return PIL.Image.open(io.BytesIO(resp.content))
+    except Exception as e:
+        print(f"   ❌ Pollinations exception: {e}")
+        return None
+
+
+def cmd_generate_carousel_pollinations(_client, args):
+    """
+    Trial: Generate carousel slides using pollinations.ai
+    (image + text rendered by AI, no slide builder needed)
+    """
+    import argparse
+    parser = argparse.ArgumentParser(prog="generate-carousel-pollinations", add_help=False)
+    parser.add_argument("topic", nargs="?", help="topik carousel")
+    parser.add_argument("--num-facts", type=int, default=4, help="jumlah fakta (default: 4)")
+    parser.add_argument("--style", default="dark blue gradient, neon green accents, modern minimalist, professional", help="gaya visual")
+    parsed = parser.parse_known_args(args)[0]
+
+    if not parsed.topic:
+        print("Gunakan: python main.py generate-carousel-pollinations <topik> [--num-facts N] [--style GAYA]")
+        print()
+        print("  topik       — topik konten (contoh: Ikan Cupang)")
+        print("  --num-facts — jumlah fakta (default: 4)")
+        print("  --style     — gaya visual (default: dark blue aquarium theme)")
+        print()
+        print("Contoh:")
+        print("  python main.py generate-carousel-pollinations 'Ikan Cupang'")
+        print("  python main.py generate-carousel-pollinations 'Filter Aquarium' --num-facts 5")
+        return
+
+    from sources.facts_generator import generate_facts
+    import re
+    import time
+
+    topic = parsed.topic
+    slug = re.sub(r'[^\w\-]', '', topic.lower().replace(" ", "_").replace("-", "_"))[:30].rstrip("_")
+
+    # 1. Generate facts via Gemini (struktur JSON tetep dipake)
+    print(f"📝 Generate facts untuk \"{topic}\"...")
+    try:
+        facts = generate_facts(topic, parsed.num_facts)
+    except Exception as e:
+        print(f"❌ Gagal generate facts: {e}")
+        return
+
+    n_facts = len(facts.get("facts", []))
+    display = facts.get("display_name", topic)
+    print(f"\n📋 {n_facts} fakta tentang {display}:")
+    for f in facts["facts"]:
+        print(f"   {f['number']}. {f['title']}")
+
+    style = parsed.style
+    prompts = []
+
+    # Cover slide prompt
+    prompts.append({
+        "file": f"{slug}_poll_cover.png",
+        "prompt": (
+            f"Instagram carousel cover slide 1080x1080. "
+            f"Aquascape aquarium education theme. "
+            f"Title: '{display}'. Subtitle: '{facts.get('subtitle', '')}'. "
+            f"Style: {style}. "
+            f"Aquarisamatiran branding. Clean modern typography. No watermark. #aquascape #aquarium"
+        ),
+    })
+
+    # Fact slide prompts
+    for f in facts["facts"]:
+        prompts.append({
+            "file": f"{slug}_poll_fact_{f['number']}.png",
+            "prompt": (
+                f"Instagram carousel slide 1080x1080. "
+                f"Aquascape education. "
+                f"Fact {f['number']}: '{f['title']}'. "
+                f"Description: {f['description'][:100]}. "
+                f"Style: {style}. "
+                f"Aquarisamatiran branding. Clean typography. No watermark."
+            ),
+        })
+
+    # CTA slide prompt
+    prompts.append({
+        "file": f"{slug}_poll_cta.png",
+        "prompt": (
+            f"Instagram carousel last slide 1080x1080. "
+            f"Call to action: 'Follow @aquarisamatiran for more aquarium education'. "
+            f"Style: {style}. "
+            f"Like, comment, share icons. Aquarisamatiran branding. No watermark."
+        ),
+    })
+
+    # 2. Generate each slide via pollinations.ai (sequential)
+    print(f"\n🎨 Generate {len(prompts)} slides via pollinations.ai...")
+    os.makedirs(PHOTO_DIR, exist_ok=True)
+
+    for i, slide in enumerate(prompts):
+        print(f"\n[{i+1}/{len(prompts)}] {slide['file']}")
+        img = _pollinations_image(slide["prompt"])
+        if img:
+            img.save(PHOTO_DIR / slide["file"])
+            print(f"   ✅ Saved: {slide['file']} ({img.size[0]}x{img.size[1]})")
+        else:
+            print(f"   ⚠️  Gagal generate {slide['file']}, lanjut...")
+        if i < len(prompts) - 1:
+            wait = 15
+            print(f"   ⏳ Waiting {wait}s before next request...")
+            time.sleep(wait)
+
+    print(f"\n{'='*40}")
+    print(f"✅ Selesai! {len(prompts)} slide di {PHOTO_DIR}")
+    print(f"   Upload: python main.py post-carousel --upload-only --slug {slug}")
+    print(f"{'='*40}")
+
     import argparse
     parser = argparse.ArgumentParser(prog="generate-carousel", add_help=False)
     parser.add_argument("topic", nargs="?", help="nama ikan/tanaman/topik edukasi")
@@ -1207,6 +1331,7 @@ def main():
         print('  stage-photo <foto>         — [Foto] upload Catbox + generate caption')
         print('  generate-caption <video>   — (opsional) caption aja tanpa upload')
         print("  generate-carousel <topik>  — generate carousel slides (facts Gemini + gambar)")
+        print("  generate-carousel-pollinations <topik>  — [TRIAL] generate carousel via pollinations.ai (gambar + teks langsung)")
         print("  comments <media_id>        — lihat komen")
         print('  reply <comment_id> <msg>   — balas komen')
         print("  insights [media_id]        — lihat insights")
@@ -1237,6 +1362,7 @@ def main():
         "stage-photo": cmd_stage_photo,
         "generate-caption": cmd_generate_caption,
         "generate-carousel": cmd_generate_carousel,
+        "generate-carousel-pollinations": cmd_generate_carousel_pollinations,
         "delete-post": cmd_delete_post,
         "file-map": cmd_file_map,
         "curriculum": cmd_curriculum,

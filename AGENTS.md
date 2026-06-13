@@ -6,6 +6,7 @@ Currently running `aquarisamatiran` (aquascape) as the primary account.
 ## Location Detection
 
 Check `grep ^LOCATION .env` untuk tau lagi di VPS (`vps`) atau laptop lokal (`local`).
+Aman dari SSH silang — command `grep` membaca `.env` di mesin tempat proses berjalan, bukan mesin asal SSH.
 
 ## Tech Stack
 

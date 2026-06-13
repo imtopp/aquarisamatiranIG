@@ -3,6 +3,10 @@
 **Nix** — Multi-niche carousel & content CLI. Build anything, switch niches freely.
 Currently running `aquarisamatiran` (aquascape) as the primary account.
 
+## Location Detection
+
+Check `grep ^LOCATION .env` untuk tau lagi di VPS (`vps`) atau laptop lokal (`local`).
+
 ## Tech Stack
 
 - **Python 3.14**, `requests`, `python-dotenv`, `moviepy`, `google-genai`

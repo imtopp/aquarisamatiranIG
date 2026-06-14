@@ -1,4 +1,4 @@
-﻿"""Curriculum manager ΓÇö single source of truth untuk struktur kurikulum multi-season, multi-level, multi-topic.
+﻿"""Curriculum manager — single source of truth untuk struktur kurikulum multi-season, multi-level, multi-topic.
 
 Topics are nested per-season in curriculum_content.json v4+:
   topics: { "1": { "01": {...}, "02": {...} }, "2": { "01": {...} } }
@@ -28,7 +28,7 @@ SCHEDULE_JSON = BASE / "schedule.json"
 AGENTS_MD = BASE / "AGENTS.md"
 
 
-# ΓöÇΓöÇ helpers ΓöÇΓöÇ
+# ──── helpers ────
 
 def load():
     return json.loads(SRC.read_text(encoding="utf-8"))
@@ -36,7 +36,7 @@ def load():
 
 def save(data):
     SRC.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"  Γ£à curriculum_content.json saved (v{data.get('version', '?')})")
+    print(f"  ✅ curriculum_content.json saved (v{data.get('version', '?')})")
 
 
 def _get_season_topics(data, season):
@@ -83,14 +83,14 @@ def _level_topics(data, sid, lv):
             yield k, v
 
 
-# ΓöÇΓöÇ season crud ΓöÇΓöÇ
+# ──── season crud ────
 
 def cmd_add_season(args):
     data = load()
     title = _get_arg(args, "--title")
     subtitle = _get_arg(args, "--subtitle", "")
     if not title:
-        print("Γ¥î --title wajib diisi")
+        print("❌ --title wajib diisi")
         return
 
     existing_ids = [int(k) for k in data.get("seasons", {})]
@@ -103,14 +103,14 @@ def cmd_add_season(args):
         "level_labels": {"1": "New Level 1"},
     }
     save(data)
-    print(f"  ≡ƒåò Season {new_id}: {title} added")
+    print(f"  ✅ Season {new_id}: {title} added")
 
 
 def cmd_edit_season(args):
     data = load()
     season_id = _get_arg(args, "--season")
     if not season_id or season_id not in data.get("seasons", {}):
-        print(f"Γ¥î --season {season_id} tidak ditemukan")
+        print(f"❌ --season {season_id} tidak ditemukan")
         return
     season = data["seasons"][season_id]
     title = _get_arg(args, "--title")
@@ -120,29 +120,29 @@ def cmd_edit_season(args):
     if subtitle is not None:
         season["subtitle"] = subtitle
     save(data)
-    print(f"  Γ£Å∩╕Å  Season {season_id} updated")
+    print(f"  ✅  Season {season_id} updated")
 
 
 def cmd_delete_season(args):
     data = load()
     season_id = _get_arg(args, "--season")
     if not season_id or season_id not in data.get("seasons", {}):
-        print(f"Γ¥î --season {season_id} tidak ditemukan")
+        print(f"❌ --season {season_id} tidak ditemukan")
         return
 
     st = data.get("topics", {}).pop(str(season_id), {})
     del data["seasons"][season_id]
     save(data)
-    print(f"  ≡ƒùæ∩╕Å  Season {season_id} deleted ({len(st)} topics removed)")
+    print(f"  ✅  Season {season_id} deleted ({len(st)} topics removed)")
 
 
-# ΓöÇΓöÇ level crud ΓöÇΓöÇ
+# ──── level crud ────
 
 def cmd_add_level(args):
     data = load()
     season_id = _get_arg(args, "--season", "1")
     if season_id not in data.get("seasons", {}):
-        print(f"Γ¥î Season {season_id} tidak ditemukan")
+        print(f"❌ Season {season_id} tidak ditemukan")
         return
     level_num = _get_arg(args, "--number")
     label = _get_arg(args, "--label", "")
@@ -155,7 +155,7 @@ def cmd_add_level(args):
     data["seasons"][season_id].setdefault("level_labels", {})
     data["seasons"][season_id]["level_labels"][str(int(level_num))] = label or f"Level {int(level_num)}"
     save(data)
-    print(f"  ≡ƒåò Level {level_num} added to Season {season_id}")
+    print(f"  ✅ Level {level_num} added to Season {season_id}")
 
 
 def cmd_edit_level(args):
@@ -165,30 +165,30 @@ def cmd_edit_level(args):
     label = _get_arg(args, "--label")
 
     if not level_num or season_id not in data.get("seasons", {}):
-        print("Γ¥î --level dan --season valid wajib diisi")
+        print("❌ --level dan --season valid wajib diisi")
         return
     levels = data["seasons"][season_id].get("level_labels", {})
     if level_num not in levels:
-        print(f"Γ¥î Level {level_num} tidak ditemukan di Season {season_id}")
+        print(f"❌ Level {level_num} tidak ditemukan di Season {season_id}")
         return
     if label:
         levels[level_num] = label
         save(data)
-        print(f"  Γ£Å∩╕Å  Level {level_num} in Season {season_id} updated")
+        print(f"  ✅  Level {level_num} in Season {season_id} updated")
 
 
-# ΓöÇΓöÇ topic crud ΓöÇΓöÇ
+# ──── topic crud ────
 
 def cmd_add_topic(args):
     data = load()
     season_id = _get_arg(args, "--season")
     if not season_id:
-        print("Γ¥î --season wajib diisi")
+        print("❌ --season wajib diisi")
         return
     level = _get_arg(args, "--level", "1")
     title = _get_arg(args, "--title")
     if not title:
-        print("Γ¥î --title wajib diisi")
+        print("❌ --title wajib diisi")
         return
 
     new_key = _next_topic_num(data, season_id)
@@ -212,7 +212,7 @@ def cmd_add_topic(args):
 
     _get_season_topics(data, season_id)[new_key] = topic
     save(data)
-    print(f"  ≡ƒåò S{season_id}#{new_key}: {title} (L{level}) added")
+    print(f"  ✅ S{season_id}#{new_key}: {title} (L{level}) added")
 
 
 def cmd_edit_topic(args):
@@ -220,11 +220,11 @@ def cmd_edit_topic(args):
     season_id = _get_arg(args, "--season")
     num = _get_arg(args, "--num")
     if not season_id or not num:
-        print("Γ¥î --season dan --num wajib diisi")
+        print("❌ --season dan --num wajib diisi")
         return
     st = _get_season_topics(data, season_id)
     if num not in st:
-        print(f"Γ¥î S{season_id}#{num} tidak ditemukan")
+        print(f"❌ S{season_id}#{num} tidak ditemukan")
         return
 
     topic = st[num]
@@ -243,7 +243,7 @@ def cmd_edit_topic(args):
         topic["keywords"] = [k.strip() for k in keywords_raw.split(",") if k.strip()]
 
     save(data)
-    print(f"  Γ£Å∩╕Å  S{season_id}#{num} updated")
+    print(f"  ✅  S{season_id}#{num} updated")
 
 
 def cmd_delete_topic(args):
@@ -251,17 +251,17 @@ def cmd_delete_topic(args):
     season_id = _get_arg(args, "--season")
     num = _get_arg(args, "--num")
     if not season_id or not num:
-        print("Γ¥î --season dan --num wajib diisi")
+        print("❌ --season dan --num wajib diisi")
         return
     st = _get_season_topics(data, season_id)
     if num not in st:
-        print(f"Γ¥î S{season_id}#{num} tidak ditemukan")
+        print(f"❌ S{season_id}#{num} tidak ditemukan")
         return
 
     del st[num]
     data = _renumber_topics(data)
     save(data)
-    print(f"  ≡ƒùæ∩╕Å  S{season_id}#{num} deleted (topics renumbered)")
+    print(f"  ✅  S{season_id}#{num} deleted (topics renumbered)")
 
 
 def cmd_list(args):
@@ -283,16 +283,16 @@ def cmd_list(args):
 
         for lv in sorted(levels, key=int):
             label = levels[lv]
-            print(f"\n  ΓöÇΓöÇ Level {lv}: {label} ΓöÇΓöÇ")
+            print(f"\n  ──── Level {lv}: {label} ────")
             lv_topics = [(k, st[k]) for k in sorted(st, key=int) if st[k].get("level") == int(lv)]
             if not lv_topics:
                 print("    (empty)")
             for k, v in lv_topics:
-                status_icon = {"live": "Γ£à", "scheduled": "≡ƒôà", "planned": "Γ¼£"}.get(v.get("status", ""), "Γ¼£")
+                status_icon = {"live": "✅", "scheduled": "📅", "planned": "⬜"}.get(v.get("status", ""), "⬜")
                 print(f"    {status_icon} #{k} {v['title']:30s} [{v.get('status','planned')}]")
 
 
-# ΓöÇΓöÇ sync ΓöÇΓöÇ
+# ──── sync ────
 
 def cmd_sync(args):
     data = load()
@@ -300,26 +300,26 @@ def cmd_sync(args):
     _sync_agents_md(data)
     _sync_schedule_json(data)
     _sync_bio_html(data)
-    print("\n  Γ£à All files synced!")
+    print("\n  ✅ All files synced!")
 
 
 def _sync_curriculum_md(data):
     seasons = data.get("seasons", {})
 
-    lines = ["# ≡ƒôÜ Kurikulum Aquarisamatiran\n"]
-    lines.append("Belajar aquarium dari nol sampai advanced ΓÇö step by step, pake bahasa awam.\n")
+    lines = ["# 📚 Kurikulum Aquarisamatiran\n"]
+    lines.append("Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.\n")
     lines.append("---\n")
 
     for sid in sorted(seasons, key=int):
         s = seasons[sid]
         st = data.get("topics", {}).get(str(sid), {})
-        lines.append(f"\n## ≡ƒîè Season {sid}: {s['title']}\n")
+        lines.append(f"\n## 🌱 Season {sid}: {s['title']}\n")
         if s.get("subtitle"):
             lines.append(f"> {s['subtitle']}\n")
 
         levels = s.get("level_labels", {})
         for lv in sorted(levels, key=int):
-            label = levels[lv].split("ΓÇö")[0].strip() if "ΓÇö" in levels[lv] else levels[lv]
+            label = levels[lv].split("—")[0].strip() if "—" in levels[lv] else levels[lv]
             lines.append(f"\n### Level {lv}: {label}\n")
             lines.append("| # | Topik | Status |\n")
             lines.append("|---|-------|--------|\n")
@@ -330,24 +330,24 @@ def _sync_curriculum_md(data):
                     continue
                 title = v.get("title", "?")
                 status = v.get("status", "planned")
-                icon = {"live": "Γ£à", "scheduled": "≡ƒôà", "planned": "Γ¼£"}.get(status, "Γ¼£")
+                icon = {"live": "✅", "scheduled": "📅", "planned": "⬜"}.get(status, "⬜")
                 tgl = v.get("scheduled_time", "")
                 tgl_str = f" ({tgl})" if tgl else ""
                 lines.append(f"| {k} | {title}{tgl_str} | {icon} |\n")
 
     CUR_MD.write_text("".join(lines), encoding="utf-8")
-    print("  Γ£à curriculum.md regenerated")
+    print("  ✅ curriculum.md regenerated")
 
 
 def _sync_agents_md(data):
-    """No-op ΓÇö terminology now served from curriculum_content.json by bot.py directly."""
+    """No-op — terminology now served from curriculum_content.json by bot.py directly."""
     pass
 
 
 def _sync_schedule_json(data):
-    """Ensure schedule.json matches curriculum_content.json ΓÇö handles renumbering, time updates, cross-season."""
+    """Ensure schedule.json matches curriculum_content.json — handles renumbering, time updates, cross-season."""
     if not SCHEDULE_JSON.exists():
-        print("  ΓÜá∩╕Å  schedule.json not found ΓÇö skip")
+        print("  ⚠️  schedule.json not found — skip")
         return
 
     schedule = json.loads(SCHEDULE_JSON.read_text(encoding="utf-8"))
@@ -400,7 +400,7 @@ def _sync_schedule_json(data):
             if v.get("result_id"):
                 entry["result_id"] = v["result_id"]
             if old_label and old_label != target_label:
-                print(f"  ≡ƒöä schedule.json: {old_label} ΓåÆ S{sid}#{num}")
+                print(f"  🔄 schedule.json: {old_label} → S{sid}#{num}")
         elif v.get("status") in ("live", "scheduled"):
             entry = {
                 "curriculum": target_label,
@@ -418,7 +418,7 @@ def _sync_schedule_json(data):
                 entry["urls"] = []
             entry["caption"] = v.get("caption", "")
             schedule.append(entry)
-            print(f"  ≡ƒô¥ schedule.json: added S{sid}#{num}")
+            print(f"  📋 schedule.json: added S{sid}#{num}")
 
     # Build set of valid curriculum+season combos
     valid_keys = set()
@@ -440,13 +440,13 @@ def _sync_schedule_json(data):
     schedule = [e for e in schedule if keep(e)]
 
     SCHEDULE_JSON.write_text(json.dumps(schedule, indent=2, ensure_ascii=False), encoding="utf-8")
-    print("  Γ£à schedule.json synced")
+    print("  ✅ schedule.json synced")
 
 
 def _sync_bio_html(data):
     """Regenerate bio/index.html card structure from JSON."""
     if not BIO_HTML.exists():
-        print("  ΓÜá∩╕Å  bio/index.html not found ΓÇö skip")
+        print("  ⚠️  bio/index.html not found — skip")
         return
 
     seasons = data.get("seasons", {})
@@ -458,7 +458,7 @@ def _sync_bio_html(data):
         st = data.get("topics", {}).get(str(sid), {})
         season_html = [f'  <div class="season" data-season="{sid}">']
         season_html.append('  <div class="season-header">')
-        season_html.append(f'    <h2>≡ƒîè Season {sid}: {s["title"]}</h2>')
+        season_html.append(f'    <h2>🌱 Season {sid}: {s["title"]}</h2>')
         if s.get("subtitle"):
             season_html.append(f'    <p>{s["subtitle"]}</p>')
         season_html.append("  </div>")
@@ -467,8 +467,8 @@ def _sync_bio_html(data):
             label = levels[lv]
             season_html.append("")
             season_html.append('  <div class="section">')
-            lv_icon = {1: "≡ƒôû", 2: "≡ƒƒí", 3: "≡ƒƒá", 4: "≡ƒö┤"}.get(int(lv), "≡ƒôû")
-            season_html.append(f'    <h2>{lv_icon} Level {lv} ΓÇö {label.split("ΓÇö")[0].strip()}</h2>')
+            lv_icon = {1: "🌱", 2: "🌿", 3: "🌳", 4: "💎"}.get(int(lv), "🌱")
+            season_html.append(f'    <h2>{lv_icon} Level {lv} — {label.split("—")[0].strip()}</h2>')
             season_html.append(f'    <p class="level-intro">{label}</p>')
 
             for k in sorted(st, key=int):
@@ -482,14 +482,14 @@ def _sync_bio_html(data):
 
                 if status == "live":
                     tag_cls = "tag-live"
-                    tag_text = "Γ£à Live"
+                    tag_text = "✅ Live"
                 elif status == "scheduled":
                     tag_cls = "tag-soon"
                     st_text = v.get("scheduled_time", "")
-                    tag_text = f"≡ƒôà {st_text}" if st_text else "≡ƒôà Soon"
+                    tag_text = f"📅 {st_text}" if st_text else "📅 Soon"
                 else:
                     tag_cls = "tag-empty"
-                    tag_text = "≡ƒö£"
+                    tag_text = "🔜"
 
                 href = permalink if permalink else "https://instagram.com/aquarisamatiran"
                 level_class = f"l{lv}"
@@ -516,12 +516,12 @@ def _sync_bio_html(data):
     if header_end >= 0 and cta_start > header_end:
         new_html = old_html[:old_html.find("</div>\n\n", header_end) + 7] + "\n\n" + "\n\n".join(season_blocks) + "\n\n" + old_html[cta_start:]
         BIO_HTML.write_text(new_html, encoding="utf-8")
-        print("  Γ£à bio/index.html regenerated")
+        print("  ✅ bio/index.html regenerated")
     else:
-        print("  ΓÜá∩╕Å  Could not find card section in bio/index.html ΓÇö manual update needed")
+        print("  ⚠️  Could not find card section in bio/index.html — manual update needed")
 
 
-# ΓöÇΓöÇ arg helpers ΓöÇΓöÇ
+# ──── arg helpers ────
 
 def _get_arg(args, name, default=None):
     for i, a in enumerate(args):
@@ -530,7 +530,7 @@ def _get_arg(args, name, default=None):
     return default
 
 
-# ΓöÇΓöÇ dispatch ΓöÇΓöÇ
+# ──── dispatch ────
 
 def cmd_curriculum(client, args):
     if not args:
@@ -577,7 +577,7 @@ def _cmd_add(args):
         "season": cmd_add_season,
         "level": cmd_add_level,
         "topic": cmd_add_topic,
-    }.get(sub, lambda _: print(f"Γ¥î add {sub} tidak dikenal"))(subargs)
+    }.get(sub, lambda _: print(f"❌ add {sub} tidak dikenal"))(subargs)
 
 
 def _cmd_edit(args):
@@ -590,7 +590,7 @@ def _cmd_edit(args):
         "season": cmd_edit_season,
         "level": cmd_edit_level,
         "topic": cmd_edit_topic,
-    }.get(sub, lambda _: print(f"Γ¥î edit {sub} tidak dikenal"))(subargs)
+    }.get(sub, lambda _: print(f"❌ edit {sub} tidak dikenal"))(subargs)
 
 
 def _cmd_delete(args):
@@ -602,7 +602,7 @@ def _cmd_delete(args):
     {
         "season": cmd_delete_season,
         "topic": cmd_delete_topic,
-    }.get(sub, lambda _: print(f"Γ¥î delete {sub} tidak dikenal"))(subargs)
+    }.get(sub, lambda _: print(f"❌ delete {sub} tidak dikenal"))(subargs)
 
 
 if __name__ == "__main__":

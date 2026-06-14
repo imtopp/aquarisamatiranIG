@@ -3,12 +3,12 @@
   "seasons": {
     "1": {
       "title": "Perjalanan dari Nol Sampai Pro",
-      "subtitle": "Belajar aquarium step by step ΓÇö mulai dari nol banget sampai bisa aquascape advanced",
+      "subtitle": "Belajar aquarium step by step — mulai dari nol banget sampai bisa aquascape advanced",
       "level_labels": {
-        "1": "Pemula Absolut ΓÇö dari yang belum tau apa-apa",
-        "2": "Mulai Pede ΓÇö udah punya tank? saatnya naik level!",
-        "3": "Naik Kelas ΓÇö saatnya eksperimen",
-        "4": "Advanced ΓÇö master class"
+        "1": "Pemula Absolut — dari yang belum tau apa-apa",
+        "2": "Mulai Pede — udah punya tank? saatnya naik level!",
+        "3": "Naik Kelas — saatnya eksperimen",
+        "4": "Advanced — master class"
       }
     }
   },
@@ -21,7 +21,7 @@
         "subtitle": "Dunia Air di Rumahmu",
         "scientific_name": "Aquarium (Aquaria)",
         "level": 1,
-        "status": "scheduled",
+        "status": "live",
         "keywords": [
           "freshwater vs saltwater",
           "aquascape vs aquarium",
@@ -102,7 +102,9 @@
               "Mental Health"
             ]
           }
-        ]
+        ],
+        "permalink": "https://www.instagram.com/p/DZU5WSCDZxh/",
+        "result_id": "17882725962597921"
       },
       "02": {
         "slug": "peralatan-dasar",
@@ -111,7 +113,7 @@
         "subtitle": "Mulai Hobi Tanpa Bingung!",
         "scientific_name": "Sistem Pendukung Kehidupan Akuatik",
         "level": 1,
-        "status": "scheduled",
+        "status": "live",
         "keywords": [
           "filter",
           "HOB/canister/sponge",
@@ -194,7 +196,9 @@
               "Water Change"
             ]
           }
-        ]
+        ],
+        "permalink": "https://www.instagram.com/p/DZaDnSJDRAG/",
+        "result_id": "17874365340506399"
       },
       "03": {
         "slug": "siklus-nitrogen",
@@ -203,7 +207,7 @@
         "subtitle": "Jantung Kehidupan Ekosistem Air",
         "scientific_name": "Biogeochemical Nitrogen Cycle",
         "level": 1,
-        "status": "scheduled",
+        "status": "live",
         "keywords": [
           "cycling",
           "amonia-nitrit-nitrat",
@@ -261,7 +265,9 @@
               "Rutin Mingguan"
             ]
           }
-        ]
+        ],
+        "permalink": "https://www.instagram.com/p/DZSPFw2Hfk6/",
+        "result_id": "18329549080271215"
       },
       "04": {
         "slug": "ikan-pertama",
@@ -272,7 +278,7 @@
         "level": 1,
         "status": "live",
         "scheduled_time": "2026-06-12 19:00",
-        "caption": "Pengen beli ikan tapi bingung mulai dari mana? ≡ƒÿ⌐\n\nNah ini dia panduan milih ikan pertama biar gak nyesel ΓÇö karena percaya deh, asal-asalan masukin ikan itu resep bencana ≡ƒÿ¡ (udah pernah, tau rasanya wkwk)\n\nYang dibahas:\n≡ƒÆ¬ Pilih spesies tangguh ΓÇö jangan langsung yang mahal & rare\n≡ƒôÅ Cek ukuran dewasa ΓÇö ikan kecil lucu? bisa gede 30cm lho!\n≡ƒÉƒ Karakter ikan ΓÇö ada yg preman, ada yg kalem\n≡ƒæÑ Suka sendiri atau butuh teman?\n≡ƒì╜∩╕Å Pakan yang praktis\n≡ƒîè Zona renang ΓÇö si atas, tengah, bawah\n\nUdah selesai siklus airnya? Cek dulu post siklus nitrogen aku ya biar aman! ≡ƒî▒",
+        "caption": "Pengen beli ikan tapi bingung mulai dari mana? ≡ƒÿ⌐\n\nNah ini dia panduan milih ikan pertama biar gak nyesel — karena percaya deh, asal-asalan masukin ikan itu resep bencana ≡ƒÿ¡ (udah pernah, tau rasanya wkwk)\n\nYang dibahas:\n≡ƒÆ¬ Pilih spesies tangguh — jangan langsung yang mahal & rare\n≡ƒôÅ Cek ukuran dewasa — ikan kecil lucu? bisa gede 30cm lho!\n≡ƒÉƒ Karakter ikan — ada yg preman, ada yg kalem\n≡ƒæÑ Suka sendiri atau butuh teman?\n≡ƒì╜∩╕Å Pakan yang praktis\n≡ƒîè Zona renang — si atas, tengah, bawah\n\nUdah selesai siklus airnya? Cek dulu post siklus nitrogen aku ya biar aman! ≡ƒî▒",
         "keywords": [
           "bioload",
           "stocking",
@@ -802,4 +808,3 @@
     }
   }
 }
-

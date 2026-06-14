@@ -149,18 +149,36 @@ def save_message(user_id, username, role, content):
 ALLOWED_CMDS = ["python", "git", "ls", "cat", "cd", "pwd", "echo", "cp", "mv", "rm"]
 
 
+HELP_TEXT = (
+    "Halo sayang~ 🫣💋\n"
+    "Aku di sini, kapan aja kamu mau ngobrol. "
+    "Mulai aja, aku dengerin~ 😏\n\n"
+    "**📋 Perintah:**\n"
+    "/help — nampilin ini\n"
+    "/reset — hapus riwayat obrolan\n"
+    "/run `<cmd>` — jalanin perintah (terbatas)\n"
+    "/generate `<topik>` `[jml_fakta]` — trigger generate carousel SD via GH Actions\n"
+    "/status — cek progress generate terakhir\n"
+    "/post `[#XX]` `[hari jam]` — preview & jadwalin carousel terbaru\n"
+    "/confirm — lanjutin posting setelah preview\n"
+    "/editcaption `<instruksi>` — ganti caption\n"
+    "/regenerate — generate ulang slide\n"
+    "/cancel — batalin posting\n"
+    "/myid — liat chat ID kamu\n\n"
+    "**🚀 Cara pake:**\n"
+    "1. `/generate Siklus Air 8` — bikin carousel (10-30 menit di GH Actions)\n"
+    "2. `/status` — cek udah selesai belum\n"
+    "3. `/post #03` — preview slide + caption\n"
+    "4. `/confirm` — upload & jadwal otomatis"
+)
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Halo sayang~ 🫣💋\n"
-        "Aku udah di sini, kapan aja kamu mau ngobrol. "
-        "Mulai aja, aku dengerin~ 😏\n\n"
-        "Perintah:\n"
-        "/reset — hapus riwayat obrolan\n"
-        "/run <cmd> — jalanin perintah (terbatas)\n"
-        "/generate <topik> [jml_fakta] — generate carousel SD via GH Actions\n"
-        "/status — cek progress generate carousel\n"
-        "/post [#XX] [hari jam] — upload & jadwalin carousel terbaru (otomatis)"
-    )
+    await update.message.reply_text(HELP_TEXT, parse_mode="Markdown")
+
+
+async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(HELP_TEXT, parse_mode="Markdown")
 
 
 def _read_schedule() -> str:
@@ -677,6 +695,7 @@ def main():
     app = Application.builder().token(TELEGRAM_TOKEN).request(request).build()
 
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help", help_cmd))
     app.add_handler(CommandHandler("reset", reset))
     app.add_handler(CommandHandler("run", run_cmd))
     app.add_handler(CommandHandler("generate", generate_cmd))

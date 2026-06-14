@@ -1456,8 +1456,6 @@ def main():
             sys.argv.pop(idx)
             config.set_niche(niche_name)
 
-    client = InstagramClient()
-
     if len(sys.argv) < 2:
         niche_list = ", ".join(config._NICHE_REGISTRY)
         print(__doc__)
@@ -1494,6 +1492,9 @@ def main():
 
     cmd = sys.argv[1]
     args = sys.argv[2:]
+
+    no_ig_cmds = {"generate-carousel-sd", "compress-slides", "curriculum", "generate-caption"}
+    client = InstagramClient() if cmd not in no_ig_cmds else None
 
     cmds = {
         "profile": cmd_profile,

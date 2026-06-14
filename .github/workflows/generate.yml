@@ -76,13 +76,6 @@ jobs:
           git config user.email "nix@aquarisamatiran.dev"
           git add resource/photos/edu_*.json resource/photos/*_sd_*
           git diff --cached --quiet || git commit -m "auto: generated carousel for ${{ inputs.topic }}"
+          git remote set-url origin https://x-access-token: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@github.com/imtopp/aquarisamatiranIG.git
           git push origin main
         shell: bash
-
-      - name: Trigger deploy
-        if: success()
-        run: |
-          gh workflow run deploy.yml --ref main
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}

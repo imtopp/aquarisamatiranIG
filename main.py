@@ -960,6 +960,7 @@ def cmd_generate_carousel_sd(_client, args):
                 if t:
                     topic_name = t.get("display_name", t.get("title", topic))
                     season_tag = f"S{s_num}#{t_num} "
+                    slug = t.get("slug", slug).replace("-", "_")
             else:
                 t_num = topic.lstrip("#").zfill(2)
                 for s_num, ts in cc.get("topics", {}).items():
@@ -967,6 +968,7 @@ def cmd_generate_carousel_sd(_client, args):
                         t = ts[t_num]
                         topic_name = t.get("display_name", t.get("title", topic))
                         season_tag = f"S{s_num}#{t_num} "
+                        slug = t.get("slug", slug).replace("-", "_")
                         break
     except Exception:
         pass

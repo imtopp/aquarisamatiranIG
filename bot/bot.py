@@ -579,7 +579,7 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
     print("Bot jalan di VPS... chat aku dari Telegram~")
-    app.run_polling()
+    app.run_polling(drop_pending_updates=True)
 
 
 if __name__ == "__main__":

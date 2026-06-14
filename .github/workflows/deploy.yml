@@ -21,7 +21,7 @@ jobs:
             cd /home/topp/projects/aquarisamatiran &&
             git clean -fd &&
             git pull origin main &&
-            .venv/bin/pip install -r requirements.txt 2>/dev/null;
+            .venv/bin/pip install -r requirements.txt;
             sudo systemctl restart aquarisamatiran-bot
             echo '✅ Deploy selesai'
           "

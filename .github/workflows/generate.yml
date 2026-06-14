@@ -1,7 +1,7 @@
 name: Generate Carousel (SD)
 
 concurrency:
-  group: generate-${{ github.event.inputs.topic }}
+  group: generate
   cancel-in-progress: true
 
 on:
@@ -41,13 +41,8 @@ jobs:
           pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
           pip install diffusers transformers accelerate pillow
 
-      - name: Cleanup old slides for this slug
-        run: |
-          SLUG=$(echo "${{ inputs.topic }}" | tr '[:upper:]' '[:lower:]' | tr ' -' '_' | sed 's/[^a-z0-9_]//g' | cut -c1-30 | sed 's/_*$//')
-          echo "Cleaning old slides for slug: $SLUG"
-          rm -f resource/photos/${SLUG}_sd_*
-          rm -f resource/photos/${SLUG}_slide_*
-          echo "Done"
+      - name: Cleanup temp files
+        run: rm -f resource/photos/temp_*
 
       - name: Generate carousel
         run: python main.py generate-carousel-sd "${{ inputs.topic }}" --num-facts ${{ inputs.num_facts }}
@@ -75,7 +70,7 @@ jobs:
         run: |
           git config user.name "Nix Bot"
           git config user.email "nix@aquarisamatiran.dev"
-          git add resource/photos/edu_*.json resource/photos/*_sd_* schedule.json
+          git add resource/photos/edu_*.json resource/photos/*_sd_*
           git diff --cached --quiet || git commit -m "auto: generated carousel for ${{ inputs.topic }}"
           git push origin main
         shell: bash

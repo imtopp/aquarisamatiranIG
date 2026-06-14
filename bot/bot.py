@@ -351,12 +351,14 @@ def _latest_slides(curriculum_tag: str = "") -> tuple[str | None, list[Path]]:
             topic = cur_data.get("topics", {}).get(m.group(1), {}).get(m.group(2), {})
             slug = (topic.get("slug", "") or "").replace("-", "_")
             if slug:
-                candidate = sorted(slides_dir.glob(f"{slug}_sd_*.png"))
-                candidate += sorted(slides_dir.glob(f"{slug}_sd_*.jpg"))
-                candidate += sorted(slides_dir.glob(f"{slug}_slide_*.png"))
-                candidate += sorted(slides_dir.glob(f"{slug}_slide_*.jpg"))
-                if candidate:
-                    return slug, candidate
+                sd = sorted(slides_dir.glob(f"{slug}_sd_*.png"))
+                sd += sorted(slides_dir.glob(f"{slug}_sd_*.jpg"))
+                if sd:
+                    return slug, sd
+                legacy = sorted(slides_dir.glob(f"{slug}_slide_*.png"))
+                legacy += sorted(slides_dir.glob(f"{slug}_slide_*.jpg"))
+                if legacy:
+                    return slug, legacy
 
     slides = sorted(slides_dir.glob("*_slide_??.png"))
     slides += sorted(slides_dir.glob("edu_*_??.jpg"))

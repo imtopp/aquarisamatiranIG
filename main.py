@@ -973,6 +973,11 @@ def cmd_generate_carousel_sd(_client, args):
     except Exception:
         pass
 
+    # Cleanup old slides for this slug
+    for f in list(PHOTO_DIR.glob(f"{slug}_sd_*")) + list(PHOTO_DIR.glob(f"{slug}_slide_*")):
+        f.unlink(missing_ok=True)
+        print(f"   🗑️  Hapus slide lama: {f.name}")
+
     print(f"📝 Generate facts untuk \"{topic_name}\"...")
     try:
         facts = generate_facts(topic_name, parsed.num_facts)
@@ -1037,7 +1042,7 @@ def cmd_generate_carousel_sd(_client, args):
     if raw:
         bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
         slide = build_cover(facts, None, bg_image=bg)
-        fname = f"{slug}_sd_cover.png"
+        fname = f"{slug}_sd_01_cover.png"
         slide.save(PHOTO_DIR / fname)
         saved.append(fname)
         print(f"   ✅ {fname}")
@@ -1054,7 +1059,7 @@ def cmd_generate_carousel_sd(_client, args):
         if raw:
             bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
             slide = build_fact_slide(f, None, bg_image=bg)
-            fname = f"{slug}_sd_fact_{f['number']}.png"
+            fname = f"{slug}_sd_{i+2:02d}_fact_{f['number']}.png"
             slide.save(PHOTO_DIR / fname)
             saved.append(fname)
             print(f"   ✅ {fname}")
@@ -1072,7 +1077,7 @@ def cmd_generate_carousel_sd(_client, args):
     if raw:
         bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
         slide = build_cta_slide(facts, None, bg_image=bg)
-        fname = f"{slug}_sd_cta.png"
+        fname = f"{slug}_sd_{n_facts+2:02d}_cta.png"
         slide.save(PHOTO_DIR / fname)
         saved.append(fname)
         _notify_done("cta", "CTA")

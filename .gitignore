@@ -34,6 +34,9 @@ resource/photos/edu_*.jpg
 # Temp scripts
 _*.py
 
+# Temp GH logs
+_gh_*
+
 # Large video files (>100MB)
 resource/videos/*.mp4
 resource/published/*.mp4

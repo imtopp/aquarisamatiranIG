@@ -987,6 +987,9 @@ def cmd_generate_carousel_sd(_client, args):
 
     n_facts = len(facts.get("facts", []))
     display = facts.get("display_name", topic_name)
+    # Kalau udah resolve dari curriculum, pake display_name/topic_name dari curriculum, bukan hasil Gemini
+    if season_tag:
+        display = topic_name
     print(f"\n📋 {n_facts} fakta tentang {display}:")
 
     # Fallback: cari season_tag dari topic asli (kalau pake #XX)

@@ -14,6 +14,22 @@ from dotenv import load_dotenv
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+
+def _notify_telegram(msg: str):
+    token = os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("TELEGRAM_TOKEN", "")
+    chat_id = os.environ.get("CHAT_ID", "")
+    if not token or not chat_id:
+        return
+    try:
+        import requests
+        requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={"chat_id": chat_id, "text": msg, "parse_mode": "Markdown"},
+            timeout=10,
+        )
+    except Exception:
+        pass
+
 load_dotenv()
 
 from ig_client import InstagramClient, parse_schedule
@@ -944,6 +960,9 @@ def cmd_generate_carousel_sd(_client, args):
 
     os.makedirs(PHOTO_DIR, exist_ok=True)
     saved = []
+    topic_tag = f"[*{display}*]"
+
+    _notify_telegram(f"{topic_tag} Proses dimulai untuk generate carousel.")
 
     # Prompt builder per slide type
     def _bg_prompt(slide_type: str, fact: dict | None = None) -> str:
@@ -955,8 +974,20 @@ def cmd_generate_carousel_sd(_client, args):
         else:  # cta
             return base + "peaceful aquascape with lush greenery, gentle water flow, morning light, serene underwater garden, high quality"
 
+    total_slides = n_facts + 2  # cover + facts + cta
+    slide_idx = 0
+
+    def _notify_progress(label: str, title: str):
+        nonlocal slide_idx
+        slide_idx += 1
+        _notify_telegram(f"{topic_tag} Proses gambar {slide_idx}/{total_slides} — \"{title}\" dimulai...")
+
+    def _notify_done(label: str, title: str):
+        _notify_telegram(f"{topic_tag} Generate gambar {slide_idx}/{total_slides} — \"{title}\" selesai!")
+
     # --- Cover slide ---
     print(f"\n🖼️ [1/{n_facts+2}] Cover: {display}")
+    _notify_progress("cover", "Cover")
     raw = _sd_generate(_bg_prompt("cover"))
     if raw:
         bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
@@ -965,12 +996,15 @@ def cmd_generate_carousel_sd(_client, args):
         slide.save(PHOTO_DIR / fname)
         saved.append(fname)
         print(f"   ✅ {fname}")
+        _notify_done("cover", "Cover")
     else:
         print(f"   ⚠️  Cover gagal")
 
     # --- Fact slides ---
     for i, f in enumerate(facts.get("facts", [])):
-        print(f"\n🖼️ [{i+2}/{n_facts+2}] Fact {f['number']}: {f['title']}")
+        title = f.get("title", f"Fakta {f['number']}")
+        print(f"\n🖼️ [{i+2}/{n_facts+2}] Fact {f['number']}: {title}")
+        _notify_progress("fact", title)
         raw = _sd_generate(_bg_prompt("fact", f))
         if raw:
             bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
@@ -979,6 +1013,7 @@ def cmd_generate_carousel_sd(_client, args):
             slide.save(PHOTO_DIR / fname)
             saved.append(fname)
             print(f"   ✅ {fname}")
+            _notify_done("fact", title)
         else:
             print(f"   ⚠️  Fact {f['number']} gagal")
         if i < n_facts - 1:
@@ -987,6 +1022,7 @@ def cmd_generate_carousel_sd(_client, args):
 
     # --- CTA slide ---
     print(f"\n🖼️ [{n_facts+2}/{n_facts+2}] CTA")
+    _notify_progress("cta", "CTA")
     raw = _sd_generate(_bg_prompt("cta"))
     if raw:
         bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
@@ -994,9 +1030,13 @@ def cmd_generate_carousel_sd(_client, args):
         fname = f"{slug}_sd_cta.png"
         slide.save(PHOTO_DIR / fname)
         saved.append(fname)
+        _notify_done("cta", "CTA")
         print(f"   ✅ {fname}")
     else:
         print(f"   ⚠️  CTA gagal")
+
+    _notify_telegram(f"{topic_tag} Proses generate carousel selesai! 🎉")
+    _notify_telegram(f"Gunakan `/post` di Telegram buat review & posting.")
 
     print(f"\n{'='*40}")
     if saved:

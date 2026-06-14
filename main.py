@@ -1011,6 +1011,19 @@ def cmd_generate_carousel_sd(_client, args):
     print(f"{'='*40}")
 
 
+def cmd_compress_slides(_client, args):
+    from pathlib import Path
+    from PIL import Image
+    for f in sorted(Path(PHOTO_DIR).glob("*_sd_*.png")):
+        sz = f.stat().st_size
+        if sz > 500 * 1024:
+            jpg = f.with_suffix(".jpg")
+            Image.open(f).convert("RGB").save(jpg, "JPEG", quality=82, optimize=True)
+            print(f"Compressed {f.name} ({sz//1024}KB -> {jpg.stat().st_size//1024}KB)")
+            f.unlink(missing_ok=True)
+    print("Compression done")
+
+
 def cmd_generate_carousel(_client, args):
     import argparse
     parser = argparse.ArgumentParser(prog="generate-carousel", add_help=False)
@@ -1408,6 +1421,7 @@ def main():
         "generate-caption": cmd_generate_caption,
         "generate-carousel": cmd_generate_carousel,
         "generate-carousel-sd": cmd_generate_carousel_sd,
+        "compress-slides": cmd_compress_slides,
         "delete-post": cmd_delete_post,
         "file-map": cmd_file_map,
         "curriculum": cmd_curriculum,

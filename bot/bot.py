@@ -32,6 +32,8 @@ CURRICULUM_PATH = PROJECT_DIR / "curriculum_content.json"
 FORBIDDEN_WORDS = ["lu", "gue", "lo", "elu", "gw"]
 
 GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"]
+
+_pending_posts: dict[int, dict] = {}
 GITHUB_PAT = os.environ.get("GITHUB_PAT", "")
 GH_REPO = "imtopp/aquarisamatiranIG"
 GH_API = "https://api.github.com"
@@ -456,9 +458,36 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     topic_display = _slug_to_topic(slug)
     await update.message.reply_text(f"💬 Generate caption buat \"{topic_display}\"...")
     caption = await _generate_caption(facts_json, topic_display, curriculum_tag)
-    await update.message.reply_text(f"📝 Caption:\n{caption[:500]}...")
 
-    # Upload + schedule via subprocess
+    # Preview
+    msg = (
+        f"📋 **{topic_display}** ({len(slides)} slide)\n"
+        f"📅 Jadwal: {schedule_time}\n\n"
+        f"📝 **Caption:**\n{caption[:1000]}\n\n"
+        f"Balas `/confirm` buat upload & jadwalin, atau `/cancel`"
+    )
+    await update.message.reply_text(msg, parse_mode="Markdown")
+
+    # Save pending
+    user_id = update.effective_user.id
+    _pending_posts[user_id] = {
+        "slug": slug,
+        "caption": caption,
+        "schedule_time": schedule_time,
+    }
+
+
+async def confirm_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    pending = _pending_posts.pop(user_id, None)
+    if not pending:
+        await update.message.reply_text("Ngga ada pending post. Coba `/post` dulu~")
+        return
+
+    slug = pending["slug"]
+    caption = pending["caption"]
+    schedule_time = pending["schedule_time"]
+
     await update.message.reply_text(f"📤 Upload & jadwalin \"{slug}\"...")
     try:
         proc_args = [sys.executable, "main.py", "post-carousel", "--slug", slug, "--schedule", "cron", schedule_time, caption]
@@ -471,6 +500,12 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("⏳ Kelamaan (>5 menit), cek manual aja sayang~")
     except Exception as e:
         await update.message.reply_text(f"❌ Error: {e}")
+
+
+async def cancel_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    _pending_posts.pop(user_id, None)
+    await update.message.reply_text("Oke, pending post dibatalin~ Mau `/post` lagi? 😏")
 
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -576,6 +611,8 @@ def main():
     app.add_handler(CommandHandler("generate", generate_cmd))
     app.add_handler(CommandHandler("status", status_cmd))
     app.add_handler(CommandHandler("post", post_cmd))
+    app.add_handler(CommandHandler("confirm", confirm_cmd))
+    app.add_handler(CommandHandler("cancel", cancel_cmd))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
     print("Bot jalan di VPS... chat aku dari Telegram~")

@@ -32,8 +32,9 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install -r requirements.txt
           pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-          pip install diffusers transformers accelerate pillow requests python-dotenv
+          pip install diffusers transformers accelerate pillow
 
       - name: Generate carousel
         run: python main.py generate-carousel-sd "${{ inputs.topic }}" --num-facts ${{ inputs.num_facts }}

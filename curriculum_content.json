@@ -373,7 +373,7 @@
         "subtitle": "Air Jernih, Ikan Happy!",
         "scientific_name": "Aquatic Ecosystem Homeostasis",
         "level": 1,
-        "status": "scheduled",
+        "status": "live",
         "scheduled_time": "2026-06-14 09:00",
         "caption": "Rutinitas mingguan yang wajib kamu lakuin biar aquarium tetap sehat! ≡ƒùô∩╕Å≡ƒî┐\n\nGak perlu ribet kok, cuma 6 langkah simpel:\n≡ƒ¬ú Ganti air 20-30%\n≡ƒº╣ Siphon kotoran dasar\n≡ƒº╜ Gosok alga di kaca\n≡ƒ½º Bilas busa filter\nΓ£é∩╕Å Pangkas tanaman layu\n≡ƒº¬ Tes parameter air\n\nUdah bahas filter di post Filter Aquarium? Ini penting banget biar kamu tau gimana cara rawat filternya! ≡ƒÿë",
         "keywords": [
@@ -456,7 +456,9 @@
               "Water Test"
             ]
           }
-        ]
+        ],
+        "result_id": "18016724990903677",
+        "permalink": "https://www.instagram.com/p/DZjH2D2nysd/"
       },
       "06": {
         "slug": "alga-musuh-atau-guru",

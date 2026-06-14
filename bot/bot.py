@@ -574,6 +574,11 @@ async def cancel_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Oke, pending post dibatalin~ Mau `/post` lagi? 😏")
 
 
+async def myid_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    uid = update.effective_user.id
+    await update.message.reply_text(f"Chat ID kamu: `{uid}`", parse_mode="Markdown")
+
+
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = update.message.text.lower()
@@ -681,6 +686,7 @@ def main():
     app.add_handler(CommandHandler("cancel", cancel_cmd))
     app.add_handler(CommandHandler("editcaption", editcaption_cmd))
     app.add_handler(CommandHandler("regenerate", regenerate_cmd))
+    app.add_handler(CommandHandler("myid", myid_cmd))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
     print("Bot jalan di VPS... chat aku dari Telegram~")

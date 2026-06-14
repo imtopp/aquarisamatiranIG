@@ -284,7 +284,7 @@ async def topics_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     topics = cc.get("topics", {})
     seasons = cc.get("seasons", {})
-    lines = ["**📚 Kurikulum Aquarisamatiran — Pakai `S1#07`:**\n"]
+    lines = ["**📚 Kurikulum Aquarisamatiran**\n"]
     for sid in sorted(topics, key=int):
         sname = seasons.get(sid, {}).get("name", f"Season {sid}")
         lines.append(f"**{sname}**")

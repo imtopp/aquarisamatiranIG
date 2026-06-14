@@ -919,6 +919,7 @@ def _darken_bg(img: PIL.Image.Image, opacity: float = 0.55) -> PIL.Image.Image:
 def cmd_generate_carousel_sd(_client, args):
     """Generate carousel with SD backgrounds + Pillow text overlay."""
     import argparse
+    import json
     import re
     import time
     from pathlib import Path
@@ -955,12 +956,29 @@ def cmd_generate_carousel_sd(_client, args):
     n_facts = len(facts.get("facts", []))
     display = facts.get("display_name", topic)
     print(f"\n📋 {n_facts} fakta tentang {display}:")
+
+    # Cari season + topic number dari curriculum_content.json
+    season_tag = ""
+    try:
+        cc_path = Path("curriculum_content.json")
+        if cc_path.exists():
+            cc = json.loads(cc_path.read_text(encoding="utf-8"))
+            topic_num = topic.lstrip("#").zfill(2)
+            for s_num, topics in cc.get("topics", {}).items():
+                if topic_num in topics:
+                    t = topics[topic_num]
+                    season_tag = f"S{s_num}#{topic_num} "
+                    display = t.get("display_name", display)
+                    break
+    except Exception:
+        pass
+
     for f in facts["facts"]:
         print(f"   {f['number']}. {f['title']}")
 
     os.makedirs(PHOTO_DIR, exist_ok=True)
     saved = []
-    topic_tag = f"[*{display}*]"
+    topic_tag = f"[{season_tag}{display}]"
 
     _notify_telegram(f"{topic_tag} Proses dimulai untuk generate carousel.")
 

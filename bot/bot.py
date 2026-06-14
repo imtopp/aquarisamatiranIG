@@ -155,21 +155,23 @@ HELP_TEXT = (
     "Mulai aja, aku dengerin~ 😏\n\n"
     "**📋 Perintah:**\n"
     "/help — nampilin ini\n"
+    "/topics — daftar topik kurikulum (`#XX`)\n"
     "/reset — hapus riwayat obrolan\n"
     "/run `<cmd>` — jalanin perintah (terbatas)\n"
-    "/generate `<topik>` `[jml_fakta]` — trigger generate carousel SD via GH Actions\n"
+    "/generate `#XX` `[jml_fakta]` — trigger generate carousel SD\n"
     "/status — cek progress generate terakhir\n"
-    "/post `[#XX]` `[hari jam]` — preview & jadwalin carousel terbaru\n"
+    "/post `[#XX]` `[hari jam]` — preview & jadwalin carousel\n"
     "/confirm — lanjutin posting setelah preview\n"
     "/editcaption `<instruksi>` — ganti caption\n"
     "/regenerate — generate ulang slide\n"
     "/cancel — batalin posting\n"
     "/myid — liat chat ID kamu\n\n"
     "**🚀 Cara pake:**\n"
-    "1. `/generate Siklus Air 8` — bikin carousel (10-30 menit di GH Actions)\n"
-    "2. `/status` — cek udah selesai belum\n"
-    "3. `/post #03` — preview slide + caption\n"
-    "4. `/confirm` — upload & jadwal otomatis"
+    "1. `/topics` — liat daftar #XX yang tersedia\n"
+    "2. `/generate #07` — bikin carousel (10-30 menit di GH Actions)\n"
+    "3. `/status` — cek udah selesai belum\n"
+    "4. `/post #07` — preview slide + caption\n"
+    "5. `/confirm` — upload & jadwal otomatis"
 )
 
 
@@ -272,6 +274,30 @@ def _format_curriculum_context(num: str, topic: dict) -> str:
     return "\n".join(lines)
 
 
+async def topics_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show all curriculum topics with their #XX codes."""
+    try:
+        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        await update.message.reply_text("❌ Gagal baca curriculum_content.json")
+        return
+    topics = cc.get("topics", {})
+    seasons = cc.get("seasons", {})
+    lines = ["**📚 Kurikulum Aquarisamatiran:**\n"]
+    for sid in sorted(topics, key=int):
+        sname = seasons.get(sid, {}).get("name", f"Season {sid}")
+        lines.append(f"**{sname}**")
+        for tnum in sorted(topics[sid], key=int):
+            t = topics[sid][tnum]
+            st = t.get("status", "planned")
+            emoji = {"live": "✅", "scheduled": "📅", "planned": "🔜"}.get(st, "❓")
+            dn = t.get("display_name", t.get("title", "?"))
+            lines.append(f"  {emoji} `#{tnum.zfill(2)}` {dn}")
+        lines.append("")
+    lines.append("Gunakan `#XX` di `/generate` dan `/post`.")
+    await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
+
+
 async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Trigger GH Actions workflow to generate SD carousel."""
     if not GITHUB_PAT:
@@ -279,7 +305,7 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     args = context.args
     if not args:
-        await update.message.reply_text("Contoh: /generate Macam-macam Filter 8")
+        await update.message.reply_text("Contoh: `/generate #07` atau `/generate #07 7`\nCek `/topics` buat liat daftar #XX.")
         return
     num_facts = "8"
     topic_parts = []
@@ -708,6 +734,7 @@ def main():
     app.add_handler(CommandHandler("reset", reset))
     app.add_handler(CommandHandler("run", run_cmd))
     app.add_handler(CommandHandler("generate", generate_cmd))
+    app.add_handler(CommandHandler("topics", topics_cmd))
     app.add_handler(CommandHandler("status", status_cmd))
     app.add_handler(CommandHandler("post", post_cmd))
     app.add_handler(CommandHandler("confirm", confirm_cmd))

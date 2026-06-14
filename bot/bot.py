@@ -156,7 +156,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/reset — hapus riwayat obrolan\n"
         "/run <cmd> — jalanin perintah (terbatas)\n"
         "/generate <topik> [jml_fakta] — generate carousel SD via GH Actions\n"
-        "/post <slug> <caption> — upload & jadwalin carousel"
+        "/post [#XX] [hari jam] — upload & jadwalin carousel terbaru (otomatis)"
     )
 
 
@@ -293,23 +293,141 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ Error: {e}")
 
 
-async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Upload slides + schedule carousel."""
-    args = context.args
-    if len(args) < 2:
-        await update.message.reply_text(
-            "Contoh: /post <slug> <caption...>\n"
-            "  /post macam_macam_filter Yuk belajar macam-macam filter!"
-        )
-        return
-    slug = args[0]
-    caption = " ".join(args[1:])
-    await update.message.reply_text(f"📤 Upload \"{slug}\" ke Catbox & jadwalin...")
+def _latest_slides() -> tuple[str | None, list[Path]]:
+    """Detect latest carousel slides in PHOTO_DIR, return (slug, files)."""
+    slides = sorted((PROJECT_DIR / "resource/photos").glob("*_slide_??.png"))
+    slides += sorted((PROJECT_DIR / "resource/photos").glob("edu_*_??.jpg"))
+    slides += sorted((PROJECT_DIR / "resource/photos").glob("*_sd_*.png"))
+    slides += sorted((PROJECT_DIR / "resource/photos").glob("*_sd_*.jpg"))
+    if not slides:
+        return None, []
+    # Group by prefix
+    groups = {}
+    for s in slides:
+        stem = s.stem
+        if "_slide_" in stem:
+            prefix = stem.rsplit("_slide_", 1)[0]
+        elif "_sd_" in stem:
+            prefix = stem.rsplit("_sd_", 1)[0]
+        else:
+            prefix = stem.rsplit("_", 1)[0]
+        groups.setdefault(prefix, []).append(s)
+    # Pick latest by mtime
+    latest_prefix = max(groups, key=lambda k: max(groups[k], key=lambda f: f.stat().st_mtime).stat().st_mtime)
+    return latest_prefix, sorted(groups[latest_prefix])
+
+
+def _slug_to_topic(slug: str) -> str:
+    """Convert slug to readable topic name for caption generation."""
+    return slug.replace("_", " ").title()
+
+
+async def _generate_caption(facts_json: dict | None, topic: str, curriculum_tag: str = "") -> str:
+    """Generate a caption using Gemini from facts data."""
+    if not GEMINI_API_KEYS[0]:
+        # Fallback: build simple caption from facts
+        lines = [f"{topic} — Yuk belajar! 🐟"]
+        if facts_json and "facts" in facts_json:
+            for f in facts_json["facts"]:
+                lines.append(f"\n{f.get('number','?')}. {f.get('title','')}")
+            lines.append("\nFollow @aquarisamatiran untuk belajar aquarium dari nol! 🌱")
+        return "\n".join(lines)
+
+    prompt_parts = [f"Buat caption Instagram dalam bahasa Indonesia untuk konten aquarium dengan topik: {topic}."]
+    if curriculum_tag:
+        prompt_parts.append(f"Ini adalah bagian dari kurikulum {curriculum_tag}.")
+    if facts_json and "facts" in facts_json:
+        prompt_parts.append("\nFakta-fakta dalam konten ini:")
+        for f in facts_json["facts"]:
+            prompt_parts.append(f"- {f.get('number','')}. {f.get('title','')}: {f.get('description','')[:100]}")
+    prompt_parts.append("\nGaya: santai, edukatif, engaging. Include ajakan diskusi. Maks 2000 karakter. Sertakan hashtag #Aquarisamatiran dan hashtag relevan lainnya di akhir.")
+    body = {"contents": [{"role": "user", "parts": [{"text": _today_context() + "\n\n" + system_prompt + "\n\n" + "\n".join(prompt_parts)}]}]}
+
+    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEYS[0]}"
     try:
-        result = subprocess.run(
-            [sys.executable, "main.py", "post-carousel", "--slug", slug, "--schedule", "cron", "Thu 19:00", caption],
-            capture_output=True, text=True, timeout=300, cwd=str(PROJECT_DIR),
-        )
+        async with httpx.AsyncClient(timeout=60) as client:
+            resp = await client.post(url, json=body)
+        if resp.status_code == 200:
+            return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+    except Exception:
+        pass
+    return f"{topic} — Yuk belajar bareng @aquarisamatiran! 🌱 #Aquarisamatiran #AquascapeIndonesia"
+
+
+def _nearest_slot() -> str:
+    """Return the nearest available schedule slot time string."""
+    now = datetime.datetime.now()
+    wday = now.weekday()  # Mon=0, Sun=6
+    hour = now.hour
+    weekday_slots = [(0, "19:00"), (1, "19:00"), (2, "19:00"), (3, "19:00")]
+    fri_slot = (4, "15:00")
+    weekend_slots = [(5, "09:00"), (6, "09:00")]
+    weekday_12 = (0, "12:00"), (1, "12:00"), (2, "12:00"), (3, "12:00"), (4, "12:00")
+    all_slots = weekday_slots + [fri_slot] + weekend_slots + list(weekday_12)
+    for dw, tm in all_slots:
+        days_ahead = dw - wday
+        if days_ahead < 0 or (days_ahead == 0 and int(tm.split(":")[0]) <= hour):
+            days_ahead += 7
+        target = now + datetime.timedelta(days=days_ahead)
+        return target.strftime("%Y-%m-%d") + " " + tm
+    return (now + datetime.timedelta(days=1)).strftime("%Y-%m-%d") + " 19:00"
+
+
+async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Upload slides + schedule carousel. Smart auto-detect + auto-caption."""
+    args = context.args
+    curriculum_tag = ""
+    schedule_time = ""
+    # Parse args: /post [#07] [Kamis 19:00]
+    non_flag = []
+    for a in args:
+        if a.startswith("#"):
+            curriculum_tag = a
+        elif re.match(r"^(Mon|Tue|Wed|Thu|Fri|Sat|Sun|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu)", a, re.IGNORECASE) and len(args) > args.index(a) + 1:
+            idx = list(args).index(a)
+            schedule_time = f"{a} {args[idx+1]}"
+            non_flag.append(a)
+            non_flag.append(args[idx+1])
+        else:
+            non_flag.append(a)
+
+    # Auto-detect latest slides
+    slug, slides = _latest_slides()
+    if not slug:
+        await update.message.reply_text("❌ Ngga nemu slide carousel di resource/photos/")
+        return
+
+    # Determine schedule time
+    if not schedule_time:
+        # Map day to nearest slot
+        nearest = _nearest_slot()
+        days = {"Mon": "Senin", "Tue": "Selasa", "Wed": "Rabu", "Thu": "Kamis", "Fri": "Jumat", "Sat": "Sabtu", "Sun": "Minggu"}
+        dt = datetime.datetime.strptime(nearest, "%Y-%m-%d %H:%M")
+        day_name = days.get(dt.strftime("%a"), dt.strftime("%a"))
+        time_str = dt.strftime("%H:%M")
+        schedule_time = f"{day_name} {time_str}"
+
+    await update.message.reply_text(f"🔍 Detected: \"{slug}\" ({len(slides)} slide)\n📅 Jadwal: {schedule_time}")
+
+    # Generate caption
+    facts_json = None
+    facts_path = PROJECT_DIR / "resource/photos" / f"edu_{slug}_facts.json"
+    if facts_path.exists():
+        try:
+            facts_json = json.loads(facts_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    topic_display = _slug_to_topic(slug)
+    await update.message.reply_text(f"💬 Generate caption buat \"{topic_display}\"...")
+    caption = await _generate_caption(facts_json, topic_display, curriculum_tag)
+    await update.message.reply_text(f"📝 Caption:\n{caption[:500]}...")
+
+    # Upload + schedule via subprocess
+    await update.message.reply_text(f"📤 Upload & jadwalin \"{slug}\"...")
+    try:
+        proc_args = [sys.executable, "main.py", "post-carousel", "--slug", slug, "--schedule", "cron", schedule_time, caption]
+        result = subprocess.run(proc_args, capture_output=True, text=True, timeout=300, cwd=str(PROJECT_DIR))
         out = (result.stdout or "") + (result.stderr or "")
         out = out.strip()[-3000:]
         status = "✅" if result.returncode == 0 else "❌"

@@ -480,7 +480,10 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"📋 **{topic_display}** ({len(slides)} slide)\n"
         f"📅 Jadwal: {schedule_time}\n\n"
         f"📝 **Caption:**\n{caption[:1000]}\n\n"
-        f"Balas `/confirm` buat upload & jadwalin, atau `/cancel`"
+        f"`/confirm` → upload & jadwalin\n"
+        f"`/editcaption <instruksi>` → ganti caption\n"
+        f"`/regenerate` → generate ulang slide\n"
+        f"`/cancel` → batalin"
     )
     await update.message.reply_text(msg, parse_mode="Markdown")
 
@@ -490,7 +493,54 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "slug": slug,
         "caption": caption,
         "schedule_time": schedule_time,
+        "topic_display": topic_display,
+        "facts_json": facts_json,
+        "curriculum_tag": curriculum_tag,
     }
+
+
+async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    pending = _pending_posts.get(user_id)
+    if not pending:
+        await update.message.reply_text("Ngga ada pending post. Coba `/post` dulu~")
+        return
+    instruction = " ".join(context.args) if context.args else ""
+    if not instruction:
+        await update.message.reply_text("Gunakan: `/editcaption <instruksi>`\nContoh: `/editcaption bikin lebih santai dan pake lebih banyak emoji`")
+        return
+    await update.message.reply_text(f"💬 Edit caption dengan instruksi: \"{instruction}\"...")
+    prompt = f"Instruksi: {instruction}\n\nCaption sebelumnya:\n{pending['caption'][:1500]}"
+    messages = [{"role": "user", "parts": [{"text": prompt}]}]
+    try:
+        new_caption = await _call_gemini(messages)
+        pending["caption"] = new_caption
+        await update.message.reply_text(f"✅ Caption baru:\n{new_caption[:1000]}\n\nKetik `/confirm` buat lanjut, atau `/editcaption` lagi~")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Gagal edit caption: {e}")
+
+
+async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    pending = _pending_posts.get(user_id)
+    if not pending:
+        await update.message.reply_text("Ngga ada pending post. Coba `/post` dulu~")
+        return
+    slug = pending["slug"]
+    topic_display = pending["topic_display"]
+    await update.message.reply_text(f"🔄 Generate ulang carousel \"{topic_display}\"...")
+    _pending_posts.pop(user_id, None)
+    try:
+        import httpx
+        body = '{"ref":"main","inputs":{"topic":"' + slug.replace("_", " ") + '","num_facts":"8"}}'
+        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {os.environ.get('GITHUB_PAT', '')}", "Content-Type": "application/json"}
+        resp = await HTTPX_CLIENT.post("https://api.github.com/repos/imtopp/aquarisamatiranIG/actions/workflows/generate.yml/dispatches", content=body, headers=headers)
+        if resp.status_code == 204:
+            await update.message.reply_text(f"✅ Generate ulang untuk \"{topic_display}\" udah di-trigger! Cek `/status` ~30 menit~")
+        else:
+            await update.message.reply_text(f"❌ Gagal trigger: {resp.status_code}")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Error: {e}")
 
 
 async def confirm_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -629,6 +679,8 @@ def main():
     app.add_handler(CommandHandler("post", post_cmd))
     app.add_handler(CommandHandler("confirm", confirm_cmd))
     app.add_handler(CommandHandler("cancel", cancel_cmd))
+    app.add_handler(CommandHandler("editcaption", editcaption_cmd))
+    app.add_handler(CommandHandler("regenerate", regenerate_cmd))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
     print("Bot jalan di VPS... chat aku dari Telegram~")

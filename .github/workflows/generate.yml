@@ -1,5 +1,8 @@
 name: Generate Carousel (SD)
 
+permissions:
+  contents: write
+
 concurrency:
   group: generate
   cancel-in-progress: true

@@ -685,6 +685,15 @@ async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Udah aku lupain obrolan kita~ Mau mulai lagi? 🫣")
 
 
+async def _delete_webhook(app: Application) -> None:
+    """Force delete webhook to clear 409 conflict on restart."""
+    try:
+        await app.bot.delete_webhook(drop_pending_updates=True)
+        print("✅ Webhook deleted, polling clean.")
+    except Exception as e:
+        print(f"⚠️  Gagal delete webhook: {e}")
+
+
 def main():
     if not TELEGRAM_TOKEN:
         print("TELEGRAM_TOKEN gak ada di .env")
@@ -692,7 +701,7 @@ def main():
 
     init_db()
     request = HTTPXRequest(connect_timeout=30, read_timeout=30, write_timeout=30)
-    app = Application.builder().token(TELEGRAM_TOKEN).request(request).build()
+    app = Application.builder().token(TELEGRAM_TOKEN).request(request).post_init(_delete_webhook).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_cmd))

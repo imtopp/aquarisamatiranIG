@@ -22,8 +22,6 @@ jobs:
             git clean -fd &&
             git pull origin main &&
             .venv/bin/pip install -r requirements.txt 2>/dev/null;
-            pkill -f bot/bot.py 2>/dev/null || true;
-            sleep 1;
-            nohup .venv/bin/python bot/bot.py >/dev/null 2>&1 &
+            sudo systemctl restart aquarisamatiran-bot
             echo '✅ Deploy selesai'
           "

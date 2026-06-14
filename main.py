@@ -963,13 +963,26 @@ def cmd_generate_carousel_sd(_client, args):
         cc_path = Path("curriculum_content.json")
         if cc_path.exists():
             cc = json.loads(cc_path.read_text(encoding="utf-8"))
-            topic_num = topic.lstrip("#").zfill(2)
-            for s_num, topics in cc.get("topics", {}).items():
-                if topic_num in topics:
-                    t = topics[topic_num]
+            # Parse "S1#07" or "#07"
+            m = re.match(r"S(\d+)#(\d+)", topic)
+            if m:
+                s_num, topic_num = m.group(1), m.group(2).zfill(2)
+            else:
+                topic_num = topic.lstrip("#").zfill(2)
+                s_num = None
+            if s_num:
+                ts = cc.get("topics", {}).get(s_num, {})
+                t = ts.get(topic_num)
+                if t:
                     season_tag = f"S{s_num}#{topic_num} "
                     display = t.get("display_name", display)
-                    break
+            else:
+                for s_num, ts in cc.get("topics", {}).items():
+                    if topic_num in ts:
+                        t = ts[topic_num]
+                        season_tag = f"S{s_num}#{topic_num} "
+                        display = t.get("display_name", display)
+                        break
     except Exception:
         pass
 

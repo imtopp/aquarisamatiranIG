@@ -158,19 +158,19 @@ HELP_TEXT = (
     "/topics — daftar topik kurikulum (`#XX`)\n"
     "/reset — hapus riwayat obrolan\n"
     "/run `<cmd>` — jalanin perintah (terbatas)\n"
-    "/generate `#XX` `[jml_fakta]` — trigger generate carousel SD\n"
+    "/generate `S1#07` `[jml_fakta]` — trigger generate carousel SD\n"
     "/status — cek progress generate terakhir\n"
-    "/post `[#XX]` `[hari jam]` — preview & jadwalin carousel\n"
+    "/post `[S1#07]` `[hari jam]` — preview & jadwalin carousel\n"
     "/confirm — lanjutin posting setelah preview\n"
     "/editcaption `<instruksi>` — ganti caption\n"
     "/regenerate — generate ulang slide\n"
     "/cancel — batalin posting\n"
     "/myid — liat chat ID kamu\n\n"
     "**🚀 Cara pake:**\n"
-    "1. `/topics` — liat daftar #XX yang tersedia\n"
-    "2. `/generate #07` — bikin carousel (10-30 menit di GH Actions)\n"
+    "1. `/topics` — liat daftar `S1#07` yang tersedia\n"
+    "2. `/generate S1#07` — bikin carousel (10-30 menit di GH Actions)\n"
     "3. `/status` — cek udah selesai belum\n"
-    "4. `/post #07` — preview slide + caption\n"
+    "4. `/post S1#07` — preview slide + caption\n"
     "5. `/confirm` — upload & jadwal otomatis"
 )
 
@@ -275,7 +275,7 @@ def _format_curriculum_context(num: str, topic: dict) -> str:
 
 
 async def topics_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Show all curriculum topics with their #XX codes."""
+    """Show all curriculum topics with their S#XX codes."""
     try:
         cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
     except Exception:
@@ -283,7 +283,7 @@ async def topics_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     topics = cc.get("topics", {})
     seasons = cc.get("seasons", {})
-    lines = ["**📚 Kurikulum Aquarisamatiran:**\n"]
+    lines = ["**📚 Kurikulum Aquarisamatiran — Pakai `S1#07`:**\n"]
     for sid in sorted(topics, key=int):
         sname = seasons.get(sid, {}).get("name", f"Season {sid}")
         lines.append(f"**{sname}**")
@@ -292,9 +292,9 @@ async def topics_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             st = t.get("status", "planned")
             emoji = {"live": "✅", "scheduled": "📅", "planned": "🔜"}.get(st, "❓")
             dn = t.get("display_name", t.get("title", "?"))
-            lines.append(f"  {emoji} `#{tnum.zfill(2)}` {dn}")
+            lines.append(f"  {emoji} `S{sid}#{tnum.zfill(2)}` {dn}")
         lines.append("")
-    lines.append("Gunakan `#XX` di `/generate` dan `/post`.")
+    lines.append("Contoh: `/generate S1#07`, `/post S2#01`")
     await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
 
 
@@ -459,10 +459,10 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     curriculum_tag = ""
     schedule_time = ""
-    # Parse args: /post [#07] [Kamis 19:00]
+    # Parse args: /post [S1#07] [Kamis 19:00]
     non_flag = []
     for a in args:
-        if a.startswith("#"):
+        if a.startswith("#") or re.match(r"S\d+#\d+", a):
             curriculum_tag = a
         elif re.match(r"^(Mon|Tue|Wed|Thu|Fri|Sat|Sun|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu)", a, re.IGNORECASE) and len(args) > args.index(a) + 1:
             idx = list(args).index(a)

@@ -570,13 +570,14 @@ async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not pending:
         await update.message.reply_text("Ngga ada pending post. Coba `/post` dulu~")
         return
-    slug = pending["slug"]
     topic_display = pending["topic_display"]
-    await update.message.reply_text(f"🔄 Generate ulang carousel \"{topic_display}\"...")
+    curriculum_tag = pending.get("curriculum_tag", "")
+    topic_input = curriculum_tag if curriculum_tag else pending["slug"].replace("_", " ")
+    await update.message.reply_text(f"🔄 Generate ulang carousel \"{topic_display}\" (topic: {topic_input})...")
     _pending_posts.pop(user_id, None)
     try:
         import httpx
-        body = '{"ref":"main","inputs":{"topic":"' + slug.replace("_", " ") + '","num_facts":"8"}}'
+        body = '{"ref":"main","inputs":{"topic":"' + topic_input + '","num_facts":"8"}}'
         headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {os.environ.get('GITHUB_PAT', '')}", "Content-Type": "application/json"}
         resp = await HTTPX_CLIENT.post("https://api.github.com/repos/imtopp/aquarisamatiranIG/actions/workflows/generate.yml/dispatches", content=body, headers=headers)
         if resp.status_code == 204:

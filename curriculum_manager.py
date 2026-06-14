@@ -508,13 +508,26 @@ def _sync_bio_html(data):
         season_blocks.append("\n".join(season_html))
 
     old_html = BIO_HTML.read_text(encoding="utf-8")
+    cta_start = old_html.find('<div class="cta">')
+    if cta_start < 0:
+        print("  ⚠️  CTA section not found in bio/index.html — manual update needed")
+        return
+
     header_end = old_html.find('</div>\n\n  <div class="season"')
     if header_end == -1:
+        header_end = old_html.find('</div>\n\n\n\n  <div class="season"')
+    # Also try finding any </div> followed by a season opening
+    if header_end == -1:
+        import re
+        m = re.search(r'</div>\n{2,10}  <div class="season"', old_html)
+        if m:
+            header_end = m.start()
+    if header_end == -1:
         header_end = old_html.find('</div>\n\n  <div class="section"')
-    cta_start = old_html.find('<div class="cta">')
 
     if header_end >= 0 and cta_start > header_end:
-        new_html = old_html[:old_html.find("</div>\n\n", header_end) + 7] + "\n\n" + "\n\n".join(season_blocks) + "\n\n" + old_html[cta_start:]
+        cut = header_end + 8
+        new_html = old_html[:cut] + "\n\n".join(season_blocks) + "\n\n" + old_html[cta_start:]
         BIO_HTML.write_text(new_html, encoding="utf-8")
         print("  ✅ bio/index.html regenerated")
     else:

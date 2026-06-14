@@ -624,7 +624,8 @@
           "epiphyte",
           "carpet plant",
           "rhizome"
-        ]
+        ],
+        "display_name": "Tanaman Aquascape Pemula"
       },
       "09": {
         "slug": "ganti-air",
@@ -636,7 +637,8 @@
           "selang siphon",
           "suhu air",
           "frekuensi"
-        ]
+        ],
+        "display_name": "Rutinitas Perawatan Aquarium"
       },
       "10": {
         "slug": "penyakit-ikan",
@@ -649,7 +651,8 @@
           "fin rot",
           "quarantine",
           "salt bath"
-        ]
+        ],
+        "display_name": "Penyakit & Pengobatan Ikan"
       },
       "11": {
         "slug": "parameter-air",
@@ -663,7 +666,8 @@
           "TDS",
           "test kit",
           "buffer"
-        ]
+        ],
+        "display_name": "pH, GH, KH, TDS"
       },
       "12": {
         "slug": "substrate",
@@ -676,7 +680,8 @@
           "gravel",
           "laterit",
           "caping"
-        ]
+        ],
+        "display_name": "Soil, Pasir, Gravel"
       },
       "13": {
         "slug": "co2-dan-pupuk",
@@ -689,7 +694,8 @@
           "NPK",
           "trace element",
           "dosing"
-        ]
+        ],
+        "display_name": "CO2 Difusi & Dosis Pupuk"
       },
       "14": {
         "slug": "hardscape",
@@ -702,7 +708,8 @@
           "focal point",
           "slope",
           "rule of thirds"
-        ]
+        ],
+        "display_name": "Golden Ratio & Focal Point"
       },
       "15": {
         "slug": "gaya-aquascape",
@@ -715,7 +722,8 @@
           "Dutch",
           "biotope",
           "jungle"
-        ]
+        ],
+        "display_name": "Iwagumi, Nature, Dutch"
       },
       "16": {
         "slug": "udang-dan-keong",
@@ -728,7 +736,8 @@
           "nerite",
           "amano",
           "bioload"
-        ]
+        ],
+        "display_name": "Neocaridina & Nerite"
       },
       "17": {
         "slug": "aklimatisasi-karantina",
@@ -740,7 +749,8 @@
           "quarantine tank",
           "salt bath",
           "TDS matching"
-        ]
+        ],
+        "display_name": "Drip Acclimation & Karantina"
       },
       "18": {
         "slug": "pakan-nutrisi",
@@ -753,7 +763,8 @@
           "frozen",
           "live food",
           "feeding schedule"
-        ]
+        ],
+        "display_name": "Flake, Pellet, Frozen"
       },
       "19": {
         "slug": "dry-start-method",
@@ -765,7 +776,8 @@
           "carpet plant",
           "humidity",
           "condensation"
-        ]
+        ],
+        "display_name": "DSM untuk Carpet Plant"
       },
       "20": {
         "slug": "tank-mates",
@@ -779,7 +791,8 @@
           "tetra",
           "rasbora",
           "bottom dweller"
-        ]
+        ],
+        "display_name": "Komunitas & Agresif"
       },
       "21": {
         "slug": "diy-aksesoris",
@@ -791,7 +804,8 @@
           "CO2 reactor",
           "custom light",
           "flow optimizer"
-        ]
+        ],
+        "display_name": "DIY Filter & CO2"
       },
       "22": {
         "slug": "rescape-evolusi",
@@ -803,7 +817,8 @@
           "hardscape revamp",
           "replant",
           "tank progression"
-        ]
+        ],
+        "display_name": "Tank Progression Journey"
       }
     }
   }

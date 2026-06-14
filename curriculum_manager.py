@@ -365,7 +365,7 @@ def _sync_schedule_json(data):
 
     # Iterate all topics across all seasons
     for sid, num, v in _all_topics(data):
-        target_label = f"#{num}"
+        target_label = f"S{sid}#{num}"
         rid = v.get("result_id", "")
         pl = v.get("permalink", "").strip().rstrip("/")
 
@@ -381,7 +381,7 @@ def _sync_schedule_json(data):
             entry = schedule[idx]
             old_label = entry.get("curriculum", "")
         else:
-            existing = [e for e in schedule if e.get("curriculum", "").lstrip("#") == num]
+            existing = [e for e in schedule if re.sub(r'[S#]', '', e.get("curriculum", "")) == num or e.get("curriculum", "").lstrip("#") == num]
             if existing:
                 entry = existing[0]
                 old_label = entry.get("curriculum", "")

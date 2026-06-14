@@ -81,11 +81,12 @@ def _today_context() -> str:
     return f"Hari ini: {datetime.datetime.now().strftime('%A, %d %B %Y %H:%M WIB')}"
 
 
-async def _call_gemini(messages: list[dict]) -> str:
+async def _call_gemini(messages: list[dict], system: str | None = None) -> str:
     """Call Gemini REST API with fallback keys + fallback models, retry on timeout."""
+    sp = system if system is not None else system_prompt
     if messages and messages[-1].get("role") == "user":
         today = _today_context()
-        messages[-1]["parts"][0]["text"] = f"{today}\n\n{system_prompt}\n\n{messages[-1]['parts'][0]['text']}"
+        messages[-1]["parts"][0]["text"] = f"{today}\n\n{sp}\n\n{messages[-1]['parts'][0]['text']}"
     body = {"contents": messages}
     keys = [k for k in GEMINI_API_KEYS if k]
     last_err = ""
@@ -340,15 +341,29 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ Error: {e}")
 
 
-def _latest_slides() -> tuple[str | None, list[Path]]:
-    """Detect latest carousel slides in PHOTO_DIR, return (slug, files)."""
-    slides = sorted((PROJECT_DIR / "resource/photos").glob("*_slide_??.png"))
-    slides += sorted((PROJECT_DIR / "resource/photos").glob("edu_*_??.jpg"))
-    slides += sorted((PROJECT_DIR / "resource/photos").glob("*_sd_*.png"))
-    slides += sorted((PROJECT_DIR / "resource/photos").glob("*_sd_*.jpg"))
+def _latest_slides(curriculum_tag: str = "") -> tuple[str | None, list[Path]]:
+    """Detect carousel slides in PHOTO_DIR. If curriculum_tag given (e.g. S1#07), filter by topic slug."""
+    slides_dir = PROJECT_DIR / "resource/photos"
+    if curriculum_tag:
+        m = re.match(r'S(\d+)#(\d+)', curriculum_tag)
+        if m:
+            cur_data = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+            topic = cur_data.get("topics", {}).get(m.group(1), {}).get(m.group(2), {})
+            slug = (topic.get("slug", "") or "").replace("-", "_")
+            if slug:
+                candidate = sorted(slides_dir.glob(f"{slug}_sd_*.png"))
+                candidate += sorted(slides_dir.glob(f"{slug}_sd_*.jpg"))
+                candidate += sorted(slides_dir.glob(f"{slug}_slide_*.png"))
+                candidate += sorted(slides_dir.glob(f"{slug}_slide_*.jpg"))
+                if candidate:
+                    return slug, candidate
+
+    slides = sorted(slides_dir.glob("*_slide_??.png"))
+    slides += sorted(slides_dir.glob("edu_*_??.jpg"))
+    slides += sorted(slides_dir.glob("*_sd_*.png"))
+    slides += sorted(slides_dir.glob("*_sd_*.jpg"))
     if not slides:
         return None, []
-    # Group by prefix
     groups = {}
     for s in slides:
         stem = s.stem
@@ -359,7 +374,6 @@ def _latest_slides() -> tuple[str | None, list[Path]]:
         else:
             prefix = stem.rsplit("_", 1)[0]
         groups.setdefault(prefix, []).append(s)
-    # Pick latest by mtime
     latest_prefix = max(groups, key=lambda k: max(groups[k], key=lambda f: f.stat().st_mtime).stat().st_mtime)
     return latest_prefix, sorted(groups[latest_prefix])
 
@@ -388,7 +402,13 @@ async def _generate_caption(facts_json: dict | None, topic: str, curriculum_tag:
         for f in facts_json["facts"]:
             prompt_parts.append(f"- {f.get('number','')}. {f.get('title','')}: {f.get('description','')[:100]}")
     prompt_parts.append("\nGaya: santai, edukatif, engaging. Include ajakan diskusi. Maks 2000 karakter. Sertakan hashtag #Aquarisamatiran dan hashtag relevan lainnya di akhir.")
-    body = {"contents": [{"role": "user", "parts": [{"text": _today_context() + "\n\n" + system_prompt + "\n\n" + "\n".join(prompt_parts)}]}]}
+    caption_prompt = (
+        "Kamu adalah asisten pembuat konten Instagram untuk akun aquascape @aquarisamatiran. "
+        "Gaya bicara: santai, edukatif, engaging, akrab — pake bahasa Indonesia sehari-hari. "
+        "Beri informasi bermanfaat, ajak diskusi, jangan terlalu formal, jangan pake gaya genit/flirty. "
+        "Tujuan: ngajarin follower aquarium dari nol dengan cara yang asyik."
+    )
+    body = {"contents": [{"role": "user", "parts": [{"text": _today_context() + "\n\n" + caption_prompt + "\n\n" + "\n".join(prompt_parts)}]}]}
 
     url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEYS[0]}"
     try:
@@ -472,8 +492,8 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             non_flag.append(a)
 
-    # Auto-detect latest slides
-    slug, slides = _latest_slides()
+    # Auto-detect latest slides (filter by curriculum_tag if given)
+    slug, slides = _latest_slides(curriculum_tag)
     if not slug:
         await update.message.reply_text("❌ Ngga nemu slide carousel di resource/photos/")
         return
@@ -554,10 +574,15 @@ async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Gunakan: `/editcaption <instruksi>`\nContoh: `/editcaption bikin lebih santai dan pake lebih banyak emoji`")
         return
     await update.message.reply_text(f"💬 Edit caption dengan instruksi: \"{instruction}\"...")
+    caption_system = (
+        "Kamu adalah asisten pembuat konten Instagram untuk akun aquascape @aquarisamatiran. "
+        "Gaya bicara: santai, edukatif, engaging, akrab. Pake bahasa Indonesia sehari-hari, "
+        "jangan genit/flirty. Tujuan: ngajarin follower aquarium dari nol dengan cara yang asyik."
+    )
     prompt = f"Instruksi: {instruction}\n\nCaption sebelumnya:\n{pending['caption'][:1500]}"
     messages = [{"role": "user", "parts": [{"text": prompt}]}]
     try:
-        new_caption = await _call_gemini(messages)
+        new_caption = await _call_gemini(messages, system=caption_system)
         pending["caption"] = new_caption
         await update.message.reply_text(f"✅ Caption baru:\n{new_caption[:1000]}\n\nKetik `/confirm` buat lanjut, atau `/editcaption` lagi~")
     except Exception as e:

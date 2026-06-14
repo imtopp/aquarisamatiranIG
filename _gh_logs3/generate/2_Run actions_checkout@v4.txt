@@ -1,0 +1,72 @@
+﻿2026-06-14T04:28:20.9580861Z ##[group]Run actions/checkout@v4
+2026-06-14T04:28:20.9581807Z with:
+2026-06-14T04:28:20.9582304Z   repository: imtopp/aquarisamatiranIG
+2026-06-14T04:28:20.9587935Z   token: ***
+2026-06-14T04:28:20.9588414Z   ssh-strict: true
+2026-06-14T04:28:20.9588892Z   ssh-user: git
+2026-06-14T04:28:20.9589383Z   persist-credentials: true
+2026-06-14T04:28:20.9589942Z   clean: true
+2026-06-14T04:28:20.9590421Z   sparse-checkout-cone-mode: true
+2026-06-14T04:28:20.9591003Z   fetch-depth: 1
+2026-06-14T04:28:20.9591475Z   fetch-tags: false
+2026-06-14T04:28:20.9591952Z   show-progress: true
+2026-06-14T04:28:20.9592441Z   lfs: false
+2026-06-14T04:28:20.9592894Z   submodules: false
+2026-06-14T04:28:20.9593401Z   set-safe-directory: true
+2026-06-14T04:28:20.9594170Z ##[endgroup]
+2026-06-14T04:28:21.0751169Z Syncing repository: imtopp/aquarisamatiranIG
+2026-06-14T04:28:21.0754708Z ##[group]Getting Git version info
+2026-06-14T04:28:21.0756754Z Working directory is '/home/runner/work/aquarisamatiranIG/aquarisamatiranIG'
+2026-06-14T04:28:21.0767986Z [command]/usr/bin/git version
+2026-06-14T04:28:21.0857604Z git version 2.54.0
+2026-06-14T04:28:21.0884350Z ##[endgroup]
+2026-06-14T04:28:21.0907946Z Temporarily overriding HOME='/home/runner/work/_temp/03acfd63-2c4d-4c6a-bc2b-40c72d33450c' before making global git config changes
+2026-06-14T04:28:21.0922126Z Adding repository directory to the temporary git global config as a safe directory
+2026-06-14T04:28:21.0928359Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/aquarisamatiranIG/aquarisamatiranIG
+2026-06-14T04:28:21.0972823Z Deleting the contents of '/home/runner/work/aquarisamatiranIG/aquarisamatiranIG'
+2026-06-14T04:28:21.0977558Z ##[group]Initializing the repository
+2026-06-14T04:28:21.0983400Z [command]/usr/bin/git init /home/runner/work/aquarisamatiranIG/aquarisamatiranIG
+2026-06-14T04:28:21.1054926Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-06-14T04:28:21.1056944Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-06-14T04:28:21.1059055Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-06-14T04:28:21.1064562Z hint: call:
+2026-06-14T04:28:21.1065566Z hint:
+2026-06-14T04:28:21.1067420Z hint: 	git config --global init.defaultBranch <name>
+2026-06-14T04:28:21.1068848Z hint:
+2026-06-14T04:28:21.1070148Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-06-14T04:28:21.1072215Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-06-14T04:28:21.1073781Z hint:
+2026-06-14T04:28:21.1074699Z hint: 	git branch -m <name>
+2026-06-14T04:28:21.1075764Z hint:
+2026-06-14T04:28:21.1077471Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-06-14T04:28:21.1080051Z Initialized empty Git repository in /home/runner/work/aquarisamatiranIG/aquarisamatiranIG/.git/
+2026-06-14T04:28:21.1083832Z [command]/usr/bin/git remote add origin https://github.com/imtopp/aquarisamatiranIG
+2026-06-14T04:28:21.1119757Z ##[endgroup]
+2026-06-14T04:28:21.1121433Z ##[group]Disabling automatic garbage collection
+2026-06-14T04:28:21.1124232Z [command]/usr/bin/git config --local gc.auto 0
+2026-06-14T04:28:21.1157094Z ##[endgroup]
+2026-06-14T04:28:21.1158715Z ##[group]Setting up auth
+2026-06-14T04:28:21.1164693Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-06-14T04:28:21.1201072Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-06-14T04:28:21.1531005Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-06-14T04:28:21.1565568Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-06-14T04:28:21.1811396Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-06-14T04:28:21.1845829Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-06-14T04:28:21.2110756Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-06-14T04:28:21.2148874Z ##[endgroup]
+2026-06-14T04:28:21.2151031Z ##[group]Fetching the repository
+2026-06-14T04:28:21.2159461Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +1f1418f8a4aba2851b1a13b1779e61ff1ee63352:refs/remotes/origin/main
+2026-06-14T04:28:22.9793600Z From https://github.com/imtopp/aquarisamatiranIG
+2026-06-14T04:28:22.9795425Z  * [new ref]         1f1418f8a4aba2851b1a13b1779e61ff1ee63352 -> origin/main
+2026-06-14T04:28:22.9833199Z ##[endgroup]
+2026-06-14T04:28:22.9834346Z ##[group]Determining the checkout info
+2026-06-14T04:28:22.9835653Z ##[endgroup]
+2026-06-14T04:28:22.9840357Z [command]/usr/bin/git sparse-checkout disable
+2026-06-14T04:28:22.9887603Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-06-14T04:28:22.9918188Z ##[group]Checking out the ref
+2026-06-14T04:28:22.9922490Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-06-14T04:28:23.0508429Z Switched to a new branch 'main'
+2026-06-14T04:28:23.0516234Z branch 'main' set up to track 'origin/main'.
+2026-06-14T04:28:23.0519054Z ##[endgroup]
+2026-06-14T04:28:23.0551004Z [command]/usr/bin/git log -1 --format=%H
+2026-06-14T04:28:23.0577319Z 1f1418f8a4aba2851b1a13b1779e61ff1ee63352

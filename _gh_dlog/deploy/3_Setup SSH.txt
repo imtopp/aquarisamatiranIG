@@ -1,0 +1,14 @@
+﻿2026-06-14T04:30:19.6632017Z ##[group]Run webfactory/ssh-agent@v0.9.0
+2026-06-14T04:30:19.6632403Z with:
+2026-06-14T04:30:19.6634500Z   ssh-private-key: ***
+2026-06-14T04:30:19.6634795Z   log-public-key: true
+2026-06-14T04:30:19.6635062Z ##[endgroup]
+2026-06-14T04:30:19.7031463Z Starting ssh-agent
+2026-06-14T04:30:19.7249101Z SSH_AUTH_SOCK=/tmp/ssh-ojvOIWnta7KB/agent.2069
+2026-06-14T04:30:19.7250724Z SSH_AGENT_PID=2070
+2026-06-14T04:30:19.7251850Z Adding private key(s) to agent
+2026-06-14T04:30:19.7421118Z Identity added: (stdin) (***@aquarisamatiranVM)
+2026-06-14T04:30:19.7421886Z Key(s) added:
+2026-06-14T04:30:19.7461409Z 256 SHA256:KXh3o6YMEfHD0/5vkp8Xbgq1NMEbOXQVbupHGA+0/gU ***@aquarisamatiranVM (ED25519)
+2026-06-14T04:30:19.7470415Z Configuring deployment key(s)
+2026-06-14T04:30:19.7525627Z Comment for (public) key 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHSwG7QuAS/6EIH2GyL0oj6jRIbujCteRnrUVOty/yau ***@aquarisamatiranVM' does not match GitHub URL pattern. Not treating it as a GitHub deploy key.

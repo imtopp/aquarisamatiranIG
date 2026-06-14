@@ -14,6 +14,15 @@ def _hex_to_rgb(h):
     return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
 
 
+def _linux_fallback() -> str:
+    for p in ["/usr/share/fonts/truetype/nunito/Nunito-Regular.ttf",
+              "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+              "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"]:
+        if Path(p).exists():
+            return p
+    return ""
+
+
 def _get_font(name: str, size: int) -> ImageFont.FreeTypeFont:
     FONT_URL = "https://github.com/google/fonts/raw/main/ofl/nunito/"
 
@@ -23,6 +32,8 @@ def _get_font(name: str, size: int) -> ImageFont.FreeTypeFont:
     }
 
     url_name, fallback = font_map.get(name, (None, "C:/Windows/Fonts/segoeui.ttf"))
+    if not Path(fallback).exists():
+        fallback = _linux_fallback() or fallback
     if url_name is None:
         return ImageFont.truetype(fallback, size)
 

@@ -1,0 +1,123 @@
+﻿2026-06-14T04:33:35.9127286Z ##[group]Run ssh -o StrictHostKeyChecking=no ***@*** "
+2026-06-14T04:33:35.9128042Z [36;1mssh -o StrictHostKeyChecking=no ***@*** "[0m
+2026-06-14T04:33:35.9128578Z [36;1m  cd /home/***/projects/aquarisamatiran &&[0m
+2026-06-14T04:33:35.9129302Z [36;1m  git clean -fd &&[0m
+2026-06-14T04:33:35.9129705Z [36;1m  git pull origin main &&[0m
+2026-06-14T04:33:35.9130156Z [36;1m  .venv/bin/pip install -r requirements.txt 2>/dev/null; [0m
+2026-06-14T04:33:35.9130682Z [36;1m  # Kill all bot instances, then fresh start[0m
+2026-06-14T04:33:35.9131118Z [36;1m  pkill -f bot/bot.py 2>/dev/null || true;[0m
+2026-06-14T04:33:35.9131514Z [36;1m  sleep 2;[0m
+2026-06-14T04:33:35.9131873Z [36;1m  tmux kill-session -t bot 2>/dev/null || true;[0m
+2026-06-14T04:33:35.9132274Z [36;1m  sleep 1;[0m
+2026-06-14T04:33:35.9132864Z [36;1m  tmux new-session -d -s bot -c /home/***/projects/aquarisamatiran '.venv/bin/python bot/bot.py';[0m
+2026-06-14T04:33:35.9133570Z [36;1m  # Hapus crontab lama (kalo ada) — skrg pake cron-job.org aja[0m
+2026-06-14T04:33:35.9134217Z [36;1m  crontab -l 2>/dev/null | grep -v runner.py | crontab - 2>/dev/null || true;[0m
+2026-06-14T04:33:35.9134726Z [36;1m  echo '✅ Deploy selesai'[0m
+2026-06-14T04:33:35.9135089Z [36;1m"[0m
+2026-06-14T04:33:35.9348062Z shell: /usr/bin/bash -e {0}
+2026-06-14T04:33:35.9348566Z env:
+2026-06-14T04:33:35.9349322Z   SSH_AUTH_SOCK: /tmp/ssh-DsVDvwDowumh/agent.2086
+2026-06-14T04:33:35.9349956Z   SSH_AGENT_PID: 2087
+2026-06-14T04:33:35.9350387Z ##[endgroup]
+2026-06-14T04:33:36.8307781Z Warning: Permanently added '***' (ED25519) to the list of known hosts.
+2026-06-14T04:33:37.4565097Z 
+2026-06-14T04:33:37.4566253Z   ___ ___   ___ _             _  _  _         _   
+2026-06-14T04:33:37.4567852Z  |_ _|   \ / __| |___ _  _ __| || || |___ ___| |_ 
+2026-06-14T04:33:37.4569478Z   | || |) | (__| / _ \ || / _` || __ / _ (_-<  _|
+2026-06-14T04:33:37.4570686Z  |___|___/ \___|_\___/\_,_\__,_||_||_\___/__/\__|
+2026-06-14T04:33:37.4571702Z 
+2026-06-14T04:33:37.4572267Z         >>> AUTHORIZED ACCESS ONLY <<<
+2026-06-14T04:33:37.4573288Z 
+2026-06-14T04:33:37.4573916Z   Terminated connection if unauthorized.
+2026-06-14T04:33:37.4575194Z   Activity is logged and monitored.
+2026-06-14T04:33:37.4575918Z 
+2026-06-14T04:33:37.4576928Z   https://my.idcloudhost.com  |  https://idcloudhost.com/panduan
+2026-06-14T04:33:37.4577951Z 
+2026-06-14T04:33:38.4357473Z Removing bot/chat_history.db
+2026-06-14T04:33:38.4358714Z Removing resource/photos/edu_ikan_cupang_facts.json
+2026-06-14T04:33:39.5469908Z From https://github.com/im***/aquarisamatiranIG
+2026-06-14T04:33:39.5471809Z  * branch            main       -> FETCH_HEAD
+2026-06-14T04:33:39.5473231Z    14f90aa..d12f41b  main       -> origin/main
+2026-06-14T04:33:39.6234096Z Updating fa807c6..d12f41b
+2026-06-14T04:33:39.6235418Z Fast-forward
+2026-06-14T04:33:39.6311542Z  .github/workflows/deploy.yml                       |   1 +
+2026-06-14T04:33:39.6312509Z  .github/workflows/generate.yml                     |   5 +-
+2026-06-14T04:33:39.6314144Z  AGENTS.md                                          |  27 ++-
+2026-06-14T04:33:39.6315641Z  bio/index.html                                     |   2 +-
+2026-06-14T04:33:39.6316972Z  bot/bot.py                                         | 232 ++++++++++++++++++++-
+2026-06-14T04:33:39.6318376Z  curriculum_content.json                            |   4 +-
+2026-06-14T04:33:39.6319801Z  main.py                                            |  18 +-
+2026-06-14T04:33:39.6321427Z  resource/.uploaded.json                            |  12 +-
+2026-06-14T04:33:39.6322307Z  resource/photos/edu_ikan_cupang_facts.json         |  29 +++
+2026-06-14T04:33:39.6323048Z  .../photos/edu_mitos_vs_fakta_aquar_facts.json     |  89 ++++++++
+2026-06-14T04:33:39.6323800Z  resource/photos/ikan_cupang_sd_cover.png           | Bin 0 -> 1477670 bytes
+2026-06-14T04:33:39.6324542Z  resource/photos/ikan_cupang_sd_cta.png             | Bin 0 -> 1277317 bytes
+2026-06-14T04:33:39.6325259Z  resource/photos/ikan_cupang_sd_fact_01.png         | Bin 0 -> 1436693 bytes
+2026-06-14T04:33:39.6326293Z  resource/photos/ikan_cupang_sd_fact_02.png         | Bin 0 -> 1508644 bytes
+2026-06-14T04:33:39.6327048Z  .../photos/mitos_vs_fakta_aquarium_sd_cover.png    | Bin 0 -> 1376655 bytes
+2026-06-14T04:33:39.6327970Z  resource/photos/mitos_vs_fakta_aquarium_sd_cta.png | Bin 0 -> 1539441 bytes
+2026-06-14T04:33:39.6328694Z  .../photos/mitos_vs_fakta_aquarium_sd_fact_01.png  | Bin 0 -> 1381829 bytes
+2026-06-14T04:33:39.6333305Z  .../photos/mitos_vs_fakta_aquarium_sd_fact_02.png  | Bin 0 -> 1237264 bytes
+2026-06-14T04:33:39.6334304Z  .../photos/mitos_vs_fakta_aquarium_sd_fact_03.png  | Bin 0 -> 1431680 bytes
+2026-06-14T04:33:39.6335245Z  .../photos/mitos_vs_fakta_aquarium_sd_fact_04.png  | Bin 0 -> 1428252 bytes
+2026-06-14T04:33:39.6336172Z  .../photos/mitos_vs_fakta_aquarium_sd_fact_05.png  | Bin 0 -> 1484467 bytes
+2026-06-14T04:33:39.6336863Z  .../photos/mitos_vs_fakta_aquarium_sd_fact_06.png  | Bin 0 -> 1396395 bytes
+2026-06-14T04:33:39.6337431Z  .../photos/mitos_vs_fakta_aquarium_sd_fact_07.png  | Bin 0 -> 1470613 bytes
+2026-06-14T04:33:39.6337991Z  .../photos/mitos_vs_fakta_aquarium_sd_fact_08.png  | Bin 0 -> 1334243 bytes
+2026-06-14T04:33:39.6338470Z  schedule.json                                      |  26 ++-
+2026-06-14T04:33:39.6338883Z  test_sd.py                                         |  17 ++
+2026-06-14T04:33:39.6339689Z  26 files changed, 441 insertions(+), 21 deletions(-)
+2026-06-14T04:33:39.6340180Z  create mode 100644 resource/photos/edu_ikan_cupang_facts.json
+2026-06-14T04:33:39.6340684Z  create mode 100644 resource/photos/edu_mitos_vs_fakta_aquar_facts.json
+2026-06-14T04:33:39.6341174Z  create mode 100644 resource/photos/ikan_cupang_sd_cover.png
+2026-06-14T04:33:39.6341609Z  create mode 100644 resource/photos/ikan_cupang_sd_cta.png
+2026-06-14T04:33:39.6342046Z  create mode 100644 resource/photos/ikan_cupang_sd_fact_01.png
+2026-06-14T04:33:39.6342488Z  create mode 100644 resource/photos/ikan_cupang_sd_fact_02.png
+2026-06-14T04:33:39.6342965Z  create mode 100644 resource/photos/mitos_vs_fakta_aquarium_sd_cover.png
+2026-06-14T04:33:39.6343488Z  create mode 100644 resource/photos/mitos_vs_fakta_aquarium_sd_cta.png
+2026-06-14T04:33:39.6343989Z  create mode 100644 resource/photos/mitos_vs_fakta_aquarium_sd_fact_01.png
+2026-06-14T04:33:39.6344511Z  create mode 100644 resource/photos/mitos_vs_fakta_aquarium_sd_fact_02.png
+2026-06-14T04:33:39.6345018Z  create mode 100644 resource/photos/mitos_vs_fakta_aquarium_sd_fact_03.png
+2026-06-14T04:33:39.6345527Z  create mode 100644 resource/photos/mitos_vs_fakta_aquarium_sd_fact_04.png
+2026-06-14T04:33:39.6346026Z  create mode 100644 resource/photos/mitos_vs_fakta_aquarium_sd_fact_05.png
+2026-06-14T04:33:39.6346520Z  create mode 100644 resource/photos/mitos_vs_fakta_aquarium_sd_fact_06.png
+2026-06-14T04:33:39.6347012Z  create mode 100644 resource/photos/mitos_vs_fakta_aquarium_sd_fact_07.png
+2026-06-14T04:33:39.6347514Z  create mode 100644 resource/photos/mitos_vs_fakta_aquarium_sd_fact_08.png
+2026-06-14T04:33:39.6347945Z  create mode 100644 test_sd.py
+2026-06-14T04:33:40.3460784Z Requirement already satisfied: requests>=2.31 in ./.venv/lib/python3.10/site-packages (from -r requirements.txt (line 1)) (2.34.2)
+2026-06-14T04:33:40.3474029Z Requirement already satisfied: python-dotenv>=1.0 in ./.venv/lib/python3.10/site-packages (from -r requirements.txt (line 2)) (1.2.2)
+2026-06-14T04:33:40.3484872Z Requirement already satisfied: Pillow>=10.0 in ./.venv/lib/python3.10/site-packages (from -r requirements.txt (line 3)) (11.3.0)
+2026-06-14T04:33:40.3496194Z Requirement already satisfied: google-genai>=1.0 in ./.venv/lib/python3.10/site-packages (from -r requirements.txt (line 4)) (2.8.0)
+2026-06-14T04:33:40.3510148Z Requirement already satisfied: moviepy>=2.0 in ./.venv/lib/python3.10/site-packages (from -r requirements.txt (line 5)) (2.2.1)
+2026-06-14T04:33:40.3521814Z Requirement already satisfied: python-telegram-bot>=21.0 in ./.venv/lib/python3.10/site-packages (from -r requirements.txt (line 6)) (22.7)
+2026-06-14T04:33:40.3638888Z Requirement already satisfied: charset_normalizer<4,>=2 in ./.venv/lib/python3.10/site-packages (from requests>=2.31->-r requirements.txt (line 1)) (3.4.7)
+2026-06-14T04:33:40.3687580Z Requirement already satisfied: idna<4,>=2.5 in ./.venv/lib/python3.10/site-packages (from requests>=2.31->-r requirements.txt (line 1)) (3.18)
+2026-06-14T04:33:40.3689437Z Requirement already satisfied: certifi>=2023.5.7 in ./.venv/lib/python3.10/site-packages (from requests>=2.31->-r requirements.txt (line 1)) (2026.5.20)
+2026-06-14T04:33:40.3690540Z Requirement already satisfied: urllib3<3,>=1.26 in ./.venv/lib/python3.10/site-packages (from requests>=2.31->-r requirements.txt (line 1)) (2.7.0)
+2026-06-14T04:33:40.5279925Z Requirement already satisfied: distro<2,>=1.7.0 in ./.venv/lib/python3.10/site-packages (from google-genai>=1.0->-r requirements.txt (line 4)) (1.9.0)
+2026-06-14T04:33:40.5283276Z Requirement already satisfied: pydantic<3.0.0,>=2.9.0 in ./.venv/lib/python3.10/site-packages (from google-genai>=1.0->-r requirements.txt (line 4)) (2.13.4)
+2026-06-14T04:33:40.5285892Z Requirement already satisfied: tenacity<9.2.0,>=8.2.3 in ./.venv/lib/python3.10/site-packages (from google-genai>=1.0->-r requirements.txt (line 4)) (9.1.4)
+2026-06-14T04:33:40.5287538Z Requirement already satisfied: websockets<17.0,>=13.0.0 in ./.venv/lib/python3.10/site-packages (from google-genai>=1.0->-r requirements.txt (line 4)) (16.0)
+2026-06-14T04:33:40.5289288Z Requirement already satisfied: httpx<1.0.0,>=0.28.1 in ./.venv/lib/python3.10/site-packages (from google-genai>=1.0->-r requirements.txt (line 4)) (0.28.1)
+2026-06-14T04:33:40.5290974Z Requirement already satisfied: typing-extensions<5.0.0,>=4.14.0 in ./.venv/lib/python3.10/site-packages (from google-genai>=1.0->-r requirements.txt (line 4)) (4.15.0)
+2026-06-14T04:33:40.5292605Z Requirement already satisfied: sniffio in ./.venv/lib/python3.10/site-packages (from google-genai>=1.0->-r requirements.txt (line 4)) (1.3.1)
+2026-06-14T04:33:40.5294144Z Requirement already satisfied: anyio<5.0.0,>=4.8.0 in ./.venv/lib/python3.10/site-packages (from google-genai>=1.0->-r requirements.txt (line 4)) (4.13.0)
+2026-06-14T04:33:40.5295783Z Requirement already satisfied: google-auth[requests]<3.0.0,>=2.48.1 in ./.venv/lib/python3.10/site-packages (from google-genai>=1.0->-r requirements.txt (line 4)) (2.53.0)
+2026-06-14T04:33:40.5296948Z Requirement already satisfied: decorator<6.0,>=4.0.2 in ./.venv/lib/python3.10/site-packages (from moviepy>=2.0->-r requirements.txt (line 5)) (5.3.1)
+2026-06-14T04:33:40.5298003Z Requirement already satisfied: imageio<3.0,>=2.5 in ./.venv/lib/python3.10/site-packages (from moviepy>=2.0->-r requirements.txt (line 5)) (2.37.3)
+2026-06-14T04:33:40.5299465Z Requirement already satisfied: proglog<=1.0.0 in ./.venv/lib/python3.10/site-packages (from moviepy>=2.0->-r requirements.txt (line 5)) (0.1.12)
+2026-06-14T04:33:40.5301330Z Requirement already satisfied: imageio_ffmpeg>=0.2.0 in ./.venv/lib/python3.10/site-packages (from moviepy>=2.0->-r requirements.txt (line 5)) (0.6.0)
+2026-06-14T04:33:40.5303208Z Requirement already satisfied: numpy>=1.25.0 in ./.venv/lib/python3.10/site-packages (from moviepy>=2.0->-r requirements.txt (line 5)) (2.2.6)
+2026-06-14T04:33:40.5305162Z Requirement already satisfied: exceptiongroup>=1.0.2 in ./.venv/lib/python3.10/site-packages (from anyio<5.0.0,>=4.8.0->google-genai>=1.0->-r requirements.txt (line 4)) (1.3.1)
+2026-06-14T04:33:40.5760231Z Requirement already satisfied: pyasn1-modules>=0.2.1 in ./.venv/lib/python3.10/site-packages (from google-auth[requests]<3.0.0,>=2.48.1->google-genai>=1.0->-r requirements.txt (line 4)) (0.4.2)
+2026-06-14T04:33:40.5773447Z Requirement already satisfied: cryptography>=38.0.3 in ./.venv/lib/python3.10/site-packages (from google-auth[requests]<3.0.0,>=2.48.1->google-genai>=1.0->-r requirements.txt (line 4)) (48.0.1)
+2026-06-14T04:33:40.5947005Z Requirement already satisfied: httpcore==1.* in ./.venv/lib/python3.10/site-packages (from httpx<1.0.0,>=0.28.1->google-genai>=1.0->-r requirements.txt (line 4)) (1.0.9)
+2026-06-14T04:33:40.6060926Z Requirement already satisfied: h11>=0.16 in ./.venv/lib/python3.10/site-packages (from httpcore==1.*->httpx<1.0.0,>=0.28.1->google-genai>=1.0->-r requirements.txt (line 4)) (0.16.0)
+2026-06-14T04:33:40.7458268Z Requirement already satisfied: tqdm in ./.venv/lib/python3.10/site-packages (from proglog<=1.0.0->moviepy>=2.0->-r requirements.txt (line 5)) (4.68.2)
+2026-06-14T04:33:40.7605575Z Requirement already satisfied: typing-inspection>=0.4.2 in ./.venv/lib/python3.10/site-packages (from pydantic<3.0.0,>=2.9.0->google-genai>=1.0->-r requirements.txt (line 4)) (0.4.2)
+2026-06-14T04:33:40.7617632Z Requirement already satisfied: pydantic-core==2.46.4 in ./.venv/lib/python3.10/site-packages (from pydantic<3.0.0,>=2.9.0->google-genai>=1.0->-r requirements.txt (line 4)) (2.46.4)
+2026-06-14T04:33:40.7630073Z Requirement already satisfied: annotated-types>=0.6.0 in ./.venv/lib/python3.10/site-packages (from pydantic<3.0.0,>=2.9.0->google-genai>=1.0->-r requirements.txt (line 4)) (0.7.0)
+2026-06-14T04:33:40.8202131Z Requirement already satisfied: cffi>=2.0.0 in ./.venv/lib/python3.10/site-packages (from cryptography>=38.0.3->google-auth[requests]<3.0.0,>=2.48.1->google-genai>=1.0->-r requirements.txt (line 4)) (2.0.0)
+2026-06-14T04:33:40.8332341Z Requirement already satisfied: pyasn1<0.7.0,>=0.6.1 in ./.venv/lib/python3.10/site-packages (from pyasn1-modules>=0.2.1->google-auth[requests]<3.0.0,>=2.48.1->google-genai>=1.0->-r requirements.txt (line 4)) (0.6.3)
+2026-06-14T04:33:40.8718928Z Requirement already satisfied: pycparser in ./.venv/lib/python3.10/site-packages (from cffi>=2.0.0->cryptography>=38.0.3->google-auth[requests]<3.0.0,>=2.48.1->google-genai>=1.0->-r requirements.txt (line 4)) (3.0)
+2026-06-14T04:33:41.1089888Z ##[error]Process completed with exit code 255.

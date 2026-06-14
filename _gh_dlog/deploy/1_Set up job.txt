@@ -1,0 +1,32 @@
+﻿2026-06-14T04:30:16.0379098Z Current runner version: '2.335.1'
+2026-06-14T04:30:16.0479987Z ##[group]Runner Image Provisioner
+2026-06-14T04:30:16.0481771Z Hosted Compute Agent
+2026-06-14T04:30:16.0483066Z Version: 20260527.539
+2026-06-14T04:30:16.0484303Z Commit: a891dd388383b896fa6ac04a82c0b75cec981078
+2026-06-14T04:30:16.0485888Z Build Date: 2026-05-27T21:39:57Z
+2026-06-14T04:30:16.0487119Z Worker ID: {abe15882-6c3f-4679-87dc-fe8d54dd4b50}
+2026-06-14T04:30:16.0489049Z Azure Region: eastus2
+2026-06-14T04:30:16.0490520Z ##[endgroup]
+2026-06-14T04:30:16.0493102Z ##[group]Operating System
+2026-06-14T04:30:16.0494294Z Ubuntu
+2026-06-14T04:30:16.0495304Z 24.04.4
+2026-06-14T04:30:16.0496217Z LTS
+2026-06-14T04:30:16.0497131Z ##[endgroup]
+2026-06-14T04:30:16.0498304Z ##[group]Runner Image
+2026-06-14T04:30:16.0499387Z Image: ubuntu-24.04
+2026-06-14T04:30:16.0520912Z Version: 20260607.184.1
+2026-06-14T04:30:16.0523004Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260607.184/images/ubuntu/Ubuntu2404-Readme.md
+2026-06-14T04:30:16.0526180Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260607.184
+2026-06-14T04:30:16.0527961Z ##[endgroup]
+2026-06-14T04:30:16.0530433Z ##[group]GITHUB_TOKEN Permissions
+2026-06-14T04:30:16.0533853Z Contents: read
+2026-06-14T04:30:16.0535111Z Metadata: read
+2026-06-14T04:30:16.0536182Z Packages: read
+2026-06-14T04:30:16.0537351Z ##[endgroup]
+2026-06-14T04:30:16.0561290Z Secret source: Actions
+2026-06-14T04:30:16.0562825Z Prepare workflow directory
+2026-06-14T04:30:16.1575542Z Prepare all required actions
+2026-06-14T04:30:16.1697195Z Getting action download info
+2026-06-14T04:30:16.5714858Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-06-14T04:30:16.6514246Z Download action repository 'webfactory/ssh-agent@v0.9.0' (SHA:dc588b651fe13675774614f8e6a936a468676387)
+2026-06-14T04:30:16.9171359Z Complete job name: deploy

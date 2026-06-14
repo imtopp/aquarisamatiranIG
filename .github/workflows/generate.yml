@@ -1,0 +1,62 @@
+name: Generate Carousel (SD)
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: 'Topik carousel'
+        required: true
+        type: string
+      num_facts:
+        description: 'Jumlah fakta'
+        required: false
+        default: '8'
+        type: string
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache SD model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: sd-model-v1-5
+
+      - name: Install dependencies
+        run: |
+          pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install diffusers transformers accelerate pillow requests python-dotenv
+
+      - name: Generate carousel
+        run: python main.py generate-carousel-sd "${{ inputs.topic }}" --num-facts ${{ inputs.num_facts }}
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY_1: ${{ secrets.BACKUP_GEMINI_API_KEY }}
+
+      - name: Upload slides as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-slides
+          path: resource/photos/*.png
+
+      - name: Upload facts JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-facts
+          path: resource/photos/edu_*.json
+
+      - name: Commit facts & schedule changes
+        run: |
+          git config user.name "Nix Bot"
+          git config user.email "nix@aquarisamatiran.dev"
+          git add resource/photos/edu_*.json schedule.json
+          git diff --cached --quiet || git commit -m "auto: generated carousel for ${{ inputs.topic }}"
+          git push origin main

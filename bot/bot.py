@@ -608,6 +608,19 @@ async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     topic_display = pending["topic_display"]
     curriculum_tag = pending.get("curriculum_tag", "")
+    if not curriculum_tag:
+        slug = pending["slug"]
+        try:
+            cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+            for s_num, ts in cc.get("topics", {}).items():
+                for t_num, t in ts.items():
+                    if t.get("slug", "").replace("-", "_") == slug:
+                        curriculum_tag = f"S{s_num}#{t_num}"
+                        break
+                if curriculum_tag:
+                    break
+        except Exception:
+            pass
     topic_input = curriculum_tag if curriculum_tag else pending["slug"].replace("_", " ")
     await update.message.reply_text(f"🔄 Generate ulang carousel \"{topic_display}\" (topic: {topic_input})...")
     _pending_posts.pop(user_id, None)

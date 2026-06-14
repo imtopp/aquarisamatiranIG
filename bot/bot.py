@@ -405,22 +405,27 @@ async def _generate_caption(facts_json: dict | None, topic: str, curriculum_tag:
         for f in facts_json["facts"]:
             prompt_parts.append(f"- {f.get('number','')}. {f.get('title','')}: {f.get('description','')[:100]}")
     prompt_parts.append("\nGaya: santai, edukatif, engaging. Include ajakan diskusi. Maks 2000 karakter. Sertakan hashtag #Aquarisamatiran dan hashtag relevan lainnya di akhir.")
-    caption_prompt = (
+    caption_system = (
         "Kamu adalah asisten pembuat konten Instagram untuk akun aquascape @aquarisamatiran. "
         "Gaya bicara: santai, edukatif, engaging, akrab — pake bahasa Indonesia sehari-hari. "
         "Beri informasi bermanfaat, ajak diskusi, jangan terlalu formal, jangan pake gaya genit/flirty. "
         "Tujuan: ngajarin follower aquarium dari nol dengan cara yang asyik."
     )
-    body = {"contents": [{"role": "user", "parts": [{"text": _today_context() + "\n\n" + caption_prompt + "\n\n" + "\n".join(prompt_parts)}]}]}
+    text = _today_context() + "\n\n" + "\n".join(prompt_parts)
 
-    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEYS[0]}"
-    try:
-        async with httpx.AsyncClient(timeout=60) as client:
-            resp = await client.post(url, json=body)
-        if resp.status_code == 200:
-            return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
-    except Exception:
-        pass
+    keys = [k for k in GEMINI_API_KEYS if k]
+    for key in keys:
+        for model in GEMINI_MODELS:
+            url = f"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent?key={key}"
+            body = {"contents": [{"role": "user", "parts": [{"text": text}]}]}
+            if caption_system:
+                body["system_instruction"] = {"parts": [{"text": caption_system}]}
+            try:
+                resp = await HTTPX_CLIENT.post(url, json=body)
+                if resp.status_code == 200:
+                    return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+            except Exception:
+                continue
     return f"{topic} — Yuk belajar bareng @aquarisamatiran! 🌱 #Aquarisamatiran #AquascapeIndonesia"
 
 

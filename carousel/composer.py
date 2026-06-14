@@ -60,11 +60,14 @@ def _get_font(name: str, size: int) -> ImageFont.FreeTypeFont:
 
 
 def _get_symbol_font(size: int) -> ImageFont.FreeTypeFont:
-    """Coba Segoe UI Symbol (font symbol bawaan Windows) — fallback ke regular."""
+    """Coba Segoe UI Symbol (font symbol bawaan Windows) — fallback ke Noto/DejaVu di Linux."""
     candidates = [
         "C:/Windows/Fonts/seguisym.ttf",
         "C:/Windows/Fonts/seguiemj.ttf",
         "C:/Windows/Fonts/segoeui.ttf",
+        "/usr/share/fonts/truetype/noto/NotoSansSymbols-Regular.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
     ]
     for path in candidates:
         p = Path(path)
@@ -73,7 +76,7 @@ def _get_symbol_font(size: int) -> ImageFont.FreeTypeFont:
                 return ImageFont.truetype(str(p), size)
             except Exception:
                 continue
-    return ImageFont.truetype("C:/Windows/Fonts/segoeui.ttf", size)
+    return ImageFont.load_default()
 
 
 _EMOJI_RANGES = [
@@ -96,6 +99,8 @@ def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
     candidates = [
         "C:/Windows/Fonts/seguiemj.ttf",
         "C:/Windows/Fonts/seguisym.ttf",
+        "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+        "/usr/share/fonts/opentype/noto/NotoColorEmoji.ttf",
     ]
     for path in candidates:
         p = Path(path)

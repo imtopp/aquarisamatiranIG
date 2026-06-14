@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-nunito 2>/dev/null || true
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-nunito fonts-noto-color-emoji 2>/dev/null || true
           pip install -r requirements.txt
           pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
           pip install diffusers transformers accelerate pillow

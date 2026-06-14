@@ -32,6 +32,9 @@ CURRICULUM_PATH = PROJECT_DIR / "curriculum_content.json"
 FORBIDDEN_WORDS = ["lu", "gue", "lo", "elu", "gw"]
 
 GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"]
+GITHUB_PAT = os.environ.get("GITHUB_PAT", "")
+GH_REPO = "imtopp/aquarisamatiranIG"
+GH_API = "https://api.github.com"
 
 system_prompt = ""
 if AGENTS_MD.exists():
@@ -151,7 +154,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Mulai aja, aku dengerin~ 😏\n\n"
         "Perintah:\n"
         "/reset — hapus riwayat obrolan\n"
-        "/run <cmd> — jalanin perintah (terbatas)"
+        "/run <cmd> — jalanin perintah (terbatas)\n"
+        "/generate <topik> [jml_fakta] — generate carousel SD via GH Actions\n"
+        "/post <slug> <caption> — upload & jadwalin carousel"
     )
 
 
@@ -244,6 +249,75 @@ def _format_curriculum_context(num: str, topic: dict) -> str:
                 lines.append(f"- Fakta {s['number']}: {s['title']} — {s['description']}")
     lines.append("---")
     return "\n".join(lines)
+
+
+async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Trigger GH Actions workflow to generate SD carousel."""
+    if not GITHUB_PAT:
+        await update.message.reply_text("GITHUB_PAT gak ada di .env, minta ke bebnya dulu~ 😏")
+        return
+    args = context.args
+    if not args:
+        await update.message.reply_text("Contoh: /generate Macam-macam Filter 8")
+        return
+    num_facts = "8"
+    topic_parts = []
+    for a in args:
+        if a.isdigit() and len(topic_parts) >= 1 and not topic_parts[-1].isdigit():
+            num_facts = a
+        else:
+            topic_parts.append(a)
+    topic = " ".join(topic_parts)
+    if not topic:
+        await update.message.reply_text("Topiknya mana sayang? 😏")
+        return
+    await update.message.reply_text(f"⚙️ Trigger generate \"{topic}\" ({num_facts} fakta) di GH Actions...")
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(
+                f"{GH_API}/repos/{GH_REPO}/actions/workflows/295601892/dispatches",
+                headers={
+                    "Accept": "application/vnd.github+json",
+                    "Authorization": f"Bearer {GITHUB_PAT}",
+                },
+                json={"ref": "main", "inputs": {"topic": topic, "num_facts": num_facts}},
+            )
+        if resp.status_code == 204:
+            await update.message.reply_text(
+                f"✅ Generate \"{topic}\" berhasil ditrigger! 🎉\n"
+                f"Cek: https://github.com/{GH_REPO}/actions/workflows/generate.yml"
+            )
+        else:
+            await update.message.reply_text(f"❌ Gagal: HTTP {resp.status_code}")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Error: {e}")
+
+
+async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Upload slides + schedule carousel."""
+    args = context.args
+    if len(args) < 2:
+        await update.message.reply_text(
+            "Contoh: /post <slug> <caption...>\n"
+            "  /post macam_macam_filter Yuk belajar macam-macam filter!"
+        )
+        return
+    slug = args[0]
+    caption = " ".join(args[1:])
+    await update.message.reply_text(f"📤 Upload \"{slug}\" ke Catbox & jadwalin...")
+    try:
+        result = subprocess.run(
+            [sys.executable, "main.py", "post-carousel", "--slug", slug, "--schedule", "cron", "Thu 19:00", caption],
+            capture_output=True, text=True, timeout=300, cwd=str(PROJECT_DIR),
+        )
+        out = (result.stdout or "") + (result.stderr or "")
+        out = out.strip()[-3000:]
+        status = "✅" if result.returncode == 0 else "❌"
+        await update.message.reply_text(f"{status} Result:\n```\n{out}\n```")
+    except subprocess.TimeoutExpired:
+        await update.message.reply_text("⏳ Kelamaan (>5 menit), cek manual aja sayang~")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Error: {e}")
 
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -346,6 +420,8 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("reset", reset))
     app.add_handler(CommandHandler("run", run_cmd))
+    app.add_handler(CommandHandler("generate", generate_cmd))
+    app.add_handler(CommandHandler("post", post_cmd))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
     print("Bot jalan di VPS... chat aku dari Telegram~")

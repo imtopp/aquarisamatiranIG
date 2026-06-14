@@ -1,0 +1,89 @@
+{
+  "topic": "Mitos vs Fakta Aquarium",
+  "display_name": "Mitos & Fakta Dunia Aquarium",
+  "subtitle": "Bongkar Mitos, Raih Sukses!",
+  "scientific_name": "General Aquaristics",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Ikan Kecil di Toples? ❌🏡",
+      "description": "Mitos ini berbahaya! Semua ikan, sekecil apapun, butuh ruang gerak, sirkulasi air, dan siklus nitrogen yang stabil. Toples atau mangkok tidak bisa menyediakan lingkungan sehat dan hanya akan menyiksa ikanmu.",
+      "tags": [
+        "VolumeAir",
+        "SiklusNitrogen",
+        "KesehatanIkan"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Ikan Air Dingin Tak Butuh Heater? 🌡️",
+      "description": "Faktanya, sebagian besar ikan 'air dingin' yang dijual (seperti cupang atau guppy) adalah ikan tropis yang butuh suhu stabil (24-28°C). Fluktuasi suhu yang drastis bisa membuat ikan stres dan rentan penyakit.",
+      "tags": [
+        "SuhuAir",
+        "HeaterAquarium",
+        "IkanTropis"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Ganti Air Hanya Jika Keruh? 💧",
+      "description": "Air bisa terlihat jernih tapi mengandung polutan berbahaya seperti amonia, nitrit, dan nitrat tinggi. Penggantian air parsial (Water Change) rutin sangat vital untuk membuang zat-zat ini dan menjaga kualitas air optimal.",
+      "tags": [
+        "WaterChange",
+        "KualitasAir",
+        "ParameterAir"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Makin Banyak Ikan, Makin Bagus? 🐠🐡",
+      "description": "Justru sebaliknya! Overstocking (terlalu banyak ikan) akan mempercepat penumpukan limbah, menurunkan kualitas air, dan meningkatkan stres serta risiko penyakit pada ikan. Perhatikan kapasitas aquariummu.",
+      "tags": [
+        "Overstocking",
+        "KapasitasAquarium",
+        "ManajemenLimbah"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Ikan Bisa Puasa Lama? 🍽️",
+      "description": "Meskipun ikan bisa bertahan beberapa hari tanpa makan, puasa berkepanjangan akan melemahkan sistem imun, membuat ikan kurus, stres, dan rentan terhadap infeksi. Beri pakan secukupnya secara teratur.",
+      "tags": [
+        "PakanIkan",
+        "NutrisiHewan",
+        "JadwalPakan"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Filter Hanya untuk Jernihkan Air? ✨",
+      "description": "Filter memiliki fungsi vital yaitu filtrasi biologis, yang mengubah amonia dan nitrit beracun menjadi nitrat yang kurang berbahaya. Filtrasi mekanis (untuk menjernihkan) hanyalah salah satu bagiannya.",
+      "tags": [
+        "FilterBiologis",
+        "FilterMekanis",
+        "SistemFiltrasi"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Lampu Aquarium Nyala 24 Jam? 🌗",
+      "description": "Ikan dan tanaman membutuhkan siklus terang-gelap seperti di alam. Menyalakan lampu 24 jam dapat menyebabkan ikan stres, mengganggu pola tidur mereka, dan memicu pertumbuhan alga berlebihan.",
+      "tags": [
+        "Pencahayaan",
+        "SiklusFotom",
+        "AlgaControl"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Air Keran Langsung Aman Dipakai? 🧪",
+      "description": "Air keran seringkali mengandung klorin atau kloramin yang berbahaya bagi ikan dan bakteri baik di filter. Selalu gunakan dechlorinator sebelum memasukkan air keran baru ke aquarium. Sesuaikan juga suhu dan pH.",
+      "tags": [
+        "Dechlorinator",
+        "Klorin",
+        "PreparasiAir"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

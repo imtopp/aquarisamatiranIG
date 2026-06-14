@@ -162,18 +162,25 @@ Menunjukkin kalau proses itu berharga — nggak perlu jadi expert dulu buat mula
 | **Inspirasi** | Tank tour, slowmo, aesthetic | **Reels** |
 | **Interaksi** | Q&A, polling, ajak diskusi | **Carousel/Foto + Stories** |
 
-### Jadwal Posting (3-4x/minggu)
-| Hari | Jam WIB | Format | Pilar | Tujuan |
-|------|---------|--------|-------|--------|
-| Senin | **19:00** | 🎬 **Reel** | Proses/Cerita | Discovery awal minggu |
-| Rabu | **19:00** | 🎠 **Carousel Edu** | Edukasi | Saves & authority |
-| Jumat | **19:00** | 🎬 **Reel** | Inspirasi | Weekend push |
-| Minggu | **09:00** | 📸 **Foto/Carousel** | Interaksi | Diskusi santuy |
+### Jadwal Posting (realigned to cron-job.org trigger times)
+Jam posting fix mengikuti cron trigger. Pilar di bawah **hanya saran** (suggestion), bukan aturan — format apapun bisa diisi di slot manapun.
+
+| Hari | Jam WIB | Saran Pilar | Saran Format |
+|------|---------|-------------|--------------|
+| Senin | **19:00** | Proses & Cerita | Reel 🎬 |
+| Selasa | **19:00** | (bebas) | (bebas) |
+| Rabu | **19:00** | Edukasi | Carousel 🎠 |
+| Kamis | **19:00** | (bebas) | (bebas) |
+| Jumat | **15:00** | Inspirasi | Reel 🎬 |
+| Sabtu | **09:00** | Interaksi | Carousel/Foto 📸 |
+| Minggu | **09:00** | Interaksi | Carousel/Foto 📸 |
+
+### Scheduling Note
+Saat suggest jadwal, prioritaskan **slot terdekat yang tersedia** (berdasarkan cron trigger), bukan pilar.  
+Tapi tetap infokan pilar default slot itu:  
+*"Sabtu 09:00 — saran pilarnya Interaksi (Carousel/Foto), tapi gapapa diisi konten apapun."*
 
 **Daily**: 2-3 Stories (proses tank, polling, ngobrol)
-
-### Fitur Baru
-- `--schedule "Mon 19:00"` / `--schedule "2026-06-08 19:00"` di perintah `post-*` — IG server yg handle, laptop mati gapapa
 
 ## Landing Pages
 

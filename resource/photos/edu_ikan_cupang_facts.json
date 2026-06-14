@@ -1,0 +1,29 @@
+{
+  "topic": "Ikan Cupang",
+  "display_name": "Ikan Cupang",
+  "subtitle": "Si Petarung Berkilau Elegan",
+  "scientific_name": "Betta splendens",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Pernapasan Spesial! 😮",
+      "description": "Ikan Cupang punya organ unik bernama labirin! Ini memungkinkan mereka menghirup oksigen langsung dari udara di permukaan air, sehingga bisa bertahan di kondisi air dengan oksigen rendah. Jadi, jangan heran kalau sesekali cupangmu nongol ke atas untuk 'bernapas' ya!",
+      "tags": [
+        "Organ Labirin",
+        "Oksigen Udara",
+        "Adaptasi Unik"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Petarung Sejati! ⚔️",
+      "description": "Sesuai namanya, 'Betta' berasal dari nama prajurit kuno. Ikan Cupang jantan sangat teritorial dan bisa agresif terhadap cupang jantan lain, bahkan terkadang betina. Lebih baik pelihara mereka sendirian di wadah yang terpisah untuk menghindari perkelahian dan stres!",
+      "tags": [
+        "Agresif",
+        "Teritorial",
+        "Soliter"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

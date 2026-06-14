@@ -187,7 +187,7 @@ def cmd_post_carousel(client, args):
     caption = " ".join(filtered) if filtered else ""
 
     # Auto-detect slide terbaru
-    slides = sorted(PHOTO_DIR.glob("*_slide_??.png")) + sorted(PHOTO_DIR.glob("edu_*_??.jpg"))
+    slides = sorted(PHOTO_DIR.glob("*_slide_??.png")) + sorted(PHOTO_DIR.glob("edu_*_??.jpg")) + sorted(PHOTO_DIR.glob("*_sd_*.png"))
     if not slides:
         print("❌ Ngga ada slide carousel di resource/photos/")
         print()
@@ -200,6 +200,8 @@ def cmd_post_carousel(client, args):
         stem = s.stem
         if "_slide_" in stem:
             prefix = stem.rsplit("_slide_", 1)[0]
+        elif "_sd_" in stem:
+            prefix = stem.rsplit("_sd_", 1)[0]
         else:
             prefix = stem.rsplit("_", 1)[0]
         groups.setdefault(prefix, []).append(s)
@@ -224,10 +226,20 @@ def cmd_post_carousel(client, args):
 
     print(f"📤 Upload {len(latest)} slide ke Catbox...")
     urls = []
+    from PIL import Image
+    import io
     for p in latest:
         print(f"  Upload {p.name}...")
-        url = upload_file(p)
-        _save_map(url, str(p))
+        upload_path = p
+        # Auto-compress PNG >500KB ke JPEG biar IG gak timeout
+        if p.suffix.lower() == ".png" and p.stat().st_size > 500 * 1024:
+            jpg_path = p.with_suffix(".jpg")
+            if not jpg_path.exists():
+                Image.open(p).convert("RGB").save(jpg_path, "JPEG", quality=82, optimize=True)
+            upload_path = jpg_path
+            print(f"   🗜️  Kompres ke JPEG ({upload_path.stat().st_size // 1024} KB)")
+        url = upload_file(upload_path)
+        _save_map(url, str(upload_path))
         urls.append(url)
         print(f"   ✅ {url}")
 

@@ -946,45 +946,57 @@ def cmd_generate_carousel_sd(_client, args):
     topic = parsed.topic
     slug = re.sub(r'[^\w\-]', '', topic.lower().replace(" ", "_").replace("-", "_"))[:30].rstrip("_")
 
-    print(f"📝 Generate facts untuk \"{topic}\"...")
-    try:
-        facts = generate_facts(topic, parsed.num_facts)
-    except Exception as e:
-        print(f"❌ Gagal generate facts: {e}")
-        return
-
-    n_facts = len(facts.get("facts", []))
-    display = facts.get("display_name", topic)
-    print(f"\n📋 {n_facts} fakta tentang {display}:")
-
-    # Cari season + topic number dari curriculum_content.json
+    # Resolve S1#07 / #07 ke nama topik asli dari curriculum
+    topic_name = topic
     season_tag = ""
     try:
         cc_path = Path("curriculum_content.json")
         if cc_path.exists():
             cc = json.loads(cc_path.read_text(encoding="utf-8"))
-            # Parse "S1#07" or "#07"
             m = re.match(r"S(\d+)#(\d+)", topic)
             if m:
-                s_num, topic_num = m.group(1), m.group(2).zfill(2)
-            else:
-                topic_num = topic.lstrip("#").zfill(2)
-                s_num = None
-            if s_num:
-                ts = cc.get("topics", {}).get(s_num, {})
-                t = ts.get(topic_num)
+                s_num, t_num = m.group(1), m.group(2).zfill(2)
+                t = cc.get("topics", {}).get(s_num, {}).get(t_num)
                 if t:
-                    season_tag = f"S{s_num}#{topic_num} "
-                    display = t.get("display_name", display)
+                    topic_name = t.get("display_name", t.get("title", topic))
+                    season_tag = f"S{s_num}#{t_num} "
             else:
+                t_num = topic.lstrip("#").zfill(2)
                 for s_num, ts in cc.get("topics", {}).items():
-                    if topic_num in ts:
-                        t = ts[topic_num]
-                        season_tag = f"S{s_num}#{topic_num} "
-                        display = t.get("display_name", display)
+                    if t_num in ts:
+                        t = ts[t_num]
+                        topic_name = t.get("display_name", t.get("title", topic))
+                        season_tag = f"S{s_num}#{t_num} "
                         break
     except Exception:
         pass
+
+    print(f"📝 Generate facts untuk \"{topic_name}\"...")
+    try:
+        facts = generate_facts(topic_name, parsed.num_facts)
+    except Exception as e:
+        print(f"❌ Gagal generate facts: {e}")
+        return
+
+    n_facts = len(facts.get("facts", []))
+    display = facts.get("display_name", topic_name)
+    print(f"\n📋 {n_facts} fakta tentang {display}:")
+
+    # Fallback: cari season_tag dari topic asli (kalau pake #XX)
+    if not season_tag:
+        try:
+            cc_path = Path("curriculum_content.json")
+            if cc_path.exists():
+                cc = json.loads(cc_path.read_text(encoding="utf-8"))
+                t_num = topic.lstrip("#").zfill(2)
+                for s_num, ts in cc.get("topics", {}).items():
+                    if t_num in ts:
+                        t = ts[t_num]
+                        season_tag = f"S{s_num}#{t_num} "
+                        display = t.get("display_name", display)
+                        break
+        except Exception:
+            pass
 
     for f in facts["facts"]:
         print(f"   {f['number']}. {f['title']}")

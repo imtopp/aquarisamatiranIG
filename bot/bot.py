@@ -156,6 +156,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/reset — hapus riwayat obrolan\n"
         "/run <cmd> — jalanin perintah (terbatas)\n"
         "/generate <topik> [jml_fakta] — generate carousel SD via GH Actions\n"
+        "/status — cek progress generate carousel\n"
         "/post [#XX] [hari jam] — upload & jadwalin carousel terbaru (otomatis)"
     )
 
@@ -373,6 +374,40 @@ def _nearest_slot() -> str:
     return (now + datetime.timedelta(days=1)).strftime("%Y-%m-%d") + " 19:00"
 
 
+async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Check latest GH Actions generate run status."""
+    if not GITHUB_PAT:
+        await update.message.reply_text("GITHUB_PAT gak ada, gak bisa cek~ 😏")
+        return
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.get(
+                f"{GH_API}/repos/{GH_REPO}/actions/workflows/295601892/runs?per_page=1",
+                headers={"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GITHUB_PAT}"},
+            )
+        if resp.status_code != 200:
+            await update.message.reply_text(f"❌ Gagal cek status: HTTP {resp.status_code}")
+            return
+        run = resp.json()["workflow_runs"][0]
+        status = run["status"]
+        conclusion = run["conclusion"] or "—"
+        topic = run.get("display_title", "?")
+        html_url = run["html_url"]
+        emoji = {"completed": "✅", "in_progress": "🔄", "queued": "⏳", "failure": "❌", "success": "✅"}.get(status if status == "completed" else status, "❓")
+        created = run["created_at"][:16].replace("T", " ")
+        msg = (
+            f"{emoji} Generate: **{topic}**\n"
+            f"Status: **{status}** ({conclusion})\n"
+            f"Dibuat: {created} WIB\n"
+            f"[Lihat di GitHub]({html_url})"
+        )
+        if slides := _latest_slides()[1]:
+            msg += f"\n📸 Slide siap: {len(slides)} file"
+        await update.message.reply_text(msg)
+    except Exception as e:
+        await update.message.reply_text(f"❌ Error: {e}")
+
+
 async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Upload slides + schedule carousel. Smart auto-detect + auto-caption."""
     args = context.args
@@ -539,6 +574,7 @@ def main():
     app.add_handler(CommandHandler("reset", reset))
     app.add_handler(CommandHandler("run", run_cmd))
     app.add_handler(CommandHandler("generate", generate_cmd))
+    app.add_handler(CommandHandler("status", status_cmd))
     app.add_handler(CommandHandler("post", post_cmd))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 

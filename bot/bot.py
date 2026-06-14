@@ -10,7 +10,7 @@ from pathlib import Path
 
 import httpx
 from dotenv import load_dotenv
-from telegram import Update
+from telegram import Update, InputMediaPhoto
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from telegram.request import HTTPXRequest
 
@@ -446,6 +446,22 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(f"🔍 Detected: \"{slug}\" ({len(slides)} slide)\n📅 Jadwal: {schedule_time}")
 
+    # Kirim preview slides
+    await update.message.reply_text(f"📸 Kirim preview slide...")
+    media_group = []
+    for s in sorted(slides):
+        if len(media_group) >= 10:
+            break
+        try:
+            media_group.append(InputMediaPhoto(media=s.open("rb")))
+        except Exception:
+            continue
+    if media_group:
+        try:
+            await update.message.reply_media_group(media_group)
+        except Exception:
+            await update.message.reply_text("⚠️ Gagal kirim preview, lanjut aja~")
+
     # Generate caption
     facts_json = None
     facts_path = PROJECT_DIR / "resource/photos" / f"edu_{slug}_facts.json"
@@ -459,7 +475,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"💬 Generate caption buat \"{topic_display}\"...")
     caption = await _generate_caption(facts_json, topic_display, curriculum_tag)
 
-    # Preview
+    # Preview + confirm
     msg = (
         f"📋 **{topic_display}** ({len(slides)} slide)\n"
         f"📅 Jadwal: {schedule_time}\n\n"

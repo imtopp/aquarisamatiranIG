@@ -109,6 +109,24 @@ def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
                 return ImageFont.truetype(str(p), size)
             except Exception:
                 continue
+
+    # Fallback: download Noto Color Emoji
+    font_url = "https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf"
+    cache_dir = Path(tempfile.gettempdir()) / "aquarisamatiramoji_fonts"
+    cache_path = cache_dir / "NotoColorEmoji.ttf"
+    if not cache_path.exists():
+        try:
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            r = requests.get(font_url, timeout=30)
+            if r.status_code == 200:
+                cache_path.write_bytes(r.content)
+        except Exception:
+            pass
+    if cache_path.exists():
+        try:
+            return ImageFont.truetype(str(cache_path), size)
+        except Exception:
+            pass
     return None
 
 

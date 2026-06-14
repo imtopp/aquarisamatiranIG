@@ -45,11 +45,23 @@ jobs:
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
 
+      - name: Compress slides (PNG>500KB → JPEG)
+        run: python -c "
+import sys; from pathlib import Path; from PIL import Image
+for f in sorted(Path('resource/photos').glob('*_sd_*.png')):
+    sz = f.stat().st_size
+    if sz > 500*1024:
+        jpg = f.with_suffix('.jpg')
+        Image.open(f).convert('RGB').save(jpg, 'JPEG', quality=82, optimize=True)
+        print(f'Compressed {f.name} ({sz//1024}KB -> {jpg.stat().st_size//1024}KB)')
+        f.unlink(missing_ok=True)
+"
+
       - name: Upload slides as artifact
         uses: actions/upload-artifact@v4
         with:
           name: generated-slides
-          path: resource/photos/*.png
+          path: resource/photos/*_sd_*
 
       - name: Upload facts JSON
         uses: actions/upload-artifact@v4
@@ -57,10 +69,10 @@ jobs:
           name: generated-facts
           path: resource/photos/edu_*.json
 
-      - name: Commit facts & schedule changes
+      - name: Commit generated files
         run: |
           git config user.name "Nix Bot"
           git config user.email "nix@aquarisamatiran.dev"
-          git add resource/photos/edu_*.json schedule.json
+          git add resource/photos/edu_*.json resource/photos/*_sd_* resource/photos/*_slide_* schedule.json
           git diff --cached --quiet || git commit -m "auto: generated carousel for ${{ inputs.topic }}"
           git push origin main

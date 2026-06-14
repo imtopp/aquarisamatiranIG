@@ -24,7 +24,7 @@ def _notify_telegram(msg: str):
         import requests
         requests.post(
             f"https://api.telegram.org/bot{token}/sendMessage",
-            json={"chat_id": chat_id, "text": msg, "parse_mode": "Markdown"},
+            json={"chat_id": chat_id, "text": msg, "parse_mode": "HTML"},
             timeout=10,
         )
     except Exception:

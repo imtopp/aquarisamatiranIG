@@ -21,14 +21,9 @@ jobs:
             cd /home/topp/projects/aquarisamatiran &&
             git clean -fd &&
             git pull origin main &&
-            .venv/bin/pip install -r requirements.txt 2>/dev/null; 
-            # Kill all bot instances, then fresh start
+            .venv/bin/pip install -r requirements.txt 2>/dev/null;
             pkill -f bot/bot.py 2>/dev/null || true;
-            sleep 2;
-            tmux kill-session -t bot 2>/dev/null || true;
             sleep 1;
-            tmux new-session -d -s bot -c /home/topp/projects/aquarisamatiran '.venv/bin/python bot/bot.py';
-            # Hapus crontab lama (kalo ada) — skrg pake cron-job.org aja
-            crontab -l 2>/dev/null | grep -v runner.py | crontab - 2>/dev/null || true;
+            nohup .venv/bin/python bot/bot.py >/dev/null 2>&1 &
             echo '✅ Deploy selesai'
           "

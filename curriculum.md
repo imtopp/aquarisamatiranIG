@@ -1,53 +1,44 @@
-# 📚 Kurikulum Aquarisamatiran
-
-Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
-
+# ≡ƒôÜ Kurikulum Aquarisamatiran
+Belajar aquarium dari nol sampai advanced ΓÇö step by step, pake bahasa awam.
 ---
 
-## 🌊 Season 1: Perjalanan dari Nol Sampai Pro
+## ≡ƒîè Season 1: Perjalanan dari Nol Sampai Pro
+> Belajar aquarium step by step ΓÇö mulai dari nol banget sampai bisa aquascape advanced
 
-## 🟢 Level 1: Pemula Absolut
-
-| # | Topik | Tgl Post | Status |
-|---|-------|----------|--------|
-| 01 | Aquarium itu Apa? — jenis, budget, mitos | 2026-06-08 | ✅ |
-| 02 | Peralatan Dasar — wadah, filter, lampu, dll | 2026-06-10 | ✅ |
-| 03 | Setup & Siklus Air | 2026-06-07 | ✅ |
-| 04 | Ikan Pertama — jenis kuat & murah | 2026-06-12 | ⬜ |
-| 05 | Rawat Mingguan — kasih makan, ganti air, bersih | 2026-06-14 | ⬜ |
-| 06 | Alga: Musuh atau Guru? — jenis, penyebab, cara ngatasin | — | ⬜ |
-
-## 🟡 Level 2: Mulai Pede
-
+### Level 1: Pemula Absolut
 | # | Topik | Status |
 |---|-------|--------|
-| 07 | Macam-macam Filter | ✅ 2026-06-07 |
-| 08 | Tanaman Dasar — yang susah mati | ⬜ |
-| 09 | Ganti Air & Perawatan Detail | ⬜ |
-| 10 | Penyakit Ikan — diagnosis & obat | ⬜ |
-| 11 | Parameter Air (pH/GH/KH/TDS) — lebih dalem | ⬜ |
-| 12 | Substrate Deep Dive — soil vs pasir vs gravel | ⬜ |
+| 01 | Aquarium itu Apa? | ≡ƒôà |
+| 02 | Peralatan Dasar Aquarium | ≡ƒôà |
+| 03 | Setup & Siklus Air | ≡ƒôà |
+| 04 | Ikan Pertama (2026-06-12 19:00) | Γ£à |
+| 05 | Rawat Mingguan (2026-06-14 09:00) | Γ£à |
+| 06 | Alga: Musuh atau Guru? (2026-06-17 19:00) | ≡ƒôà |
 
-## 🟠 Level 3: Naik Kelas
-
+### Level 2: Mulai Pede
 | # | Topik | Status |
 |---|-------|--------|
-| 13 | CO2 & Pupuk — difusi, NPK, dosing | ⬜ |
-| 14 | Hardscape & Layout — golden ratio, focal point | ⬜ |
-| 15 | Gaya Aquascape — Iwagumi, Nature, Dutch | ⬜ |
-| 16 | Udang & Keong — nano tank heroes | ⬜ |
-| 17 | Aklimatisasi & Karantina — jangan cemplung! | ⬜ |
-| 18 | Pakan & Nutrisi Ikan — jenis & jadwal | ⬜ |
+| 07 | Macam-macam Filter | ≡ƒôà |
+| 08 | Tanaman Dasar | Γ¼£ |
+| 09 | Ganti Air & Perawatan | Γ¼£ |
+| 10 | Penyakit Ikan | Γ¼£ |
+| 11 | Parameter Air | Γ¼£ |
+| 12 | Substrate Deep Dive | Γ¼£ |
 
-## 🔴 Level 4: Advanced
-
+### Level 3: Naik Kelas
 | # | Topik | Status |
 |---|-------|--------|
-| 19 | Dry Start Method — carpet tanpa CO2 | ⬜ |
-| 20 | Tank Mates Compatibility — siapa cocok sama siapa | ⬜ |
-| 21 | DIY Aksesoris — filter, CO2, lampu | ⬜ |
-| 22 | Rescape & Evolusi Tank | ⬜ |
+| 13 | CO2 & Pupuk | Γ¼£ |
+| 14 | Hardscape & Layout | Γ¼£ |
+| 15 | Gaya Aquascape | Γ¼£ |
+| 16 | Udang & Keong | Γ¼£ |
+| 17 | Aklimatisasi & Karantina | Γ¼£ |
+| 18 | Pakan & Nutrisi | Γ¼£ |
 
----
-
-> 🐟 **Aquarisamatiran** — Belajar aquascape dari nol, bareng-bareng!
+### Level 4: Advanced
+| # | Topik | Status |
+|---|-------|--------|
+| 19 | Dry Start Method | Γ¼£ |
+| 20 | Tank Mates | Γ¼£ |
+| 21 | DIY Aksesoris | Γ¼£ |
+| 22 | Rescape & Evolusi | Γ¼£ |

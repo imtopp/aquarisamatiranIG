@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import sys
 import time
 from pathlib import Path
 
@@ -60,10 +61,13 @@ def generate_facts(topic: str, num_facts: int = 4) -> dict:
 
     if cache_path.exists():
         print(f"📦 Facts cache ditemukan: {cache_path.name}")
-        ans = input("   Pakai ulang? (y/n): ").strip().lower()
-        if ans == "y":
-            return json.loads(cache_path.read_text(encoding="utf-8"))
-        print("   Regenerate...")
+        if sys.stdin.isatty():
+            ans = input("   Pakai ulang? (y/n): ").strip().lower()
+            if ans == "y":
+                return json.loads(cache_path.read_text(encoding="utf-8"))
+            print("   Regenerate...")
+        else:
+            print("   ⚙️  Non-interactive, auto-regenerate...")
 
     schema = _build_json_schema(niche, ct, num_facts)
 

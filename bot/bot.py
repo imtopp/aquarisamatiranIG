@@ -359,6 +359,7 @@ def _latest_slides(curriculum_tag: str = "") -> tuple[str | None, list[Path]]:
                 legacy += sorted(slides_dir.glob(f"{slug}_slide_*.jpg"))
                 if legacy:
                     return slug, legacy
+            return None, []
 
     slides = sorted(slides_dir.glob("*_slide_??.png"))
     slides += sorted(slides_dir.glob("edu_*_??.jpg"))

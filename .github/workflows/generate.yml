@@ -1,5 +1,9 @@
 name: Generate Carousel (SD)
 
+concurrency:
+  group: generate-${{ github.event.inputs.topic }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
     inputs:

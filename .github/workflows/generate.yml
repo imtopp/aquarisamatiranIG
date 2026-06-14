@@ -42,6 +42,14 @@ jobs:
           pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
           pip install diffusers transformers accelerate pillow
 
+      - name: Cleanup old slides for this slug
+        run: |
+          SLUG=$(echo "${{ inputs.topic }}" | tr '[:upper:]' '[:lower:]' | tr ' -' '_' | sed 's/[^a-z0-9_]//g' | cut -c1-30 | sed 's/_*$//')
+          echo "Cleaning old slides for slug: $SLUG"
+          rm -f resource/photos/${SLUG}_sd_*
+          rm -f resource/photos/${SLUG}_slide_*
+          echo "Done"
+
       - name: Generate carousel
         run: python main.py generate-carousel-sd "${{ inputs.topic }}" --num-facts ${{ inputs.num_facts }}
         env:

@@ -232,6 +232,9 @@ def cmd_post_carousel(client, args):
         latest_prefix = max(groups, key=lambda k: max(groups[k], key=lambda f: f.stat().st_mtime).stat().st_mtime)
 
     latest = sorted(groups[latest_prefix])
+    if len(latest) > 10:
+        print(f"❌ IG carousel maksimal 10 slide, ini ada {len(latest)} (cover + fakta + CTA). Kurangin jumlah fakta atau pisahin.")
+        return
     print(f"📋 Detected {len(latest)} slide: {', '.join(f.name for f in latest)}")
 
     if not caption:

@@ -499,6 +499,9 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not slug:
         await update.message.reply_text("❌ Ngga nemu slide carousel di resource/photos/")
         return
+    if len(slides) > 10:
+        await update.message.reply_text(f"❌ IG carousel maksimal 10 slide, ini ada {len(slides)} (cover + fakta + CTA). Generate ulang pake lebih dikit fakta ya~")
+        return
 
     # Determine schedule time
     if not schedule_time:

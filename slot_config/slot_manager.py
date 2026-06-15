@@ -120,9 +120,9 @@ class SlotManager:
         }
 
     async def sync_cronjob(self) -> str:
-        token = os.environ.get("CRONJOB_TOKEN", "")
+        token = os.environ.get("CRONJOB_TOKEN") or os.environ.get("CRONJOB_API_KEY", "")
         if not token:
-            return "❌ CRONJOB_TOKEN gak ada di .env"
+            return "❌ CRONJOB_TOKEN / CRONJOB_API_KEY gak ada di .env"
         changed = False
         results = []
         async with httpx.AsyncClient(timeout=15) as client:

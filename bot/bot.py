@@ -683,9 +683,9 @@ def _day_keyboard(selected: set[int]) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
-def _confirm_keyboard(sid: str, days_str: str, time: str) -> InlineKeyboardMarkup:
+def _confirm_keyboard() -> InlineKeyboardMarkup:
     keyboard = [
-        [InlineKeyboardButton("✅ Ya, simpan", callback_data=f"wiz:confirm:{sid}:{days_str}:{time}")],
+        [InlineKeyboardButton("✅ Ya, simpan", callback_data="wiz:confirm")],
         [InlineKeyboardButton("❌ Batal", callback_data="wiz:cancel")],
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -758,17 +758,13 @@ async def wizard_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_text(f"✅ Hari: {wiz['days_msg']}\n\n⏰ **Jam berapa?** (HH:MM format, contoh: `19:00`)", parse_mode="Markdown")
         return
 
-    if data.startswith("wiz:confirm:"):
+    if data == "wiz:confirm":
         wiz = context.user_data.pop("wizard", None)
         if not wiz:
             return
-        parts = data.split(":", 3)
-        sid = parts[2]
-        days_str = parts[3]
-        time_str = parts[4]
-
-        days_map = {d: i for i, d in enumerate(DAYS_ID)}
-        days_list = [days_map[d.strip()] for d in days_str.split(",")]
+        sid = wiz["sid"]
+        days_list = sorted(wiz["selected_days"])
+        time_str = wiz["time"]
 
         ok = SLOT_MANAGER.add_slot(sid, days_list, time_str)
         if not ok:
@@ -816,7 +812,7 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"Jam: {text}\n\n"
                 f"Udah bener?"
             )
-            await update.message.reply_text(preview, reply_markup=_confirm_keyboard(wiz["sid"], days_str, text), parse_mode="Markdown")
+            await update.message.reply_text(preview, reply_markup=_confirm_keyboard(), parse_mode="Markdown")
             return
         context.user_data.pop("wizard", None)
 

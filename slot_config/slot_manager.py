@@ -98,17 +98,17 @@ class SlotManager:
                 "enabled": True,
                 "title": slot.get("title", slot["id"]),
                 "saveResponses": True,
+                "url": "https://api.github.com/repos/imtopp/aquarisamatiranIG/actions/workflows/scheduler.yml/dispatches",
+                "requestMethod": 1,
                 "schedule": {
                     "timezone": "Asia/Jakarta",
                     "hours": [int(hh)],
                     "mdays": [-1],
                     "minutes": [int(mm)],
                     "months": [-1],
-                    "wdays": [d + 1 for d in slot["days"]],
+                    "wdays": [(d + 1) % 7 for d in slot["days"]],
                 },
-                "request": {
-                    "url": "https://api.github.com/repos/imtopp/aquarisamatiranIG/actions/workflows/scheduler.yml/dispatches",
-                    "method": "POST",
+                "extendedData": {
                     "headers": {
                         "Accept": "application/vnd.github.v3+json",
                         "Authorization": f"Bearer {os.environ.get('GITHUB_PAT', '')}",

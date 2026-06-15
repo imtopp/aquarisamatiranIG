@@ -172,7 +172,8 @@ HELP_TEXT = (
     "/regenerate — generate ulang slide\n"
     "/cancel — batalin posting\n"
     "/myid — liat chat ID kamu\n"
-    "/setslot — atur jadwal slot (`add` wizard, `remove`, `sync`)\n\n"
+    "/setslot — atur jadwal slot (`add` wizard, `remove`, `sync`)\n"
+    "/schedule — liat jadwal postingan\n\n"
     "**🧙 Wizard Interaktif:**\n"
     "Ketik `/setslot add` — bot tanya nama, pilih hari via tombol, jam → auto-sync cron-job.org!\n\n"
     "**🚀 Cara pake:**\n"
@@ -691,6 +692,15 @@ def _confirm_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
+async def schedule_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    sched = _read_schedule()
+    if sched:
+        reply = f"{sched}\n\nAda yang mau ditanyain lagi, beb? 😏"
+        await update.message.reply_text(reply)
+    else:
+        await update.message.reply_text("❌ `schedule.json` gak bisa dibaca atau kosong.")
+
+
 async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     if not args:
@@ -931,6 +941,7 @@ def main():
     app.add_handler(CommandHandler("editcaption", editcaption_cmd))
     app.add_handler(CommandHandler("regenerate", regenerate_cmd))
     app.add_handler(CommandHandler("myid", myid_cmd))
+    app.add_handler(CommandHandler("schedule", schedule_cmd))
     app.add_handler(CommandHandler("setslot", setslot_cmd))
     app.add_handler(CallbackQueryHandler(wizard_callback, pattern="^wiz:"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))

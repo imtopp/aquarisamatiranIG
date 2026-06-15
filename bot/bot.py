@@ -437,12 +437,20 @@ def _nearest_slot() -> str:
     weekend_slots = [(5, "09:00"), (6, "09:00")]
     weekday_12 = (0, "12:00"), (1, "12:00"), (2, "12:00"), (3, "12:00"), (4, "12:00")
     all_slots = weekday_slots + [fri_slot] + weekend_slots + list(weekday_12)
+    best = None
+    best_dt = None
     for dw, tm in all_slots:
         days_ahead = dw - wday
-        if days_ahead < 0 or (days_ahead == 0 and int(tm.split(":")[0]) <= hour):
+        h, m = int(tm.split(":")[0]), int(tm.split(":")[1])
+        if days_ahead < 0 or (days_ahead == 0 and (h < hour or (h == hour and m <= now.minute))):
             days_ahead += 7
         target = now + datetime.timedelta(days=days_ahead)
-        return target.strftime("%Y-%m-%d") + " " + tm
+        target = target.replace(hour=h, minute=m, second=0, microsecond=0)
+        if best_dt is None or target < best_dt:
+            best_dt = target
+            best = (dw, tm)
+    if best:
+        return best_dt.strftime("%Y-%m-%d") + " " + best[1]
     return (now + datetime.timedelta(days=1)).strftime("%Y-%m-%d") + " 19:00"
 
 

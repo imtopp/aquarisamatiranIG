@@ -302,7 +302,10 @@ async def topics_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             st = t.get("status", "planned")
             emoji = {"live": "✅", "scheduled": "📅", "planned": "🔜"}.get(st, "❓")
             dn = t.get("display_name", t.get("title", "?"))
-            lines.append(f"  {emoji} `S{sid}#{tnum.zfill(2)}` {dn}")
+            jadwal = ""
+            if st == "scheduled" and t.get("scheduled_time"):
+                jadwal = f" — {t['scheduled_time']} WIB"
+            lines.append(f"  {emoji} `S{sid}#{tnum.zfill(2)}` {dn}{jadwal}")
         lines.append("")
     lines.append("Contoh: `/generate S1#07`, `/post S2#01`")
     await update.message.reply_text("\n".join(lines), parse_mode="Markdown")

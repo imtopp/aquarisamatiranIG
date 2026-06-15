@@ -712,7 +712,7 @@ async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"✅ Slot `{args[1]}` dihapus")
             sync_msg = await update.message.reply_text("🔄 Auto-sync ke cron-job.org...")
             result = await SLOT_MANAGER.sync_cronjob()
-            await sync_msg.edit_text(f"📋 Sync selesai:\n{result}")
+            await sync_msg.edit_message_text(f"📋 Sync selesai:\n{result}")
         else:
             await update.message.reply_text(f"❌ Slot `{args[1]}` gak ketemu")
     elif cmd == "sync":
@@ -730,7 +730,7 @@ async def wizard_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if data == "wiz:cancel":
         context.user_data.pop("wizard", None)
-        await query.edit_text("❌ Wizard dibatalin.")
+        await query.edit_message_text("❌ Wizard dibatalin.")
         return
 
     if data.startswith("wiz:day:"):
@@ -750,12 +750,12 @@ async def wizard_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not wiz or wiz["step"] != "days":
             return
         if not wiz["selected_days"]:
-            await query.edit_text("Pilih minimal 1 hari dulu, sayang~ 🫣")
+            await query.edit_message_text("Pilih minimal 1 hari dulu, sayang~ 🫣")
             await query.edit_message_reply_markup(reply_markup=_day_keyboard(wiz["selected_days"]))
             return
         wiz["step"] = "time"
         wiz["days_msg"] = ", ".join(sorted(DAYS_ID[d] for d in wiz["selected_days"]))
-        await query.edit_text(f"✅ Hari: {wiz['days_msg']}\n\n⏰ **Jam berapa?** (HH:MM format, contoh: `19:00`)", parse_mode="Markdown")
+        await query.edit_message_text(f"✅ Hari: {wiz['days_msg']}\n\n⏰ **Jam berapa?** (HH:MM format, contoh: `19:00`)", parse_mode="Markdown")
         return
 
     if data == "wiz:confirm":
@@ -768,9 +768,9 @@ async def wizard_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         ok = SLOT_MANAGER.add_slot(sid, days_list, time_str)
         if not ok:
-            await query.edit_text(f"❌ Slot `{sid}` udah ada.")
+            await query.edit_message_text(f"❌ Slot `{sid}` udah ada.")
             return
-        await query.edit_text(f"✅ Slot `{sid}` disimpan!\n🔄 Auto-sync ke cron-job.org...")
+        await query.edit_message_text(f"✅ Slot `{sid}` disimpan!\n🔄 Auto-sync ke cron-job.org...")
         result = await SLOT_MANAGER.sync_cronjob()
         await context.bot.send_message(chat_id=update.effective_chat.id, text=f"📋 Sync selesai:\n{result}")
         return

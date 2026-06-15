@@ -381,7 +381,7 @@ def _sync_schedule_json(data):
             entry = schedule[idx]
             old_label = entry.get("curriculum", "")
         else:
-            existing = [e for e in schedule if re.sub(r'[S#]', '', e.get("curriculum", "")) == num or e.get("curriculum", "").lstrip("#") == num]
+            existing = [e for e in schedule if re.search(r"#(\d+)", e.get("curriculum", "")) and re.search(r"#(\d+)", e.get("curriculum", "")).group(1) == num]
             if existing:
                 entry = existing[0]
                 old_label = entry.get("curriculum", "")
@@ -430,7 +430,8 @@ def _sync_schedule_json(data):
         s = entry.get("season")
         if not c:
             return True
-        n = c.lstrip("#")
+        m = re.search(r"#(\d+)", c)
+        n = m.group(1) if m else c.lstrip("#")
         if s and (n, int(s)) in valid_keys:
             return True
         if (n, None) in valid_keys:

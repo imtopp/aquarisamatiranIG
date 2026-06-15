@@ -14,6 +14,7 @@ from telegram import Update, InputMediaPhoto
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from telegram.request import HTTPXRequest
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from slot_config.slot_manager import SlotManager, DAYS_ID
 
 sys.stdout.reconfigure(encoding="utf-8")

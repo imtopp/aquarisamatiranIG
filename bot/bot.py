@@ -690,6 +690,9 @@ async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ok = SLOT_MANAGER.add_slot(sid, days, time, cron_id)
         if ok:
             await update.message.reply_text(f"✅ Slot `{sid}` ditambahin: {time} di {len(days)} hari")
+            sync_msg = await update.message.reply_text("🔄 Auto-sync ke cron-job.org...")
+            result = await SLOT_MANAGER.sync_cronjob()
+            await sync_msg.edit_text(f"📋 Sync selesai:\n{result}")
         else:
             await update.message.reply_text(f"❌ Slot `{sid}` udah ada")
     elif cmd == "remove":
@@ -699,6 +702,9 @@ async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ok = SLOT_MANAGER.remove_slot(args[1])
         if ok:
             await update.message.reply_text(f"✅ Slot `{args[1]}` dihapus")
+            sync_msg = await update.message.reply_text("🔄 Auto-sync ke cron-job.org...")
+            result = await SLOT_MANAGER.sync_cronjob()
+            await sync_msg.edit_text(f"📋 Sync selesai:\n{result}")
         else:
             await update.message.reply_text(f"❌ Slot `{args[1]}` gak ketemu")
     elif cmd == "sync":

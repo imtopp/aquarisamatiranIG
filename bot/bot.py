@@ -386,7 +386,7 @@ def _slug_to_topic(slug: str) -> str:
     return slug.replace("_", " ").title()
 
 
-async def _generate_caption(facts_json: dict | None, topic: str, curriculum_tag: str = "") -> str:
+async def _generate_caption(facts_json: dict | None, topic: str) -> str:
     """Generate a caption using Gemini from facts data."""
     if not GEMINI_API_KEYS[0]:
         # Fallback: build simple caption from facts
@@ -398,8 +398,6 @@ async def _generate_caption(facts_json: dict | None, topic: str, curriculum_tag:
         return "\n".join(lines)
 
     prompt_parts = [f"Buat caption Instagram dalam bahasa Indonesia untuk konten aquarium dengan topik: {topic}."]
-    if curriculum_tag:
-        prompt_parts.append(f"Ini adalah bagian dari kurikulum {curriculum_tag}.")
     if facts_json and "facts" in facts_json:
         prompt_parts.append("\nFakta-fakta dalam konten ini:")
         for f in facts_json["facts"]:
@@ -505,6 +503,15 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not slug:
         await update.message.reply_text("❌ Ngga nemu slide carousel di resource/photos/")
         return
+    if not curriculum_tag:
+        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        for s_num, ts in cc.get("topics", {}).items():
+            for t_num, t in ts.items():
+                if t.get("slug", "").replace("-", "_") == slug:
+                    curriculum_tag = f"S{s_num}#{t_num}"
+                    break
+            if curriculum_tag:
+                break
     if len(slides) > 10:
         await update.message.reply_text(f"❌ IG carousel maksimal 10 slide, ini ada {len(slides)} (cover + fakta + CTA). Generate ulang pake lebih dikit fakta ya~")
         return
@@ -548,7 +555,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     topic_display = _slug_to_topic(slug)
     await update.message.reply_text(f"💬 Generate caption buat \"{topic_display}\"...")
-    caption = await _generate_caption(facts_json, topic_display, curriculum_tag)
+    caption = await _generate_caption(facts_json, topic_display)
 
     # Preview + confirm
     msg = (

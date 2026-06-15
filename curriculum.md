@@ -18,7 +18,7 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 ### Level 2: Mulai Pede
 | # | Topik | Status |
 |---|-------|--------|
-| 07 | Macam-macam Filter | 📅 |
+| 07 | Macam-macam Filter | ⬜ |
 | 08 | Tanaman Dasar | ⬜ |
 | 09 | Ganti Air & Perawatan | ⬜ |
 | 10 | Penyakit Ikan | ⬜ |

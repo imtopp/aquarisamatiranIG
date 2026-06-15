@@ -1,87 +1,87 @@
 {
   "topic": "Sistem Filtrasi",
-  "display_name": "Sistem Filtrasi Aquarium",
-  "subtitle": "Jantung Aquarium Sehatmu!",
-  "scientific_name": null,
+  "display_name": "Sistem Filtrasi Aquarium: Wajib Tahu!",
+  "subtitle": "Air Bersih, Ikan Sehat!",
+  "scientific_name": "N/A",
   "facts": [
     {
       "number": "01",
-      "title": "Apa Itu Filtrasi? 🤔",
-      "description": "Filtrasi adalah proses kunci untuk menjaga air aquarium tetap bersih dan sehat. Ini bekerja layaknya ginjal bagi ikan-ikanmu, menghilangkan kotoran dan racun yang tak terlihat maupun terlihat.",
+      "title": "Apa Itu Filtrasi? 💧",
+      "description": "Filtrasi adalah proses membersihkan air dari sisa makanan, kotoran ikan, dan zat berbahaya lainnya. Ini adalah tulang punggung kesehatan ekosistem aquarium kamu!",
       "tags": [
-        "#AirBersih",
-        "#EkosistemSehat",
-        "#DasarAquarium"
+        "DasarAquarium",
+        "KualitasAir",
+        "AirBersih"
       ]
     },
     {
       "number": "02",
-      "title": "Kenapa Filtrasi Penting? ✨",
-      "description": "Tanpa filtrasi yang baik, sisa makanan, kotoran ikan, dan materi organik lainnya akan menumpuk, menyebabkan air keruh dan beracun. Ini bisa membahayakan kesehatan ikan, bahkan menyebabkan kematian jika dibiarkan.",
+      "title": "Filter Mekanik: Saringan Kasar 💪",
+      "description": "Fungsinya untuk menyaring partikel padat seperti kotoran ikan dan sisa pakan. Media seperti kapas filter atau busa akan menjebak kotoran agar air tidak cepat keruh.",
       "tags": [
-        "#MencegahPenyakit",
-        "#KualitasAir",
-        "#IkanSehat"
+        "FisikFilter",
+        "KapasFilter",
+        "BusaFilter"
       ]
     },
     {
       "number": "03",
-      "title": "Filtrasi Mekanis ⚙️",
-      "description": "Tipe filtrasi ini bertugas menghilangkan partikel fisik yang mengotori air seperti sisa makanan atau kotoran. Media seperti spons, dakron, atau filter pad akan menangkap kotoran ini agar air terlihat jernih.",
+      "title": "Filter Biologis: Rumah Bakteri Baik 🦠",
+      "description": "Ini bagian terpenting! Bakteri baik di sini mengurai amonia beracun (dari kotoran) menjadi nitrit, lalu nitrat yang lebih aman. Media berpori luas adalah sarang ideal mereka.",
       "tags": [
-        "#SponsFilter",
-        "#Dakron",
-        "#PembersihFisik"
+        "BakteriBaik",
+        "SiklusNitrogen",
+        "AmoniaNitrat"
       ]
     },
     {
       "number": "04",
-      "title": "Filtrasi Biologis 🦠",
-      "description": "Ini adalah jantung dari setiap sistem filtrasi yang baik! Bakteri baik akan tumbuh di media filter biologis dan mengubah amonia serta nitrit beracun (hasil buangan ikan) menjadi nitrat yang jauh lebih tidak berbahaya.",
+      "title": "Filter Kimiawi: Pembersih Tersembunyi 🧪",
+      "description": "Bertugas menghilangkan zat terlarut yang tidak bisa diatasi filter lain, seperti bau tidak sedap, warna kuning pada air, atau sisa obat-obatan. Arang aktif adalah contoh yang populer.",
       "tags": [
-        "#BakteriBaik",
-        "#SiklusNitrogen",
-        "#MediaBio"
+        "ArangAktif",
+        "MenghilangkanBau",
+        "WarnaAir"
       ]
     },
     {
       "number": "05",
-      "title": "Filtrasi Kimiawi 🧪",
-      "description": "Filtrasi ini menggunakan bahan kimia khusus untuk menghilangkan zat terlarut yang tidak diinginkan dari air. Contohnya, karbon aktif dapat menyerap bau, warna, dan beberapa polutan kimia.",
+      "title": "Media Filter Andalan ✨",
+      "description": "Kapas/busa (mekanik), bioball/keramik ring/batu apung (biologis), dan arang aktif/purigen (kimiawi) adalah kombinasi media yang sangat direkomendasikan untuk aquarium kamu.",
       "tags": [
-        "#KarbonAktif",
-        "#Zeolit",
-        "#PenyerapPolutan"
+        "JenisMedia",
+        "Bioball",
+        "Purigen"
       ]
     },
     {
       "number": "06",
-      "title": "Media Filter Populer 💡",
-      "description": "Untuk mekanis, ada filter sponge; untuk biologis, ada ceramic ring, bioball, atau Matrix; dan untuk kimiawi, ada karbon aktif atau purigen. Kombinasi yang tepat akan membuat filtermu sangat efektif!",
+      "title": "Urutan Filter Penting! ➡️",
+      "description": "Idealnya, aliran air masuk ke filter mekanik dulu (kapas), lalu biologis (bioball), baru kimiawi (arang aktif). Urutan ini memaksimalkan efisiensi dan menjaga bakteri baik tetap optimal.",
       "tags": [
-        "#CeramicRing",
-        "#Bioball",
-        "#FilterSponge"
+        "FlowFilter",
+        "OptimasiFilter",
+        "SusunanFilter"
       ]
     },
     {
       "number": "07",
-      "title": "Jenis Filter Umum 🏞️",
-      "description": "Beberapa jenis filter populer untuk pemula adalah Hang-on-Back (HOB) yang digantung di belakang aquarium, internal filter yang diletakkan di dalam, atau canister filter untuk kapasitas yang lebih besar.",
+      "title": "Perawatan Filter Rutin 🧼",
+      "description": "Media mekanik (kapas) harus rutin dibersihkan/diganti. Media biologis cukup dibilas dengan air aquarium saat membersihkan agar bakteri baik tidak mati terkena air kran berklorin.",
       "tags": [
-        "#HOBFilter",
-        "#InternalFilter",
-        "#CanisterFilter"
+        "RutinBersih",
+        "JagaBakteri",
+        "MaintenanceAquarium"
       ]
     },
     {
       "number": "08",
-      "title": "Perawatan Filter Rutin 🛠️",
-      "description": "Jangan lupa membersihkan media filter mekanis secara berkala di air bekas aquarium! Hindari mencuci media biologis di bawah air keran karena klorin bisa membunuh bakteri baik. Air aquarium adalah yang terbaik!",
+      "title": "Investasi Kesehatan Ikan ⚠️",
+      "description": "Sistem filtrasi yang memadai adalah investasi terbaik untuk menjaga ikan tetap sehat dan aktif. Tanpa filter yang baik, kualitas air akan menurun drastis, menyebabkan ikan mudah stres dan sakit.",
       "tags": [
-        "#Maintenance",
-        "#JanganCuciKeran",
-        "#TipsFilter"
+        "InvestasiIkan",
+        "PilihFilter",
+        "KesehatanIkan"
       ]
     }
   ],

@@ -11,7 +11,7 @@ SLOTS_PATH = Path(__file__).resolve().parent / "slots.json"
 
 DAYS_ID = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-CRONJOB_API = "https://api.cron-job.org/v2/jobs"
+CRONJOB_API = "https://api.cron-job.org/jobs"
 
 
 class SlotManager:

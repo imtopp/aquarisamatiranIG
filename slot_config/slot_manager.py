@@ -132,13 +132,13 @@ class SlotManager:
                 body = self._build_cron_body(slot)
                 try:
                     if cid:
-                        resp = await client.put(f"{CRONJOB_API}/{cid}", json=body, headers=headers)
+                        resp = await client.patch(f"{CRONJOB_API}/{cid}", json=body, headers=headers)
                         if resp.status_code == 404:
                             results.append(f"  {slot['id']}: job #{cid} not found, re-creating...")
                             slot["cron_id"] = 0
                             cid = 0
-                            resp = await client.post(CRONJOB_API, json=body, headers=headers)
-                            if resp.status_code in (200, 201):
+                            resp = await client.put(CRONJOB_API, json=body, headers=headers)
+                            if resp.status_code == 200:
                                 new_id = resp.json().get("jobId", 0)
                                 slot["cron_id"] = new_id
                                 changed = True
@@ -148,8 +148,8 @@ class SlotManager:
                         else:
                             results.append(f"  {slot['id']}: update HTTP {resp.status_code}")
                     else:
-                        resp = await client.post(CRONJOB_API, json=body, headers=headers)
-                        if resp.status_code in (200, 201):
+                        resp = await client.put(CRONJOB_API, json=body, headers=headers)
+                        if resp.status_code == 200:
                             new_id = resp.json().get("jobId", 0)
                             slot["cron_id"] = new_id
                             changed = True

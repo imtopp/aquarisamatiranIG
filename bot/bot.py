@@ -702,7 +702,7 @@ async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if cmd == "add":
         context.user_data["wizard"] = {"step": "id"}
-        await update.message.reply_text("📝 **Id slotnya?**\nContoh: `weekend-09`, `weekday-19`, `lunch-12`", parse_mode="Markdown")
+        await update.message.reply_text("📝 **Id slotnya?** (huruf, angka, strip `-`, underscore `_` aja, gak boleh spasi)\nContoh: `weekend-09`, `weekday-19`, `lunch-12`", parse_mode="Markdown")
     elif cmd == "remove":
         if len(args) < 2:
             await update.message.reply_text("Pake: `/setslot remove <id>`")

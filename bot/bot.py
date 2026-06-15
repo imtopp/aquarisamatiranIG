@@ -455,7 +455,7 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         conclusion = run["conclusion"] or "—"
         topic = run.get("display_title", "?")
         html_url = run["html_url"]
-        emoji = {"completed": "✅", "in_progress": "🔄", "queued": "⏳", "failure": "❌", "success": "✅"}.get(status if status == "completed" else status, "❓")
+        emoji = {"queued": "⏳", "in_progress": "🔄", "completed": {"success": "✅", "failure": "❌", "cancelled": "🚫"}.get(conclusion, "❓")}.get(status, "❓")
         created = run["created_at"][:16].replace("T", " ")
         msg = (
             f"{emoji} Generate: **{topic}**\n"

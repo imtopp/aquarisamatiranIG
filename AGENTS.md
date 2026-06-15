@@ -241,6 +241,20 @@ Tapi tetap infokan pilar default slot itu:
 
 Nix akan auto-pilih jadwal ini berdasarkan hari posting. Entries di `schedule.json` harus punya `time` yang sesuai dengan jam cron grup-nya.
 
+### Slot Management
+
+Slot jadwal dikelola via `slot_config/slots.json` + `SlotManager`:
+
+- **`slot_config/slots.json`** — file konfigurasi slot, bisa diedit langsung & dipush
+- **`slot_config/slot_manager.py`** — class `SlotManager` (load, save, nearest_slot, add, remove, sync_cronjob)
+
+Sync cron-job.org otomatis terjadi di 3 jalur:
+1. **`/setslot add/remove`** via Telegram → auto-sync (butuh VPS hidup + `CRONJOB_TOKEN`)
+2. **Push ke `slot_config/slots.json`** → GH Action `sync-slots.yml` jalan (butuh `CRONJOB_TOKEN` + `GITHUB_PAT` di secrets)
+3. **Manual CLI** → `python main.py sync-slots` (dari lokal mana aja)
+
+`CRONJOB_TOKEN` di .env opsional — cuma dipake kalo sync ke cron-job.org API v2.
+
 ## Instagram API Limitations
 
 - **Carousel scheduling (`--schedule`)** ❌ — error "User must be on whitelist". IG Graph API gak ngizinin carousel scheduling tanpa approval khusus. **Jangan pernah pake `--schedule`** di `post-carousel`.

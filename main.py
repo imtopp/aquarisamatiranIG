@@ -143,7 +143,7 @@ def _find_curriculum_key_by_slug(slug: str) -> str | None:
     for sid, st in cc.get("topics", {}).items():
         for num, topic in st.items():
             if topic.get("slug") == slug or topic.get("slug", "").replace("-", "_") == slug:
-                return f"#{num}"
+                return f"S{sid}#{num}"
     return None
 
 

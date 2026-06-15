@@ -701,8 +701,8 @@ async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cmd = args[0].lower()
 
     if cmd == "add":
-        context.user_data["wizard"] = {"step": "name"}
-        await update.message.reply_text("📝 **Nama slotnya?**\nContoh: `weekend-09`, `weekday-19`, `lunch-12`", parse_mode="Markdown")
+        context.user_data["wizard"] = {"step": "id"}
+        await update.message.reply_text("📝 **Id slotnya?**\nContoh: `weekend-09`, `weekday-19`, `lunch-12`", parse_mode="Markdown")
     elif cmd == "remove":
         if len(args) < 2:
             await update.message.reply_text("Pake: `/setslot remove <id>`")
@@ -783,12 +783,12 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Wizard: handle text responses for /setslot add
     wiz = context.user_data.get("wizard")
     if wiz:
-        if wiz["step"] == "name":
+        if wiz["step"] == "id":
             if not re.match(r"^[a-zA-Z0-9_-]+$", text):
-                await update.message.reply_text("❌ Nama cuma boleh huruf, angka, strip, underscore. Coba lagi~")
+                await update.message.reply_text("❌ Id cuma boleh huruf, angka, strip, underscore. Coba lagi~")
                 return
             if any(s["id"] == text for s in SLOT_MANAGER.slots):
-                await update.message.reply_text(f"❌ Slot `{text}` udah ada. Pake nama lain~")
+                await update.message.reply_text(f"❌ Slot `{text}` udah ada. Pake id lain~")
                 return
             wiz["sid"] = text
             wiz["step"] = "days"

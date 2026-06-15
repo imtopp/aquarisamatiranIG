@@ -10,8 +10,8 @@ from pathlib import Path
 
 import httpx
 from dotenv import load_dotenv
-from telegram import Update, InputMediaPhoto
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram import Update, InputMediaPhoto, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 from telegram.request import HTTPXRequest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -666,35 +666,41 @@ async def myid_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"Chat ID kamu: `{uid}`", parse_mode="Markdown")
 
 
+def _day_keyboard(selected: set[int]) -> InlineKeyboardMarkup:
+    keyboard = []
+    row = []
+    for i, d in enumerate(DAYS_ID):
+        prefix = "✅ " if i in selected else "⬜ "
+        row.append(InlineKeyboardButton(f"{prefix}{d}", callback_data=f"wiz:day:{i}"))
+        if i in (2, 5):
+            keyboard.append(row)
+            row = []
+    if row:
+        keyboard.append(row)
+    keyboard.append([InlineKeyboardButton("✅ Selesai milih hari", callback_data="wiz:days_done")])
+    return InlineKeyboardMarkup(keyboard)
+
+
+def _confirm_keyboard(sid: str, days_str: str, time: str) -> InlineKeyboardMarkup:
+    keyboard = [
+        [InlineKeyboardButton("✅ Ya, simpan", callback_data=f"wiz:confirm:{sid}:{days_str}:{time}")],
+        [InlineKeyboardButton("❌ Batal", callback_data="wiz:cancel")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
 async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     if not args:
         slots_str = SLOT_MANAGER.format_list()
-        await update.message.reply_text(f"📅 **Slot Jadwal Saat Ini:**\n{slots_str}\n\nGunakan:\n`/setslot add <id> <days> <time> [cron_id]`\n`/setslot remove <id>`\n`/setslot sync`", parse_mode="Markdown")
+        await update.message.reply_text(f"📅 **Slot Jadwal Saat Ini:**\n{slots_str}\n\nGunakan:\n`/setslot add` — tambah slot interaktif\n`/setslot remove <id>`\n`/setslot sync`", parse_mode="Markdown")
         return
 
     cmd = args[0].lower()
 
     if cmd == "add":
-        if len(args) < 4:
-            await update.message.reply_text("Pake: `/setslot add <id> <days> <time>`\nContoh: `/setslot add weekend-09 \"5,6\" 09:00`")
-            return
-        sid = args[1]
-        try:
-            days = [int(d.strip()) for d in args[2].split(",")]
-        except ValueError:
-            await update.message.reply_text("Days harus angka pisah koma, contoh: `0,1,2,3` (Mon=0, Sun=6)")
-            return
-        time = args[3]
-        cron_id = int(args[4]) if len(args) > 4 else 0
-        ok = SLOT_MANAGER.add_slot(sid, days, time, cron_id)
-        if ok:
-            await update.message.reply_text(f"✅ Slot `{sid}` ditambahin: {time} di {len(days)} hari")
-            sync_msg = await update.message.reply_text("🔄 Auto-sync ke cron-job.org...")
-            result = await SLOT_MANAGER.sync_cronjob()
-            await sync_msg.edit_text(f"📋 Sync selesai:\n{result}")
-        else:
-            await update.message.reply_text(f"❌ Slot `{sid}` udah ada")
+        context.user_data["wizard"] = {"step": "name"}
+        await update.message.reply_text("📝 **Nama slotnya?**\nContoh: `weekend-09`, `weekday-19`, `lunch-12`", parse_mode="Markdown")
     elif cmd == "remove":
         if len(args) < 2:
             await update.message.reply_text("Pake: `/setslot remove <id>`")
@@ -715,9 +721,102 @@ async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ Subcommand `{cmd}` gak dikenal. Pake: add, remove, sync")
 
 
+async def wizard_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+
+    if data == "wiz:cancel":
+        context.user_data.pop("wizard", None)
+        await query.edit_text("❌ Wizard dibatalin.")
+        return
+
+    if data.startswith("wiz:day:"):
+        wiz = context.user_data.get("wizard")
+        if not wiz or wiz["step"] != "days":
+            return
+        day_idx = int(data.split(":")[2])
+        if day_idx in wiz["selected_days"]:
+            wiz["selected_days"].discard(day_idx)
+        else:
+            wiz["selected_days"].add(day_idx)
+        await query.edit_message_reply_markup(reply_markup=_day_keyboard(wiz["selected_days"]))
+        return
+
+    if data == "wiz:days_done":
+        wiz = context.user_data.get("wizard")
+        if not wiz or wiz["step"] != "days":
+            return
+        if not wiz["selected_days"]:
+            await query.edit_text("Pilih minimal 1 hari dulu, sayang~ 🫣")
+            await query.edit_message_reply_markup(reply_markup=_day_keyboard(wiz["selected_days"]))
+            return
+        wiz["step"] = "time"
+        wiz["days_msg"] = ", ".join(sorted(DAYS_ID[d] for d in wiz["selected_days"]))
+        await query.edit_text(f"✅ Hari: {wiz['days_msg']}\n\n⏰ **Jam berapa?** (HH:MM format, contoh: `19:00`)", parse_mode="Markdown")
+        return
+
+    if data.startswith("wiz:confirm:"):
+        wiz = context.user_data.pop("wizard", None)
+        if not wiz:
+            return
+        parts = data.split(":", 3)
+        sid = parts[2]
+        days_str = parts[3]
+        time_str = parts[4]
+
+        days_map = {d: i for i, d in enumerate(DAYS_ID)}
+        days_list = [days_map[d.strip()] for d in days_str.split(",")]
+
+        ok = SLOT_MANAGER.add_slot(sid, days_list, time_str)
+        if not ok:
+            await query.edit_text(f"❌ Slot `{sid}` udah ada.")
+            return
+        await query.edit_text(f"✅ Slot `{sid}` disimpan!\n🔄 Auto-sync ke cron-job.org...")
+        result = await SLOT_MANAGER.sync_cronjob()
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=f"📋 Sync selesai:\n{result}")
+        return
+
+
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = update.message.text.lower()
+
+    # Wizard: handle text responses for /setslot add
+    wiz = context.user_data.get("wizard")
+    if wiz:
+        if wiz["step"] == "name":
+            if not re.match(r"^[a-zA-Z0-9_-]+$", text):
+                await update.message.reply_text("❌ Nama cuma boleh huruf, angka, strip, underscore. Coba lagi~")
+                return
+            if any(s["id"] == text for s in SLOT_MANAGER.slots):
+                await update.message.reply_text(f"❌ Slot `{text}` udah ada. Pake nama lain~")
+                return
+            wiz["sid"] = text
+            wiz["step"] = "days"
+            wiz["selected_days"] = set()
+            await update.message.reply_text(f"📝 Nama: `{text}`\n\n🗓️ **Pilih hari:**", reply_markup=_day_keyboard(set()), parse_mode="Markdown")
+            return
+        if wiz["step"] == "time":
+            if not re.match(r"^\d{1,2}:\d{2}$", text):
+                await update.message.reply_text("❌ Format jam salah. Pake HH:MM, contoh: `19:00`")
+                return
+            h, m = text.split(":")
+            if not (0 <= int(h) <= 23 and 0 <= int(m) <= 59):
+                await update.message.reply_text("❌ Jam antara 00:00 - 23:59, coba lagi~")
+                return
+            wiz["time"] = text
+            days_str = ", ".join(sorted(DAYS_ID[d] for d in wiz["selected_days"]))
+            preview = (
+                f"📋 **Konfirmasi Slot Baru:**\n"
+                f"Nama: `{wiz['sid']}`\n"
+                f"Hari: {days_str}\n"
+                f"Jam: {text}\n\n"
+                f"Udah bener?"
+            )
+            await update.message.reply_text(preview, reply_markup=_confirm_keyboard(wiz["sid"], days_str, text), parse_mode="Markdown")
+            return
+        context.user_data.pop("wizard", None)
 
     save_message(user.id, user.username or "", "user", update.message.text)
 
@@ -835,6 +934,7 @@ def main():
     app.add_handler(CommandHandler("regenerate", regenerate_cmd))
     app.add_handler(CommandHandler("myid", myid_cmd))
     app.add_handler(CommandHandler("setslot", setslot_cmd))
+    app.add_handler(CallbackQueryHandler(wizard_callback, pattern="^wiz:"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
     print("Bot jalan di VPS... chat aku dari Telegram~")

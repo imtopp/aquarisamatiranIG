@@ -11,7 +11,6 @@ SLOTS_PATH = Path(__file__).resolve().parent / "slots.json"
 
 DAYS_ID = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-DAYS_ID = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
 CRONJOB_API = "https://api.cron-job.org/v2/jobs"
 
 
@@ -92,49 +91,60 @@ class SlotManager:
             lines.append(f"• `{s['id']}` — {s['time']} — {days_str}{cron}")
         return "\n".join(lines) if lines else "(belum ada slot)"
 
+    def _build_cron_body(self, slot: dict) -> dict:
+        hh, mm = slot["time"].split(":")
+        return {
+            "job": {
+                "enabled": True,
+                "title": slot.get("title", slot["id"]),
+                "saveResponses": True,
+                "schedule": {
+                    "timezone": "Asia/Jakarta",
+                    "hours": [int(hh)],
+                    "mdays": [-1],
+                    "minutes": [int(mm)],
+                    "months": [-1],
+                    "wdays": [d + 1 for d in slot["days"]],
+                },
+                "request": {
+                    "url": "https://api.github.com/repos/imtopp/aquarisamatiranIG/actions/workflows/scheduler.yml/dispatches",
+                    "method": "POST",
+                    "headers": {
+                        "Accept": "application/vnd.github.v3+json",
+                        "Authorization": f"Bearer {os.environ.get('GITHUB_PAT', '')}",
+                        "Content-Type": "application/json",
+                    },
+                    "body": '{"ref":"main"}',
+                },
+            }
+        }
+
     async def sync_cronjob(self) -> str:
         token = os.environ.get("CRONJOB_TOKEN", "")
         if not token:
             return "❌ CRONJOB_TOKEN gak ada di .env"
+        changed = False
         results = []
         async with httpx.AsyncClient(timeout=15) as client:
             headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
             for slot in self.slots:
                 cid = slot.get("cron_id")
-                if not cid:
-                    continue
-                day_bits = 0
-                for d in slot["days"]:
-                    day_bits |= 1 << ((d + 1) % 7)
-                hh, mm = slot["time"].split(":")
-                body = {
-                    "job": {
-                        "enabled": True,
-                        "title": slot.get("title", slot["id"]),
-                        "saveResponses": True,
-                        "schedule": {
-                            "timezone": "Asia/Jakarta",
-                            "hours": [int(hh)],
-                            "mdays": [-1],
-                            "minutes": [int(mm)],
-                            "months": [-1],
-                            "wdays": [d + 1 for d in slot["days"]],
-                        },
-                        "request": {
-                            "url": "https://api.github.com/repos/imtopp/aquarisamatiranIG/actions/workflows/scheduler.yml/dispatches",
-                            "method": "POST",
-                            "headers": {
-                                "Accept": "application/vnd.github.v3+json",
-                                "Authorization": f"Bearer {os.environ.get('GITHUB_PAT', '')}",
-                                "Content-Type": "application/json",
-                            },
-                            "body": '{"ref":"main"}',
-                        },
-                    }
-                }
+                body = self._build_cron_body(slot)
                 try:
-                    resp = await client.put(f"{CRONJOB_API}/{cid}", json=body, headers=headers)
-                    results.append(f"  {slot['id']}: HTTP {resp.status_code}")
+                    if cid:
+                        resp = await client.put(f"{CRONJOB_API}/{cid}", json=body, headers=headers)
+                        results.append(f"  {slot['id']}: update HTTP {resp.status_code}")
+                    else:
+                        resp = await client.post(CRONJOB_API, json=body, headers=headers)
+                        if resp.status_code in (200, 201):
+                            new_id = resp.json().get("jobId", 0)
+                            slot["cron_id"] = new_id
+                            changed = True
+                            results.append(f"  {slot['id']}: created (job #{new_id})")
+                        else:
+                            results.append(f"  {slot['id']}: create failed HTTP {resp.status_code}")
                 except Exception as e:
                     results.append(f"  {slot['id']}: ❌ {e}")
+        if changed:
+            self.save()
         return "\n".join(results)

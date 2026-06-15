@@ -14,6 +14,8 @@ from telegram import Update, InputMediaPhoto
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from telegram.request import HTTPXRequest
 
+from slot_config.slot_manager import SlotManager, DAYS_ID
+
 sys.stdout.reconfigure(encoding="utf-8")
 
 load_dotenv()
@@ -37,6 +39,8 @@ _pending_posts: dict[int, dict] = {}
 GITHUB_PAT = os.environ.get("GITHUB_PAT", "")
 GH_REPO = "imtopp/aquarisamatiranIG"
 GH_API = "https://api.github.com"
+
+SLOT_MANAGER = SlotManager()
 
 system_prompt = ""
 if AGENTS_MD.exists():
@@ -166,7 +170,8 @@ HELP_TEXT = (
     "/editcaption `<instruksi>` — ganti caption\n"
     "/regenerate — generate ulang slide\n"
     "/cancel — batalin posting\n"
-    "/myid — liat chat ID kamu\n\n"
+    "/myid — liat chat ID kamu\n"
+    "/setslot — atur jadwal slot (add / remove / sync)\n\n"
     "**🚀 Cara pake:**\n"
     "1. `/topics` — liat daftar `S1#07` yang tersedia\n"
     "2. `/generate S1#07` — bikin carousel (10-30 menit di GH Actions)\n"
@@ -427,33 +432,6 @@ async def _generate_caption(facts_json: dict | None, topic: str) -> str:
     return f"{topic} — Yuk belajar bareng @aquarisamatiran! 🌱 #Aquarisamatiran #AquascapeIndonesia"
 
 
-def _nearest_slot() -> str:
-    """Return the nearest available schedule slot time string."""
-    now = datetime.datetime.now()
-    wday = now.weekday()  # Mon=0, Sun=6
-    hour = now.hour
-    weekday_slots = [(0, "19:00"), (1, "19:00"), (2, "19:00"), (3, "19:00")]
-    fri_slot = (4, "15:00")
-    weekend_slots = [(5, "09:00"), (6, "09:00")]
-    weekday_12 = (0, "12:00"), (1, "12:00"), (2, "12:00"), (3, "12:00"), (4, "12:00")
-    all_slots = weekday_slots + [fri_slot] + weekend_slots + list(weekday_12)
-    best = None
-    best_dt = None
-    for dw, tm in all_slots:
-        days_ahead = dw - wday
-        h, m = int(tm.split(":")[0]), int(tm.split(":")[1])
-        if days_ahead < 0 or (days_ahead == 0 and (h < hour or (h == hour and m <= now.minute))):
-            days_ahead += 7
-        target = now + datetime.timedelta(days=days_ahead)
-        target = target.replace(hour=h, minute=m, second=0, microsecond=0)
-        if best_dt is None or target < best_dt:
-            best_dt = target
-            best = (dw, tm)
-    if best:
-        return best_dt.strftime("%Y-%m-%d") + " " + best[1]
-    return (now + datetime.timedelta(days=1)).strftime("%Y-%m-%d") + " 19:00"
-
-
 async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Check latest GH Actions generate run status."""
     if not GITHUB_PAT:
@@ -527,10 +505,9 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Determine schedule time
     if not schedule_time:
         # Map day to nearest slot
-        nearest = _nearest_slot()
-        days = {"Mon": "Senin", "Tue": "Selasa", "Wed": "Rabu", "Thu": "Kamis", "Fri": "Jumat", "Sat": "Sabtu", "Sun": "Minggu"}
+        nearest = SLOT_MANAGER.nearest_slot()
         dt = datetime.datetime.strptime(nearest, "%Y-%m-%d %H:%M")
-        day_name = days.get(dt.strftime("%a"), dt.strftime("%a"))
+        day_name = DAYS_ID[dt.weekday()]
         time_str = dt.strftime("%H:%M")
         schedule_time = f"{day_name} {time_str}"
 
@@ -688,6 +665,49 @@ async def myid_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"Chat ID kamu: `{uid}`", parse_mode="Markdown")
 
 
+async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args
+    if not args:
+        slots_str = SLOT_MANAGER.format_list()
+        await update.message.reply_text(f"📅 **Slot Jadwal Saat Ini:**\n{slots_str}\n\nGunakan:\n`/setslot add <id> <days> <time> [cron_id]`\n`/setslot remove <id>`\n`/setslot sync`", parse_mode="Markdown")
+        return
+
+    cmd = args[0].lower()
+
+    if cmd == "add":
+        if len(args) < 4:
+            await update.message.reply_text("Pake: `/setslot add <id> <days> <time>`\nContoh: `/setslot add weekend-09 \"5,6\" 09:00`")
+            return
+        sid = args[1]
+        try:
+            days = [int(d.strip()) for d in args[2].split(",")]
+        except ValueError:
+            await update.message.reply_text("Days harus angka pisah koma, contoh: `0,1,2,3` (Mon=0, Sun=6)")
+            return
+        time = args[3]
+        cron_id = int(args[4]) if len(args) > 4 else 0
+        ok = SLOT_MANAGER.add_slot(sid, days, time, cron_id)
+        if ok:
+            await update.message.reply_text(f"✅ Slot `{sid}` ditambahin: {time} di {len(days)} hari")
+        else:
+            await update.message.reply_text(f"❌ Slot `{sid}` udah ada")
+    elif cmd == "remove":
+        if len(args) < 2:
+            await update.message.reply_text("Pake: `/setslot remove <id>`")
+            return
+        ok = SLOT_MANAGER.remove_slot(args[1])
+        if ok:
+            await update.message.reply_text(f"✅ Slot `{args[1]}` dihapus")
+        else:
+            await update.message.reply_text(f"❌ Slot `{args[1]}` gak ketemu")
+    elif cmd == "sync":
+        await update.message.reply_text("🔄 Sync slot ke cron-job.org...")
+        result = await SLOT_MANAGER.sync_cronjob()
+        await update.message.reply_text(f"📋 Hasil sync:\n{result}")
+    else:
+        await update.message.reply_text(f"❌ Subcommand `{cmd}` gak dikenal. Pake: add, remove, sync")
+
+
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     text = update.message.text.lower()
@@ -807,6 +827,7 @@ def main():
     app.add_handler(CommandHandler("editcaption", editcaption_cmd))
     app.add_handler(CommandHandler("regenerate", regenerate_cmd))
     app.add_handler(CommandHandler("myid", myid_cmd))
+    app.add_handler(CommandHandler("setslot", setslot_cmd))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
     print("Bot jalan di VPS... chat aku dari Telegram~")

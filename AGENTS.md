@@ -27,6 +27,7 @@ edit_media.py     — Video editor + file upload
 config.py         — Palette, font, API constants
 sources/          — Edu carousel: facts_generator, wikimedia, inaturalist, image_utils
 carousel/         — Edu carousel: slide_cover, slide_fact, slide_cta, composer
+slot_config/      — Slot jadwal: slots.json, slot_manager.py
 resource/
 ├── videos/       — video mentah
 ├── music/        — file musik
@@ -47,6 +48,7 @@ IG_APP_ID=1297085592205741
 IG_APP_SECRET=b6043cd5d1695b156e9d7332af56d749
 GEMINI_API_KEY=...
 PEXELS_API_KEY=...
+CRONJOB_TOKEN=...  # (opsional) buat /setslot sync
 ```
 
 ## Constraints

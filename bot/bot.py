@@ -712,7 +712,7 @@ async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(f"✅ Slot `{args[1]}` dihapus")
             sync_msg = await update.message.reply_text("🔄 Auto-sync ke cron-job.org...")
             result = await SLOT_MANAGER.sync_cronjob()
-            await sync_msg.edit_message_text(f"📋 Sync selesai:\n{result}")
+            await sync_msg.edit_text(f"📋 Sync selesai:\n{result}")
         else:
             await update.message.reply_text(f"❌ Slot `{args[1]}` gak ketemu")
     elif cmd == "sync":
@@ -772,7 +772,7 @@ async def wizard_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         await query.edit_message_text(f"✅ Slot `{sid}` disimpan!\n🔄 Auto-sync ke cron-job.org...")
         result = await SLOT_MANAGER.sync_cronjob()
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=f"📋 Sync selesai:\n{result}")
+        await query.edit_message_text(f"✅ Slot `{sid}` disimpan!\n📋 Sync selesai:\n{result}")
         return
 
 

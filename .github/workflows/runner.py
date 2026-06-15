@@ -1,6 +1,7 @@
 """Runner — jadwalin post IG dari schedule.json, jalan di VPS tiap 15 menit."""
 import json
 import os
+import re
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -38,7 +39,8 @@ def _update_curriculum_after_post(post: dict):
         return
     try:
         cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
-        num = curriculum.lstrip("#")
+        m = re.search(r"#(\d+)", curriculum)
+        num = m.group(1) if m else curriculum.lstrip("#")
         topic = _find_topic_by_num(cc, num)
         if topic:
             topic["status"] = "live"

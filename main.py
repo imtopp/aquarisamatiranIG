@@ -262,11 +262,20 @@ def cmd_post_carousel(client, args):
         urls.append(url)
         print(f"   ✅ {url}")
 
+    # Load facts from cache for curriculum update
+    _facts_path = PHOTO_DIR / f"edu_{latest_prefix[:20]}_facts.json"
+    _facts_for_cc = None
+    if _facts_path.exists():
+        try:
+            _facts_for_cc = json.loads(_facts_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
     if upload_only:
         print()
         print(f"📌 Upload-only mode — ngga dipublish ke IG")
         print(f"   URLs siap: {urls[0]} ... ({len(urls)} file)")
-        _update_curriculum_content(latest_prefix, facts=None)
+        _update_curriculum_content(latest_prefix, facts=_facts_for_cc)
         return
 
     if schedule_mode == "cron":
@@ -274,7 +283,7 @@ def cmd_post_carousel(client, args):
         dt = datetime.fromtimestamp(schedule_ts)
         time_str = dt.strftime("%Y-%m-%d %H:%M")
         _add_schedule_entry(latest_prefix, "carousel", urls, caption, time_str)
-        _update_curriculum_content(latest_prefix, status="scheduled")
+        _update_curriculum_content(latest_prefix, facts=_facts_for_cc, status="scheduled")
         print(f"\n📅 Carousel masuk antrian schedule.json: {time_str}")
         return
 
@@ -284,7 +293,7 @@ def cmd_post_carousel(client, args):
         from datetime import datetime
         dt = datetime.fromtimestamp(schedule_ts)
         _add_schedule_entry(latest_prefix, "carousel", urls, caption, dt.strftime("%Y-%m-%d %H:%M"))
-        _update_curriculum_content(latest_prefix, status="scheduled")
+        _update_curriculum_content(latest_prefix, facts=_facts_for_cc, status="scheduled")
         print(f"\n📅 Carousel masuk antrian schedule.json: {dt.strftime('%Y-%m-%d %H:%M')}")
         return
 
@@ -1093,6 +1102,10 @@ def cmd_generate_carousel_sd(_client, args):
 
     _notify_telegram(f"{topic_tag} Proses generate carousel selesai! 🎉")
     _notify_telegram(f"Gunakan `/post` di Telegram buat review & posting.")
+
+    # Sync facts ke curriculum_content.json
+    _update_curriculum_content(slug, facts)
+    print(f"📝 curriculum_content.json diupdate untuk {slug}")
 
     print(f"\n{'='*40}")
     if saved:

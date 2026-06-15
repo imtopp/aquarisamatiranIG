@@ -463,7 +463,7 @@
         "display_name": "Alga: Si Hijau, Musuh Atau Guru?",
         "subtitle": "Si Hijau, Apa Kabarmu?",
         "level": 1,
-        "status": "scheduled",
+        "status": "live",
         "keywords": [
           "green water",
           "hair algae",
@@ -546,7 +546,9 @@
             ]
           }
         ],
-        "scheduled_time": "2026-06-17 19:00"
+        "scheduled_time": "2026-06-17 19:00",
+        "result_id": "18119904010783440",
+        "permalink": "https://www.instagram.com/p/DZmxTAFkxdl/"
       },
       "07": {
         "slug": "filter-aquarium",

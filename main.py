@@ -1120,6 +1120,18 @@ def cmd_compress_slides(_client, args):
     print("Compression done")
 
 
+def cmd_sync_slots(_client, args):
+    """Sync slot jadwal ke cron-job.org (VPS-independent)."""
+    import asyncio
+    from slot_config.slot_manager import SlotManager
+    sm = SlotManager()
+    print("Slots saat ini:")
+    print(sm.format_list())
+    print("\n🔄 Sync ke cron-job.org...")
+    result = asyncio.run(sm.sync_cronjob())
+    print(result)
+
+
 def cmd_generate_carousel(_client, args):
     import argparse
     parser = argparse.ArgumentParser(prog="generate-carousel", add_help=False)
@@ -1491,6 +1503,7 @@ def main():
         print("  delete-post <media_id>     — hapus post dari IG + referensi published/")
         print("  file-map                   — tampilkan mapping URL → file lokal")
         print("  curriculum                 — kelola kurikulum (add/edit/delete season, level, topic, sync)")
+        print("  sync-slots                 — sync slot jadwal ke cron-job.org")
         print()
         print("Opsi global:")
         print(f"  --niche NAMA               pilih niche. Tersedia: {niche_list}")
@@ -1499,7 +1512,7 @@ def main():
     cmd = sys.argv[1]
     args = sys.argv[2:]
 
-    no_ig_cmds = {"generate-carousel-sd", "compress-slides", "curriculum", "generate-caption"}
+    no_ig_cmds = {"generate-carousel-sd", "compress-slides", "curriculum", "generate-caption", "sync-slots"}
     client = InstagramClient() if cmd not in no_ig_cmds else None
 
     cmds = {
@@ -1522,6 +1535,7 @@ def main():
         "delete-post": cmd_delete_post,
         "file-map": cmd_file_map,
         "curriculum": cmd_curriculum,
+        "sync-slots": cmd_sync_slots,
     }
 
     fn = cmds.get(cmd)

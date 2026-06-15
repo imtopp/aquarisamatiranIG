@@ -25,4 +25,5 @@ jobs:
         run: python main.py sync-slots
         env:
           CRONJOB_TOKEN: ${{ secrets.CRONJOB_TOKEN }}
+          CRONJOB_API_KEY: ${{ secrets.CRONJOB_API_KEY }}
           GITHUB_PAT: ${{ secrets.PAT }}

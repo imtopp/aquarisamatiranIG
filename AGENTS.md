@@ -49,6 +49,7 @@ IG_APP_SECRET=b6043cd5d1695b156e9d7332af56d749
 GEMINI_API_KEY=...
 PEXELS_API_KEY=...
 CRONJOB_TOKEN=...  # (opsional) buat /setslot sync
+CRONJOB_API_KEY=...  # alternatif (yang ada di VPS)
 ```
 
 ## Constraints

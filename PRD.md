@@ -105,9 +105,9 @@ Ada **2 file master** dengan tanggung jawab berbeda, bukan 1 file tunggal:
 source_of_truth.json  ← MASTER konten (curriculum, slides, facts, caption)
 schedule.json          ← MASTER eksekusi (jadwal, status posting, result_id)
 
-bio/index.html         ← DERIVED dari source_of_truth + schedule.json (data live)
-curriculum.md          ← DERIVED dokumentasi
-resource/photos/       ← CACHE slide images + facts JSON
+accounts/<name>/bio/index.html  ← DERIVED dari source_of_truth + schedule.json (data live)
+accounts/<name>/resource/photos/ ← CACHE slide images + facts JSON
+curriculum.md          ← DERIVED dokumentasi (opsional)
 ```
 
 **Pembagian tanggung jawab:**
@@ -320,7 +320,9 @@ accounts/
 ├── aquarisamatiran/
 │   ├── config.json              (branding, style, niche — NON-secret)
 │   ├── source_of_truth.json     (master konten)
-│   └── schedule.json            (master eksekusi)
+│   ├── schedule.json            (master eksekusi)
+│   ├── bio/index.html           (landing page — auto-generated)
+│   └── resource/                (videos, photos, music, output, published, logo)
 ├── another-account/
 │   ├── config.json
 │   ├── source_of_truth.json

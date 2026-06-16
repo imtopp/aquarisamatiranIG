@@ -102,49 +102,5 @@
     "source_ref": "C1#06",
     "result_id": "18119904010783440",
     "permalink": "https://www.instagram.com/p/DZmxTAFkxdl/"
-  },
-  {
-    "time": "2026-06-20 19:00",
-    "type": "carousel",
-    "caption": "Test caption",
-    "done": false,
-    "urls": [
-      "url1"
-    ],
-    "category": 1
-  },
-  {
-    "time": "2026-06-20 19:00",
-    "type": "carousel",
-    "caption": "Cap",
-    "done": false,
-    "urls": [
-      "url1"
-    ],
-    "category": 1
-  },
-  {
-    "time": "2026-06-20 09:00",
-    "type": "photo",
-    "caption": "Cap",
-    "done": false,
-    "url": "https://url.jpg",
-    "category": 1
-  },
-  {
-    "time": "2026-06-20 15:00",
-    "type": "reel",
-    "caption": "Cap",
-    "done": false,
-    "url": "https://url.mp4",
-    "category": 1
-  },
-  {
-    "time": "2026-06-20 19:00",
-    "type": "photo",
-    "caption": "Cap",
-    "done": false,
-    "url": "url",
-    "category": 1
   }
 ]

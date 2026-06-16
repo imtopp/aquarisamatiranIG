@@ -85,3 +85,9 @@ jobs:
           git remote set-url origin https://x-access-token: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@github.com/imtopp/aquarisamatiranIG.git
           git push origin main
         shell: bash
+
+      - name: Trigger deploy
+        run: gh workflow run deploy.yml
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash

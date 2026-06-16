@@ -1,7 +1,7 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """Curriculum manager — single source of truth untuk struktur kurikulum multi-category, multi-subcategory, multi-topic.
 
-Topics are nested per-category in curriculum_content.json v5+:
+Topics are nested per-category in source_of_truth.json v5+:
   topics: { "1": { "01": {...}, "02": {...} }, "2": { "01": {...} } }
 
 Usage:
@@ -21,11 +21,13 @@ import re
 import sys
 from pathlib import Path
 
-BASE = Path(__file__).resolve().parent
-SRC = BASE / "curriculum_content.json"
-CUR_MD = BASE / "curriculum.md"
-SCHEDULE_JSON = BASE / "schedule.json"
-BIO_HTML = BASE / "bio" / "index.html"
+from nixfw import config
+
+ACCOUNT_BASE = config.PROJECT_ROOT / "accounts" / "aquarisamatiran"
+SRC = ACCOUNT_BASE / "source_of_truth.json"
+CUR_MD = ACCOUNT_BASE / "curriculum.md"
+BIO_HTML = ACCOUNT_BASE / "bio" / "index.html"
+SCHEDULE_JSON = ACCOUNT_BASE / "schedule.json"
 
 
 # ──── helpers ────
@@ -53,6 +55,7 @@ def _migrate_v4_to_v5(data):
             "subtitle": s.get("subtitle", ""),
             "subcategories": subcats,
         }
+    # Convert topic level (int) → subcategory (string)
     for cid, st in data.get("topics", {}).items():
         for num, topic in st.items():
             lv = topic.pop("level", None)
@@ -65,7 +68,7 @@ def _migrate_v4_to_v5(data):
 
 def save(data):
     SRC.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"  \u2705 curriculum_content.json saved (v{data.get('version', '?')})")
+    print(f"  ✅ source_of_truth.json saved (v{data.get('version', '?')})")
 
 
 def _get_category_topics(data, category):
@@ -374,7 +377,7 @@ def _sync_curriculum_md(data):
 
 
 def _sync_schedule_json(data):
-    """Ensure schedule.json matches curriculum_content.json — handles renumbering, time updates, cross-category."""
+    """Ensure schedule.json matches source_of_truth.json — handles renumbering, time updates, cross-category."""
     if not SCHEDULE_JSON.exists():
         print("  ⚠️  schedule.json not found — skip")
         return
@@ -649,4 +652,4 @@ def _cmd_delete(args):
 
 
 if __name__ == "__main__":
-    cmd_curriculum(sys.argv[1:] if len(sys.argv) > 1 else [])
+    cmd_curriculum(None, sys.argv[1:] if len(sys.argv) > 1 else [])

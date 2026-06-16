@@ -40,3 +40,6 @@ _gh_*
 # Large video files (>100MB)
 resource/videos/*.mp4
 resource/published/*.mp4
+
+# Snapshots (pre-refactor baseline for diff comparison)
+.snapshot/

@@ -1,0 +1,60 @@
+{
+  "version": 4,
+  "seasons": {
+    "1": {
+      "title": "Perjalanan dari Nol Sampai Pro",
+      "subtitle": "Belajar aquarium step by step",
+      "level_labels": {
+        "1": "Pemula Absolut — dari yang belum tau apa-apa",
+        "2": "Mulai Pede — udah punya tank? saatnya naik level!",
+        "3": "Naik Kelas — saatnya eksperimen",
+        "4": "Advanced — master class"
+      }
+    }
+  },
+  "topics": {
+    "1": {
+      "01": {
+        "slug": "aquarium-itu-apa",
+        "title": "Aquarium itu Apa?",
+        "display_name": "Ekosistem Akuarium",
+        "subtitle": "Dunia Air di Rumahmu",
+        "level": 1,
+        "status": "live",
+        "keywords": ["freshwater vs saltwater", "nano tank"],
+        "slides": [
+          {"type": "cover", "title": "Ekosistem Akuarium", "subtitle": "Dunia Air di Rumahmu"},
+          {"type": "fact", "number": 1, "title": "Ekosistem Buatan", "description": "Akuarium bukan sekadar wadah kaca.", "tags": ["Biosfer Mini"]}
+        ],
+        "permalink": "https://ig.example/p/01",
+        "result_id": "post_01"
+      },
+      "06": {
+        "slug": "alga-musuh-atau-guru",
+        "title": "Alga: Musuh atau Guru?",
+        "display_name": "Alga: Si Hijau, Musuh Atau Guru?",
+        "subtitle": "Si Hijau, Apa Kabarmu?",
+        "level": 1,
+        "status": "scheduled",
+        "keywords": ["green water", "hair algae", "BBA"],
+        "slides": [
+          {"type": "cover", "title": "Alga: Si Hijau", "subtitle": "Apa Kabarmu?"},
+          {"type": "fact", "number": 1, "title": "Apa Itu Alga?", "description": "Organisme fotosintetik.", "tags": ["Fotosintetik"]}
+        ],
+        "scheduled_time": "2026-06-17 19:00"
+      },
+      "07": {
+        "slug": "filter-aquarium",
+        "title": "Macam-macam Filter",
+        "display_name": "Sistem Filtrasi",
+        "subtitle": "Biar Air Tetap Crystal Clear!",
+        "level": 2,
+        "status": "planned",
+        "keywords": ["filtrasi mekanis", "flow rate"],
+        "slides": [
+          {"type": "cover", "title": "Sistem Filtrasi", "subtitle": "Jantung Kehidupan"}
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "handle": "@aquarisamatiran",
+  "niche": "aquascape",
+  "name": "Aquarisamatiran",
+  "tagline": "Belajar aquarium dari nol, bareng-bareng! 🌱",
+  "curriculum_version": 4,
+  "bio_template": "default.html",
+  "resource_dir": "resource"
+}

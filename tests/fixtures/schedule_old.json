@@ -1,0 +1,39 @@
+[
+  {
+    "time": "2026-06-08 09:00",
+    "type": "carousel",
+    "done": true,
+    "result_id": "post_01",
+    "permalink": "https://ig.example/p/01",
+    "category": 1,
+    "source_ref": "C1#01"
+  },
+  {
+    "time": "2026-06-17 19:00",
+    "type": "carousel",
+    "done": false,
+    "urls": [
+      "https://catbox.moe/slide1.png",
+      "https://catbox.moe/slide2.png"
+    ],
+    "category": 1,
+    "source_ref": "C1#06"
+  },
+  {
+    "time": "2026-06-07 09:00",
+    "type": "photo",
+    "url": "https://catbox.moe/photo.jpg",
+    "caption": "Test photo",
+    "done": true,
+    "category": 1
+  },
+  {
+    "time": "",
+    "type": "carousel",
+    "done": true,
+    "result_id": "post_07",
+    "urls": [],
+    "category": 1,
+    "source_ref": "C1#07"
+  }
+]

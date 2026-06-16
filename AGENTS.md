@@ -16,27 +16,65 @@ Gak pake file `.env` biar aman dari overwrite gak sengaja pas update token via S
 ## Directory Structure
 
 ```
-.env              — secrets (gitignored)
+.env                  — secrets (gitignored)
 .gitignore
 AGENTS.md
-docs/             — docs: commands.md, workflow-reel.md, workflow-photo.md, workflow-edu.md
-.venv/            — virtual environment
-main.py           — CLI entry point
-ig_client.py      — Instagram API wrapper
-edit_media.py     — Video editor + file upload
-config.py         — Palette, font, API constants
-sources/          — Edu carousel: facts_generator, wikimedia, inaturalist, image_utils
-carousel/         — Edu carousel: slide_cover, slide_fact, slide_cta, composer
-slot_config/      — Slot jadwal: slots.json, slot_manager.py
-resource/
-├── videos/       — video mentah
-├── music/        — file musik
-├── photos/       — foto siap upload
-├── output/       — hasil edit (temp, disapu otomatis)
-├── published/    — referensi yg pernah di-post
-├── logo/         — aset logo/branding
-└── .uploaded.json — mapping URL → file lokal
+PRD.md                — product requirements doc
+README.md
+requirements.txt
+docs/                 — docs: commands.md, workflow-reel.md, workflow-photo.md, workflow-edu.md
+tests/                — test suite
+main.py               — CLI entry point (thin → nixfw.cli.dispatch)
+
+nixfw/                — 📦 Framework package
+├── __init__.py
+├── __main__.py           — `python -m nixfw`
+├── config.py             — Paths, palette, API constants, niche registry
+├── ig_client.py          — Instagram Graph API wrapper
+├── runner.py             — Post from schedule.json
+├── editor.py             — Video editor + file upload
+├── slot_manager.py       — Slot jadwal loader/syncer
+├── slots.json            — Definisi slot global (shared token)
+├── cli/
+│   └── dispatch.py       — CLI command dispatch
+├── curriculum/
+│   └── manager.py        — Curriculum CRUD + sync
+├── carousel/
+│   ├── composer.py       — Slide composition
+│   └── slides/           — cover, fact, cta
+├── content/
+│   ├── generator.py      — Content gen via Gemini
+│   └── providers/        — facts_generator, wikimedia, inaturalist, image_utils
+├── bio/
+│   ├── generator.py      — Bio page updater
+│   └── templates/        — Jinja2 templates
+├── bot/
+│   ├── bot.py            — Telegram bot
+│   └── handlers/         — handler perintah
+├── dashboard/            — (future)
+└── templates/
+    └── account/          — Scaffolding: config.json, resource/
+
+accounts/                 — 👤 Per-account data
+└── aquarisamatiran/
+    ├── config.json           — Account config (handle, niche, template)
+    ├── source_of_truth.json  — Master konten (curriculum + topics)
+    ├── schedule.json         — Master jadwal & status posting
+    ├── bio/index.html        — Landing page (auto-updated)
+    └── resource/
+        ├── videos/
+        ├── music/
+        ├── photos/
+        ├── output/
+        ├── published/
+        └── logo/
 ```
+
+## NixFW Package
+
+`python -m nixfw <command>` atau `python main.py <command>` — dua-duanya jalan.
+
+Nambah akun baru: copy folder dari `nixfw/templates/account/`, isi `config.json`, then `python -m nixfw curriculum sync --account <nama>`. Framework nyari data otomatis di `accounts/<nama>/`.
 
 ## Environment (.env)
 
@@ -63,13 +101,13 @@ CRONJOB_API_KEY=...  # alternatif (yang ada di VPS)
 |--------|-------|--------|
 | 1 | Perjalanan dari Nol Sampai Pro | #01–#22 (4 level) |
 
-Setiap topic di `curriculum_content.json` punya field `"season"` buat grouping.
+Setiap topic di `accounts/<name>/source_of_truth.json` punya field `"season"` buat grouping.
 
 ## Caption Writing Rule
 
 When writing captions:
-1. Check `curriculum.md` or `curriculum_content.json` which topics are ✅ (done) with their post IDs
-2. Check `schedule.json` for past post IDs
+1. Check `accounts/<name>/source_of_truth.json` which topics are ✅ (done) with their post IDs
+2. Check `accounts/<name>/schedule.json` for past post IDs
 3. Cross-reference current post topic with related past posts
 4. Automatically mention past posts in caption: *"kayak yang udah kita bahas di post [topic]"*
 
@@ -204,10 +242,10 @@ Tapi tetap infokan pilar default slot itu:
   ```
 - Access: `https://imtopp.github.io/aquarisamatiran-pages/ikan/neon-tetra/`
 - **Status**: Bio page deployed ✅ (2026-06-07)
-- **Auto-update**: Setiap kali `runner.py` sukses posting, `update_bio.py` jalan → update `bio/index.html` → dicomit ke repo ini + dipush ke `aquarisamatiran-pages`
+- **Auto-update**: Setiap kali `nixfw/runner.py` sukses posting, `nixfw/bio/generator.py` jalan → update `accounts/<name>/bio/index.html` → dicomit ke repo ini + dipush ke repo pages
 - **PAGES_PAT** (GitHub secret): Fine-grained PAT (`github_pat_...`) scoped ke `aquarisamatiran-pages` + `aquarisamatiranIG`, tersimpan di Settings → Secrets → PAGES_PAT
   - Classic PAT cadangan: `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` (scope `repo`, fallback)
-- **Mapping**: `schedule.json` tiap entry punya `"curriculum": "#XX"` → dipetakan ke card number di `bio/index.html`
+- **Mapping**: `schedule.json` tiap entry punya `"source_ref": "#XX"` → dipetakan ke card number di bio page
 
 ## Deployment
 
@@ -217,7 +255,7 @@ Tapi tetap infokan pilar default slot itu:
 
 ## Curriculum Manager (v4 — nested per-season)
 
-`curriculum_content.json` versi 4: topics nested per-season.
+`accounts/<name>/source_of_truth.json` versi 4: topics nested per-season.
 ```json
 "topics": {
   "1": { "01": {...}, "02": {...} },
@@ -227,11 +265,11 @@ Tapi tetap infokan pilar default slot itu:
 - `--season` WAJIB untuk semua operasi topic (add/edit/delete)
 - Nomor topic **per-season** (season 2 mulai lagi dari #01)
 - `python main.py curriculum sync` → regenerate `curriculum.md`, `schedule.json`, `bio/index.html`
-- Bot Telegram baca terminology langsung dari `curriculum_content.json` (gak perlu sync ke AGENTS.md)
+- Bot Telegram baca terminology langsung dari `source_of_truth.json` (gak perlu sync ke AGENTS.md)
 
 ## Scheduling
 
-**cron-job.org** — nge-hit GitHub API `workflows/scheduler.yml/dispatches` dengan PAT (`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`). Trigger pas jam posting. Judul generik karena isi ditentukan `schedule.json`. Ada 3 grup cron:
+**cron-job.org** — nge-hit GitHub API `workflows/scheduler.yml/dispatches` dengan PAT (`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`). Trigger pas jam posting. Judul generik karena isi ditentukan `accounts/<name>/schedule.json`. Ada 3 grup cron:
 
 | ID | Title | wdays | Jam WIB |
 |----|-------|-------|---------|
@@ -240,18 +278,18 @@ Tapi tetap infokan pilar default slot itu:
 | 7783400 | Weekend 09:00 WIB | Sat-Sun | 09:00 |
 | 7783402 | Lunch 12:00 WIB | Mon-Fri | 12:00 |
 
-Nix akan auto-pilih jadwal ini berdasarkan hari posting. Entries di `schedule.json` harus punya `time` yang sesuai dengan jam cron grup-nya.
+Nix akan auto-pilih jadwal ini berdasarkan hari posting. Entries di `accounts/<name>/schedule.json` harus punya `time` yang sesuai dengan jam cron grup-nya.
 
 ### Slot Management
 
-Slot jadwal dikelola via `slot_config/slots.json` + `SlotManager`:
+Slot jadwal dikelola via `nixfw/slots.json` + `nixfw/slot_manager.py`:
 
-- **`slot_config/slots.json`** — file konfigurasi slot, bisa diedit langsung & dipush
-- **`slot_config/slot_manager.py`** — class `SlotManager` (load, save, nearest_slot, add, remove, sync_cronjob)
+- **`nixfw/slots.json`** — file konfigurasi slot global (shared token, dipake semua akun)
+- **`nixfw/slot_manager.py`** — class `SlotManager` (load, save, nearest_slot, add, remove, sync_cronjob)
 
 Sync cron-job.org otomatis terjadi di 3 jalur:
 1. **`/setslot add/remove`** via Telegram → auto-sync (butuh VPS hidup + `CRONJOB_TOKEN`)
-2. **Push ke `slot_config/slots.json`** → GH Action `sync-slots.yml` jalan (butuh `CRONJOB_TOKEN` + `GITHUB_PAT` di secrets)
+2. **Push ke `nixfw/slots.json`** → GH Action `sync-slots.yml` jalan (butuh `CRONJOB_TOKEN` + `GITHUB_PAT` di secrets)
 3. **Manual CLI** → `python main.py sync-slots` (dari lokal mana aja)
 
 `CRONJOB_TOKEN` di .env opsional — cuma dipake kalo sync ke cron-job.org API v2.
@@ -260,4 +298,4 @@ Sync cron-job.org otomatis terjadi di 3 jalur:
 
 - **Carousel scheduling (`--schedule`)** ❌ — error "User must be on whitelist". IG Graph API gak ngizinin carousel scheduling tanpa approval khusus. **Jangan pernah pake `--schedule`** di `post-carousel`.
 - **Photo/reel scheduling (`--schedule`)** ✅ — masih bisa.
-- **Workaround carousel:** Upload slide ke Catbox (via `post-carousel` tanpa `--schedule`, atau manual), masukin `urls` ke `schedule.json`, biar VPS runner yang posting langsung pas jamnya (dengan `post_carousel` tanpa parameter schedule).
+- **Workaround carousel:** Upload slide ke Catbox (via `post-carousel` tanpa `--schedule`, atau manual), masukin `urls` ke `accounts/<name>/schedule.json`, biar runner yang posting langsung pas jamnya (dengan `post_carousel` tanpa parameter schedule).

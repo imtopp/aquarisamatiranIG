@@ -15,7 +15,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQu
 from telegram.request import HTTPXRequest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from slot_config.slot_manager import SlotManager, DAYS_ID
+from nixfw.slot_manager import SlotManager, DAYS_ID
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -366,7 +366,7 @@ def _latest_slides(curriculum_tag: str = "") -> tuple[str | None, list[Path]]:
     """Detect carousel slides in PHOTO_DIR. If curriculum_tag given (e.g. C1#07), filter by topic slug."""
     slides_dir = PROJECT_DIR / "resource/photos"
     if curriculum_tag:
-        m = re.match(r'S(\d+)#(\d+)', curriculum_tag)
+        m = re.match(r'[CS](\d+)#(\d+)', curriculum_tag)
         if m:
             cur_data = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
             topic = cur_data.get("topics", {}).get(m.group(1), {}).get(m.group(2), {})

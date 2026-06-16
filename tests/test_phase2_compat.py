@@ -102,7 +102,7 @@ class TestKeepIntegration:
 
 class TestSyncScheduleJson:
     def test_sync_with_v4(self, v4_content, monkeypatch, tmp_path):
-        import curriculum_manager as cm
+        import nixfw.curriculum.manager as cm
 
         content_path = tmp_path / "curriculum_content.json"
         content_path.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
@@ -122,7 +122,7 @@ class TestSyncScheduleJson:
         assert len(schedule) == 2
 
     def test_sync_with_v4_writes_source_ref(self, v4_content, monkeypatch, tmp_path):
-        import curriculum_manager as cm
+        import nixfw.curriculum.manager as cm
 
         content_path = tmp_path / "curriculum_content.json"
         content_path.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
@@ -146,7 +146,7 @@ class TestSyncScheduleJson:
                 assert entry["curriculum"].startswith("C1#")
 
     def test_sync_with_v4_preserves_existing(self, v4_content, monkeypatch, tmp_path):
-        import curriculum_manager as cm
+        import nixfw.curriculum.manager as cm
 
         content_path = tmp_path / "curriculum_content.json"
         content_path.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
@@ -169,7 +169,7 @@ class TestSyncScheduleJson:
         assert len(schedule) == 2
 
     def test_sync_with_v5(self, v5_content, monkeypatch, tmp_path):
-        import curriculum_manager as cm
+        import nixfw.curriculum.manager as cm
 
         content_path = tmp_path / "curriculum_content.json"
         content_path.write_text(json.dumps(v5_content, indent=2), encoding="utf-8")
@@ -189,7 +189,7 @@ class TestSyncScheduleJson:
         assert len(schedule) == 2
 
     def test_sync_with_v5_writes_source_ref(self, v5_content, monkeypatch, tmp_path):
-        import curriculum_manager as cm
+        import nixfw.curriculum.manager as cm
 
         content_path = tmp_path / "curriculum_content.json"
         content_path.write_text(json.dumps(v5_content, indent=2), encoding="utf-8")

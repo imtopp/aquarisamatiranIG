@@ -920,7 +920,7 @@ def _sd_generate(prompt: str, size: tuple = (512, 512)) -> PIL.Image.Image | Non
 
 def _darken_bg(img: PIL.Image.Image, opacity: float = 0.55) -> PIL.Image.Image:
     """Overlay semi-transparent dark gradient for text readability."""
-    from carousel.composer import draw_gradient_bg
+    from nixfw.carousel.composer import draw_gradient_bg
     dark = draw_gradient_bg(img.size, "#000000", "#000000")
     dark.putalpha(int(255 * opacity))
     img = img.convert("RGBA")
@@ -935,10 +935,10 @@ def cmd_generate_carousel_sd(_client, args):
     import re
     import time
     from pathlib import Path
-    from sources.facts_generator import generate_facts
-    from carousel.slide_cover import build_cover
-    from carousel.slide_fact import build_fact_slide
-    from carousel.slide_cta import build_cta_slide
+    from nixfw.content.providers.facts_generator import generate_facts
+    from nixfw.carousel.slides.cover import build_cover
+    from nixfw.carousel.slides.fact import build_fact_slide
+    from nixfw.carousel.slides.cta import build_cta_slide
 
     parser = argparse.ArgumentParser(prog="generate-carousel-sd", add_help=False)
     parser.add_argument("topic", nargs="?", help="topik konten")
@@ -1183,13 +1183,13 @@ def cmd_generate_carousel(_client, args):
         print("  python main.py generate-carousel 'Perjalanan tank pertamaku' --type story")
         return
 
-    from sources.facts_generator import generate_facts
-    from sources.wikimedia import get_wikimedia_image
-    from sources.inaturalist import get_inaturalist_image
-    from sources.image_utils import prepare_subject_image
-    from carousel.slide_cover import build_cover
-    from carousel.slide_fact import build_fact_slide
-    from carousel.slide_cta import build_cta_slide
+    from nixfw.content.providers.facts_generator import generate_facts
+    from nixfw.content.providers.wikimedia import get_wikimedia_image
+    from nixfw.content.providers.inaturalist import get_inaturalist_image
+    from nixfw.content.providers.image_utils import prepare_subject_image
+    from nixfw.carousel.slides.cover import build_cover
+    from nixfw.carousel.slides.fact import build_fact_slide
+    from nixfw.carousel.slides.cta import build_cta_slide
 
     topic = parsed.topic
     import re
@@ -1225,7 +1225,7 @@ def cmd_generate_carousel(_client, args):
         local_path = PHOTO_DIR / parsed.force_image
         if local_path.exists():
             img = PIL.Image.open(local_path).convert("RGBA")
-            from sources.image_utils import apply_cartoon_effect
+            from nixfw.content.providers.image_utils import apply_cartoon_effect
             img = apply_cartoon_effect(img)
             side = min(img.size)
             l = (img.width - side) // 2
@@ -1251,7 +1251,7 @@ def cmd_generate_carousel(_client, args):
             print("   ⏩ iNaturalist kosong, coba Pexels...")
             pexels_img = _search_pexels_image(f"{topic}")
             if pexels_img:
-                from sources.image_utils import apply_cartoon_effect
+                from nixfw.content.providers.image_utils import apply_cartoon_effect
                 pexels_img = apply_cartoon_effect(pexels_img).convert("RGBA")
                 side = min(pexels_img.size)
                 l = (pexels_img.width - side) // 2
@@ -1272,7 +1272,7 @@ def cmd_generate_carousel(_client, args):
     def _get_pexels_subject(query: str, size: int) -> PIL.Image.Image | None:
         """Search Pexels with dedup — skip URLs already used."""
         nonlocal _pexels_used_urls
-        from sources.image_utils import apply_cartoon_effect
+        from nixfw.content.providers.image_utils import apply_cartoon_effect
         import requests
         from io import BytesIO
         import re as _re

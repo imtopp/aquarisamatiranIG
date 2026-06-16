@@ -78,7 +78,7 @@ class TestCurriculumManagerWriters:
     """Tests for curriculum_manager.py _sync_schedule_json."""
 
     def test_sync_schedule_json_adds_curriculum_entries(self, v4_content, monkeypatch, tmp_path):
-        import curriculum_manager as cm
+        import nixfw.curriculum.manager as cm
 
         content_path = tmp_path / "curriculum_content.json"
         content_path.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
@@ -103,7 +103,7 @@ class TestCurriculumManagerWriters:
                 assert entry["curriculum"].startswith("C1#")
 
     def test_sync_schedule_json_preserves_existing(self, v4_content, monkeypatch, tmp_path):
-        import curriculum_manager as cm
+        import nixfw.curriculum.manager as cm
 
         content_path = tmp_path / "curriculum_content.json"
         content_path.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")

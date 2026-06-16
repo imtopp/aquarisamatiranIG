@@ -114,9 +114,9 @@ class TestMainReaders:
 class TestBioReaders:
     """Tests for build_card_statuses reader.
 
-    NOTE: Current regex r'(\d+)' on value 'S1#06' matches '1' (from S1) not '06'.
-    This is a PRE-EXISTING BUG — card_num is always 1 for S1#XX entries.
-    Tests reflect actual behavior, not desired behavior.
+    NOTE: Old regex r'(\\d+)' on value 'S1#06' matched '1' (from S1) not '06'.
+    Now fixed to r'#(\\d+)' — card_num extracts from after # correctly.
+    Tests reflect current fixed behavior.
     """
 
     def test_build_card_statuses_with_curriculum(self, schedule_old):
@@ -133,7 +133,9 @@ class TestBioReaders:
 
     def test_build_card_statuses_non_curriculum_skipped(self, schedule_old):
         result = build_card_statuses(schedule_old)
-        assert len(result) == 1
+        assert len(result) == 3  # 3 curriculum entries, 1 non-curriculum skipped
+        assert None not in result  # no None keys
+        assert 1 in result and 6 in result and 7 in result
 
     def test_build_card_statuses_scheduled(self, schedule_mixed):
         result = build_card_statuses(schedule_mixed)

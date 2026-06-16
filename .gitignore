@@ -37,6 +37,10 @@ _*.py
 # Temp GH logs
 _gh_*
 
+# Bot generated files
+bot/chat_history.db
+bot/bot.log
+
 # Large video files (>100MB)
 resource/videos/*.mp4
 resource/published/*.mp4

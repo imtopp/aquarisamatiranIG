@@ -1,4 +1,5 @@
 """Telegram bot untuk Aquarisamatiran — personality AGENTS.md + Gemini API"""
+import asyncio
 import datetime
 import json
 import os
@@ -14,9 +15,14 @@ from telegram import Update, InputMediaPhoto, InlineKeyboardButton, InlineKeyboa
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 from telegram.request import HTTPXRequest
 
-from nixfw import config as _bot_cfg
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from nixfw.config import (
+    PROJECT_ROOT,
+    SCHEDULE_PATH,
+    CONTENT_PATH as CURRICULUM_PATH,
+    PHOTO_DIR,
+    AGENTS_MD as _CFG_AGENTS_MD,
+    DB_PATH as _CFG_DB_PATH,
+)
 from nixfw.slot_manager import SlotManager, DAYS_ID
 
 sys.stdout.reconfigure(encoding="utf-8")
@@ -29,11 +35,8 @@ GEMINI_API_KEYS = [
     *[v for k, v in sorted(os.environ.items()) if k.startswith("GEMINI_API_KEY_") and v],
 ]
 ALLOWED_USERNAMES = os.environ.get("BOT_ALLOWED_USERNAMES", "").split(",")
-PROJECT_DIR = Path(__file__).resolve().parent.parent
-AGENTS_MD = PROJECT_DIR / "AGENTS.md"
-DB_PATH = PROJECT_DIR / "bot" / "chat_history.db"
-SCHEDULE_PATH = PROJECT_DIR / "accounts" / "aquarisamatiran" / "schedule.json"
-CURRICULUM_PATH = PROJECT_DIR / "accounts" / "aquarisamatiran" / "source_of_truth.json"
+AGENTS_MD = _CFG_AGENTS_MD
+DB_PATH = _CFG_DB_PATH
 FORBIDDEN_WORDS = ["lu", "gue", "lo", "elu", "gw"]
 
 GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"]
@@ -539,18 +542,21 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if len(media_group) >= 10:
             break
         try:
-            media_group.append(InputMediaPhoto(media=s.open("rb")))
+            with open(s, "rb") as f:
+                media_group.append(InputMediaPhoto(media=f.read()))
         except Exception:
             continue
     if media_group:
         try:
-            await update.message.reply_media_group(media_group)
+            await asyncio.wait_for(update.message.reply_media_group(media_group), timeout=30)
+        except asyncio.TimeoutError:
+            await update.message.reply_text("⚠️ Preview upload timeout, lanjut aja~")
         except Exception:
             await update.message.reply_text("⚠️ Gagal kirim preview, lanjut aja~")
 
     # Generate caption
     facts_json = None
-    facts_path = PROJECT_DIR / "resource/photos" / f"edu_{slug}_facts.json"
+    facts_path = PHOTO_DIR / f"edu_{slug}_facts.json"
     if facts_path.exists():
         try:
             facts_json = json.loads(facts_path.read_text(encoding="utf-8"))
@@ -559,7 +565,11 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     topic_display = _slug_to_topic(slug)
     await update.message.reply_text(f"💬 Generate caption buat \"{topic_display}\"...")
-    caption = await _generate_caption(facts_json, topic_display)
+    try:
+        caption = await asyncio.wait_for(_generate_caption(facts_json, topic_display), timeout=60)
+    except asyncio.TimeoutError:
+        caption = f"{topic_display} — Yuk belajar bareng @aquarisamatiran! 🌱 #Aquarisamatiran #AquascapeIndonesia"
+        await update.message.reply_text("⚠️ Caption generation timeout, pakai fallback~")
 
     # Preview + confirm
     msg = (
@@ -662,7 +672,7 @@ async def confirm_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"📤 Upload & jadwalin \"{slug}\"...")
     try:
         proc_args = [sys.executable, "main.py", "post-carousel", "--slug", slug, "--schedule", "cron", schedule_time, caption]
-        result = subprocess.run(proc_args, capture_output=True, text=True, timeout=300, cwd=str(PROJECT_DIR))
+        result = subprocess.run(proc_args, capture_output=True, text=True, timeout=300, cwd=str(PROJECT_ROOT))
         out = (result.stdout or "") + (result.stderr or "")
         out = out.strip()[-3000:]
         status = "✅" if result.returncode == 0 else "❌"
@@ -906,7 +916,7 @@ async def run_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         result = subprocess.run(
-            cmd, shell=True, capture_output=True, text=True, timeout=30, cwd=str(PROJECT_DIR)
+            cmd, shell=True, capture_output=True, text=True, timeout=30, cwd=str(PROJECT_ROOT)
         )
         out = (result.stdout or "") + (result.stderr or "")
         out = out.strip()[-2000:]

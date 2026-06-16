@@ -18,7 +18,7 @@ jobs:
 
       - name: Deploy
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }} " "
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
             cd /home/topp/projects/aquarisamatiran &&
             git fetch origin main &&
             git reset --hard origin/main &&

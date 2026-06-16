@@ -29,7 +29,7 @@ def build_card_statuses(schedule):
         curr = entry.get("source_ref") or entry.get("curriculum")
         if not curr:
             continue
-        m = re.search(r'(\d+)', curr)
+        m = re.search(r'#(\d+)', curr)
         if not m:
             continue
         card_num = int(m.group(1))

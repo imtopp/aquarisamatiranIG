@@ -394,9 +394,10 @@ NIX_ACCOUNTS_AQUARISAMATIRAN_PEXELS_KEY=...
 │  [Step 3] Generate Slide Images                          │
 │    Input: facts JSON                                     │
 │    Process: SD / Pexels / Wikimedia → background + text  │
-│    Output: slide PNG files                               │
-│    ⚠️  Resumable: jika gagal di slide ke-5,              │
-│        cukup ulang dari slide ke-5                       │
+│    Lokasi: GH Actions runner (butuh GPU)                 │
+│    Output: slide PNG files → commit ke repo              │
+│    ⚠️  Retrigger akan skip cache facts,                   │
+│        regen hanya slide yang hilang                     │
 │                                                          │
 │  [Auto] Update source_of_truth                           │
 │    → status: "generated"                                 │
@@ -466,6 +467,60 @@ NIX_ACCOUNTS_AQUARISAMATIRAN_PEXELS_KEY=...
 | Partial failure (misal 1/8 slide gagal) | Hanya regenerate slide yang gagal | Bot |
 
 **Notifikasi dikirim ke semua touchpoint yang tersedia.** Saat ini via Telegram bot (prioritas utama). Ke depannya bisa via dashboard notification, email, atau webhook.
+
+### 5.4 Carousel Generation via GH Actions (SD)
+
+Generate slide gambar pake Stable Diffusion **wajib jalan di GH Actions**, bukan di lokal atau VPS.
+
+| Kenapa? | Alasan |
+|---------|--------|
+| **GPU** | torch + diffusers butuh CUDA/GPU inference. VPS gak punya GPU |
+| **RAM** | SD model (1.5GB+) + processing muat di runner GH (8GB RAM) |
+| **Cleanup** | Runner mati otomatis abis selesai — gak perlu maintain infra |
+
+**Flow detail:**
+
+```
+┌─ User ─────────────────────────────┐
+│  /generate C1#07 di Telegram bot    │
+└──────────┬──────────────────────────┘
+           │ POST workflow_dispatch
+           ▼
+┌─ GitHub API ────────────────────────┐
+│  /repos/.../actions/workflows/      │
+│         generate.yml/dispatches     │
+└──────────┬──────────────────────────┘
+           │ spin up ubuntu-latest
+           ▼
+┌─ GH Actions Runner ─────────────────┐
+│                                     │
+│  1. git pull --rebase origin main   │
+│  2. Install torch + diffusers + SD  │
+│  3. Generate background via SD      │
+│  4. Overlay text via Pillow         │
+│  5. git add accounts/.../slides     │
+│  6. git commit → git push           │
+│                                     │
+│  ⏳ Estimasi: 10-30 menit           │
+└──────────┬──────────────────────────┘
+           │ User cek via /status
+           ▼
+┌─ User ─────────────────────────────┐
+│  /status → "completed"             │
+│  /post C1#07 → review → /confirm   │
+└─────────────────────────────────────┘
+```
+
+**Trigger methods:**
+
+| Cara | Command |
+|------|---------|
+| Telegram bot | `/generate C1#07` atau `/generate C1#07 6` (6 fakta) |
+| CLI | `gh workflow run generate.yml -f topic=C1#07 -f num_facts=8` |
+
+**File output:** Disimpan di `accounts/aquarisamatiran/resource/photos/{slug}_sd_*.png`  
+**Status tracking:** `/status` di bot (cek GH Actions run terakhir)  
+**Commit message:** `auto: generated carousel for C1#07`
 
 ---
 
@@ -544,8 +599,10 @@ Post langsung (tanpa jadwal) bisa dari:
 
 === CONTENT ===
 /create <curriculum>       — Buat topic baru dalam curriculum
-/generate <topic>          — Generate konten (facts + slides + caption)
-  └── progress: real-time via Telegram updates
+/generate <topic>          — Trigger GH Actions generate (facts + slides)
+  └── async: trigger → cek /status → tunggu 10-30 menit
+  └── /status              — Cek status GH Actions run terakhir
+  └── /regenerate          — Ulang generate buat topic pending terakhir
 
 === REVIEW ===
 /review                    — Preview konten pending review

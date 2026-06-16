@@ -1136,7 +1136,7 @@ def cmd_compress_slides(_client, args):
 def cmd_sync_slots(_client, args):
     """Sync slot jadwal ke cron-job.org (VPS-independent)."""
     import asyncio
-    from slot_config.slot_manager import SlotManager
+    from nixfw.slot_manager import SlotManager
     sm = SlotManager()
     print("Slots saat ini:")
     print(sm.format_list())

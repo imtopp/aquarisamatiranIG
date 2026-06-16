@@ -529,7 +529,7 @@ Generate slide gambar pake Stable Diffusion **wajib jalan di GH Actions**, bukan
 ### 6.1 Architecture
 
 ```
-slot_config/slots.json         ← configurable slot definitions
+nixfw/slots.json         ← configurable slot definitions
        │
 cron-job.org API               ← sync slot definitions otomatis
        │

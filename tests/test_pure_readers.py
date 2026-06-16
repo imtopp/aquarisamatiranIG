@@ -132,13 +132,13 @@ class TestBioReaders:
         result = build_card_statuses(schedule_old)
         assert 1 in result
         card1 = result[1]
-        assert card1[0] == "tag-live"
+        assert card1["tag_class"] == "tag-live"
 
     def test_build_card_statuses_with_source_ref(self, schedule_clean):
         result = build_card_statuses(schedule_clean)
         assert 1 in result
         card1 = result[1]
-        assert card1[0] == "tag-live"
+        assert card1["tag_class"] == "tag-live"
 
     def test_build_card_statuses_non_curriculum_skipped(self, schedule_old):
         result = build_card_statuses(schedule_old)

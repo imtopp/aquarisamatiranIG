@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title }}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: {{ palette.bg_dark }};
+    color: {{ palette.text_main }};
+    line-height: 1.6;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  .container { max-width: 600px; margin: 0 auto; }
+  .header { text-align: center; padding: 30px 0 20px; }
+  .header h1 {
+    font-size: 28px;
+    background: linear-gradient(135deg, {{ palette.accent }}, {{ palette.accent2 }});
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header p { color: {{ palette.text_sub }}; font-size: 14px; margin-top: 8px; }
+  .header .ig { color: #e1306c; -webkit-text-fill-color: #e1306c; font-weight: 600; margin-top: 4px; }
+  .section { margin: 24px 0; }
+  .section h2 { font-size: 18px; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid {{ palette.tag_bg }}; }
+  .card {
+    background: {{ palette.bg_card }}; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
+    border: 1px solid {{ palette.tag_bg }}; transition: all 0.2s; display: flex; align-items: flex-start; gap: 12px;
+  }
+  .card:hover { border-color: {{ palette.accent }}; }
+  .card .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%; font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .l1 .num { background: {{ palette.accent }}; color: {{ palette.bg_dark }}; }
+  .l2 .num { background: #f0c040; color: {{ palette.bg_dark }}; }
+  .l3 .num { background: #e86840; color: {{ palette.bg_dark }}; }
+  .l4 .num { background: #d44060; color: #fff; }
+  .card .body { flex: 1; }
+  .card .title { font-weight: 600; font-size: 14px; }
+  .card .desc { font-size: 12px; color: {{ palette.text_sub }}; margin-top: 2px; }
+  .card .status { margin-top: 6px; }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+  }
+  .tag-live { background: #00d4aa33; color: #00d4aa; border: 1px solid #00d4aa44; }
+  .tag-soon { background: #f0c04022; color: #f0c040; }
+  .tag-empty { background: #2a3a4a; color: #6a7a8a; }
+  .cta {
+    text-align: center; margin: 30px 0; padding: 20px;
+    background: linear-gradient(135deg, {{ palette.accent }}22, {{ palette.accent2 }}22);
+    border-radius: 16px; border: 1px solid {{ palette.accent }}33;
+  }
+  .cta p { font-size: 13px; color: {{ palette.text_sub }}; }
+  .cta .ig-link {
+    display: inline-block; margin-top: 10px; padding: 10px 24px;
+    background: linear-gradient(135deg, {{ palette.accent }}, {{ palette.accent2 }});
+    color: {{ palette.bg_dark }}; text-decoration: none; border-radius: 25px;
+    font-weight: 700; font-size: 14px;
+  }
+  .footer { text-align: center; font-size: 12px; color: #4a5a6a; padding: 20px 0; }
+  .card-link { text-decoration: none; color: inherit; display: block; }
+  .card-link:hover .card { border-color: {{ palette.accent }}; }
+  .level-intro { font-size: 13px; color: {{ palette.text_sub }}; margin-bottom: 14px; }
+  .season-header {
+    text-align: center; padding: 20px; margin: 30px 0 20px;
+    background: linear-gradient(135deg, {{ palette.accent }}11, {{ palette.accent2 }}11);
+    border-radius: 16px; border: 1px solid {{ palette.accent }}22;
+  }
+  .season-header h2 { font-size: 20px; border: none; padding: 0; margin: 0 0 6px; }
+  .season-header p { font-size: 13px; color: {{ palette.text_sub }}; }
+  .season + .season { margin-top: 40px; padding-top: 20px; border-top: 1px solid {{ palette.tag_bg }}; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>{{ emoji }} {{ account_name }}</h1>
+    <p>{{ tagline }}</p>
+    <div class="ig">{{ account_handle }}</div>
+  </div>
+
+  {% for cat_id, category in categories|dictsort %}
+  <div class="season" data-season="{{ cat_id }}">
+  <div class="season-header">
+    <h2>{{ category.title }}</h2>
+    {% if category.subtitle %}<p>{{ category.subtitle }}</p>{% endif %}
+  </div>
+
+  {% for subcat_id, subcat in category.subcategories|dictsort %}
+  <div class="section">
+    <h2>{{ subcat.title }}</h2>
+    <p class="level-intro">{{ subcat.title }}</p>
+    {% for num, topic in topics.get(cat_id, {})|dictsort %}
+    {% if topic.subcategory == subcat_id %}
+    {% set st = statuses.get(num|int, {'tag_class': 'tag-empty', 'tag_text': '🔜', 'permalink': ''}) %}
+    <a class="card-link" href="{{ st.permalink or '#' }}" target="_blank" rel="noopener"{% if not st.permalink %} onclick="return false;"{% endif %}>
+      <div class="card l{{ subcat_id }}">
+        <div class="num">{{ num }}</div>
+        <div class="body">
+          <div class="title">{{ topic.display_name or topic.title }}</div>
+          {% if topic.subtitle %}<div class="desc">{{ topic.subtitle }}</div>{% endif %}
+          <div class="status"><span class="tag {{ st.tag_class }}">{{ st.tag_text }}</span></div>
+        </div>
+      </div>
+    </a>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% endfor %}
+  </div>
+  {% endfor %}
+
+  <div class="cta">
+    <p>{{ cta_text }}</p>
+    <a class="ig-link" href="https://instagram.com/{{ handle }}" target="_blank">{{ account_handle }}</a>
+  </div>
+
+  <div class="footer">{{ footer_text }}</div>
+
+</div>
+</body>
+</html>

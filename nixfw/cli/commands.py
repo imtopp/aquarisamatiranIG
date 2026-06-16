@@ -35,6 +35,7 @@ def _notify_telegram(msg: str):
 from nixfw.ig_client import InstagramClient, parse_schedule
 from nixfw.editor import replace_audio, compress_video, upload_file, copy_to_published, VIDEO_DIR, MUSIC_DIR, PHOTO_DIR, OUTPUT_DIR, PUBLISHED_DIR, MAX_UPLOAD_MB
 from nixfw.curriculum.manager import cmd_curriculum
+from nixfw.cli.refresh_token import main as _refresh_token_main
 
 import PIL.Image
 import PIL.ImageDraw
@@ -1145,6 +1146,10 @@ def cmd_sync_slots(_client, args):
     print(result)
 
 
+def cmd_refresh_token(_client, args):
+    _refresh_token_main()
+
+
 def cmd_generate_carousel(_client, args):
     import argparse
     parser = argparse.ArgumentParser(prog="generate-carousel", add_help=False)
@@ -1549,6 +1554,7 @@ def main():
         "file-map": cmd_file_map,
         "curriculum": cmd_curriculum,
         "sync-slots": cmd_sync_slots,
+        "refresh-token": cmd_refresh_token,
     }
 
     fn = cmds.get(cmd)

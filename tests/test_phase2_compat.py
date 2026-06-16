@@ -18,7 +18,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 
 def _build_valid_keys(data):
-    from curriculum_manager import _all_topics
+    from nixfw.curriculum.manager import _all_topics
     valid = set()
     for sid, num, _ in _all_topics(data):
         valid.add((num, int(sid)))
@@ -44,28 +44,28 @@ def _make_keep(valid_keys):
 
 class TestAllTopics:
     def test_all_topics_v4(self, v4_content):
-        from curriculum_manager import _all_topics
+        from nixfw.curriculum.manager import _all_topics
         topics = list(_all_topics(v4_content))
         nums = sorted([num for _, num, _ in topics])
         assert nums == ["01", "06", "07"]
 
     def test_all_topics_v4_returns_three(self, v4_content):
-        from curriculum_manager import _all_topics
+        from nixfw.curriculum.manager import _all_topics
         assert len(list(_all_topics(v4_content))) == 3
 
     def test_all_topics_v4_slug_check(self, v4_content):
-        from curriculum_manager import _all_topics
+        from nixfw.curriculum.manager import _all_topics
         slugs = {v["slug"] for _, _, v in _all_topics(v4_content)}
         assert "aquarium-itu-apa" in slugs
 
     def test_all_topics_v5(self, v5_content):
-        from curriculum_manager import _all_topics
+        from nixfw.curriculum.manager import _all_topics
         topics = list(_all_topics(v5_content))
         nums = sorted([num for _, num, _ in topics])
         assert nums == ["01", "06", "07"]
 
     def test_all_topics_v5_slug_check(self, v5_content):
-        from curriculum_manager import _all_topics
+        from nixfw.curriculum.manager import _all_topics
         slugs = {v["slug"] for _, _, v in _all_topics(v5_content)}
         assert "aquarium-itu-apa" in slugs
 

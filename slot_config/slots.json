@@ -1,8 +1,0 @@
-{
-  "slots": [
-    {"id": "weekday-19", "days": [0, 1, 2, 3], "time": "19:00", "cron_id": 7783398, "title": "Weekday 19:00 WIB"},
-    {"id": "fri-15", "days": [4], "time": "15:00", "cron_id": 7783399, "title": "Jumat 15:00 WIB"},
-    {"id": "weekend-09", "days": [5, 6], "time": "09:00", "cron_id": 7783400, "title": "Weekend 09:00 WIB"},
-    {"id": "lunch-12", "days": [0, 1, 2, 3, 4], "time": "12:00", "cron_id": 7783402, "title": "Lunch 12:00 WIB"}
-  ]
-}

@@ -10,12 +10,14 @@ from pathlib import Path
 import requests
 from moviepy import AudioFileClip
 
-RESOURCE_DIR = Path("resource")
-VIDEO_DIR = RESOURCE_DIR / "videos"
-MUSIC_DIR = RESOURCE_DIR / "music"
-PHOTO_DIR = RESOURCE_DIR / "photos"
-PUBLISHED_DIR = RESOURCE_DIR / "published"
-OUTPUT_DIR = RESOURCE_DIR / "output"
+from nixfw import config as _cfg
+
+RESOURCE_DIR = _cfg.RESOURCE_DIR
+VIDEO_DIR = _cfg.RESOURCE_DIR / "videos"
+MUSIC_DIR = _cfg.RESOURCE_DIR / "music"
+PHOTO_DIR = _cfg.PHOTO_DIR
+PUBLISHED_DIR = _cfg.RESOURCE_DIR / "published"
+OUTPUT_DIR = _cfg.RESOURCE_DIR / "output"
 
 for d in [VIDEO_DIR, MUSIC_DIR, PHOTO_DIR, PUBLISHED_DIR, OUTPUT_DIR]:
     d.mkdir(parents=True, exist_ok=True)

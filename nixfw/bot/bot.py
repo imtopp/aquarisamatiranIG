@@ -14,6 +14,8 @@ from telegram import Update, InputMediaPhoto, InlineKeyboardButton, InlineKeyboa
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 from telegram.request import HTTPXRequest
 
+from nixfw import config as _bot_cfg
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from nixfw.slot_manager import SlotManager, DAYS_ID
 
@@ -365,7 +367,7 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def _latest_slides(curriculum_tag: str = "") -> tuple[str | None, list[Path]]:
     """Detect carousel slides in PHOTO_DIR. If curriculum_tag given (e.g. C1#07), filter by topic slug."""
-    slides_dir = PROJECT_DIR / "resource/photos"
+    slides_dir = _bot_cfg.PHOTO_DIR
     if curriculum_tag:
         m = re.match(r'[CS](\d+)#(\d+)', curriculum_tag)
         if m:

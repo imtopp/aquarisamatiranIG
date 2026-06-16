@@ -51,7 +51,7 @@ jobs:
           pip install diffusers transformers accelerate pillow
 
       - name: Cleanup temp files
-        run: rm -f resource/photos/temp_*
+        run: rm -f accounts/aquarisamatiran/resource/photos/temp_*
 
       - name: Generate carousel
         run: python main.py generate-carousel-sd "${{ inputs.topic }}" --num-facts ${{ inputs.num_facts }}
@@ -72,15 +72,16 @@ jobs:
         with:
           name: generated-slides
           path: |
-            resource/photos/*_sd_*
-            resource/photos/edu_*.json
+            accounts/aquarisamatiran/resource/photos/*_sd_*
+            accounts/aquarisamatiran/resource/photos/edu_*.json
 
       - name: Commit generated files
         run: |
           git config user.name "Nix Bot"
           git config user.email "nix@aquarisamatiran.dev"
-          git add resource/photos/edu_*.json resource/photos/*_sd_*
+          git add accounts/aquarisamatiran/resource/photos/edu_*.json accounts/aquarisamatiran/resource/photos/*_sd_*
           git diff --cached --quiet || git commit -m "auto: generated carousel for ${{ inputs.topic }}"
+          git pull --rebase origin main
           git remote set-url origin https://x-access-token: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@github.com/imtopp/aquarisamatiranIG.git
           git push origin main
         shell: bash

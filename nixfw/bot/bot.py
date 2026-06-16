@@ -357,7 +357,7 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if resp.status_code == 204:
             await update.message.reply_text(
                 f"✅ Generate \"{topic}\" berhasil ditrigger! 🎉\n"
-                f"Cek: https://github.com/{GH_REPO}/actions/workflows/generate.yml"
+                f"Tunggu 10-30 menit, cek progress pake /status"
             )
         else:
             await update.message.reply_text(f"❌ Gagal: HTTP {resp.status_code}")

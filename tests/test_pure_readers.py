@@ -63,27 +63,33 @@ class TestMainReaders:
     """Tests for main.py _find_curriculum_key_by_slug reader."""
 
     def test_find_key_by_slug(self, monkeypatch, tmp_path):
+        import nixfw.config as cfg
         monkeypatch.chdir(tmp_path)
         content_path = tmp_path / "curriculum_content.json"
         v4 = {"topics": {"1": {"04": {"slug": "test-slug"}}}}
         content_path.write_text(json.dumps(v4, indent=2), encoding="utf-8")
+        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
 
         import main as main_mod
         result = main_mod._find_curriculum_key_by_slug("test-slug")
         assert result == "C1#04"
 
     def test_find_key_by_slug_not_found(self, monkeypatch, tmp_path):
+        import nixfw.config as cfg
         monkeypatch.chdir(tmp_path)
         content_path = tmp_path / "curriculum_content.json"
         v4 = {"topics": {"1": {"04": {"slug": "other"}}}}
         content_path.write_text(json.dumps(v4, indent=2), encoding="utf-8")
+        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
 
         import main as main_mod
         result = main_mod._find_curriculum_key_by_slug("nonexistent")
         assert result is None
 
     def test_find_key_by_slug_file_missing(self, monkeypatch, tmp_path):
+        import nixfw.config as cfg
         monkeypatch.chdir(tmp_path)
+        monkeypatch.setattr(cfg, "CONTENT_PATH", tmp_path / "nonexistent.json")
         import main as main_mod
         result = main_mod._find_curriculum_key_by_slug("test")
         assert result is None
@@ -91,10 +97,13 @@ class TestMainReaders:
     def test_add_schedule_entry_writes_curriculum_ref(self, monkeypatch, tmp_path):
         """Before Phase 1: writes 'curriculum' field. After Phase 1: writes 'source_ref'.
         This test validates both cases."""
+        import nixfw.config as cfg
+        monkeypatch.setattr(cfg, "SCHEDULE_PATH", tmp_path / "schedule.json")
         monkeypatch.chdir(tmp_path)
         content_path = tmp_path / "curriculum_content.json"
         v4 = {"topics": {"1": {"04": {"slug": "test-slug"}}}}
         content_path.write_text(json.dumps(v4, indent=2), encoding="utf-8")
+        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
 
         import main as main_mod
         main_mod._add_schedule_entry("test-slug", "carousel", ["url1"], "Test caption", "2026-06-20 19:00")

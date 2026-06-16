@@ -133,7 +133,7 @@ def cmd_post_photo(client, args):
 
 def _find_curriculum_key_by_slug(slug: str) -> str | None:
     """Cari #XX dari curriculum_content.json berdasarkan slug."""
-    cpath = Path("curriculum_content.json")
+    cpath = config.CONTENT_PATH
     if not cpath.exists():
         return None
     try:
@@ -151,7 +151,7 @@ def _add_schedule_entry(slug: str, ptype: str, urls_or_url: str | list[str],
                          caption: str, time_str: str):
     """Tambah entry ke schedule.json."""
     import json
-    spath = Path("schedule.json")
+    spath = config.SCHEDULE_PATH
     schedule = json.loads(spath.read_text(encoding="utf-8")) if spath.exists() else []
     curriculum_key = _find_curriculum_key_by_slug(slug)
     entry = {
@@ -962,10 +962,10 @@ def cmd_generate_carousel_sd(_client, args):
     topic_name = topic
     season_tag = ""
     try:
-        cc_path = Path("curriculum_content.json")
+        cc_path = config.CONTENT_PATH
         if cc_path.exists():
             cc = json.loads(cc_path.read_text(encoding="utf-8"))
-            m = re.match(r"S(\d+)#(\d+)", topic)
+            m = re.match(r"[CS](\d+)#(\d+)", topic)
             if m:
                 s_num, t_num = m.group(1), m.group(2).zfill(2)
                 t = cc.get("topics", {}).get(s_num, {}).get(t_num)
@@ -1007,14 +1007,14 @@ def cmd_generate_carousel_sd(_client, args):
     # Fallback: cari season_tag dari topic asli (kalau pake #XX)
     if not season_tag:
         try:
-            cc_path = Path("curriculum_content.json")
+            cc_path = config.CONTENT_PATH
             if cc_path.exists():
                 cc = json.loads(cc_path.read_text(encoding="utf-8"))
                 t_num = topic.lstrip("#").zfill(2)
                 for s_num, ts in cc.get("topics", {}).items():
                     if t_num in ts:
                         t = ts[t_num]
-                        season_tag = f"S{s_num}#{t_num} "
+                        season_tag = f"C{s_num}#{t_num} "
                         display = t.get("display_name", display)
                         break
         except Exception:
@@ -1349,7 +1349,7 @@ def _update_curriculum_content(slug: str, facts: dict | None = None,
                                 status: str | None = None):
     """Update curriculum_content.json with generated facts or post result (v4 nested)."""
     import json
-    cpath = Path("curriculum_content.json")
+    cpath = config.CONTENT_PATH
     if not cpath.exists():
         return
     try:

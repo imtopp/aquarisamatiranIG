@@ -12,10 +12,12 @@ class TestScheduleWriter:
     """Tests for _add_schedule_entry in main.py."""
 
     def test_add_schedule_entry_creates_clean_entry(self, monkeypatch, tmp_path):
-        monkeypatch.chdir(tmp_path)
+        import nixfw.config as cfg
+        monkeypatch.setattr(cfg, "SCHEDULE_PATH", tmp_path / "schedule.json")
         content_path = tmp_path / "curriculum_content.json"
         v4 = {"topics": {"1": {"04": {"slug": "test-slug"}}}}
         content_path.write_text(json.dumps(v4, indent=2), encoding="utf-8")
+        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
 
         import main as main_mod
         main_mod._add_schedule_entry("test-slug", "carousel", ["url1"], "Cap", "2026-06-20 19:00")
@@ -36,6 +38,8 @@ class TestScheduleWriter:
         assert e["urls"] == ["url1"]
 
     def test_add_schedule_entry_photo(self, monkeypatch, tmp_path):
+        import nixfw.config as cfg
+        monkeypatch.setattr(cfg, "SCHEDULE_PATH", tmp_path / "schedule.json")
         monkeypatch.chdir(tmp_path)
 
         import main as main_mod
@@ -49,6 +53,8 @@ class TestScheduleWriter:
         assert "urls" not in e
 
     def test_add_schedule_entry_non_curriculum(self, monkeypatch, tmp_path):
+        import nixfw.config as cfg
+        monkeypatch.setattr(cfg, "SCHEDULE_PATH", tmp_path / "schedule.json")
         monkeypatch.chdir(tmp_path)
 
         import main as main_mod
@@ -63,6 +69,8 @@ class TestScheduleWriter:
             assert e["curriculum"] is None
 
     def test_add_schedule_entry_appends(self, monkeypatch, tmp_path):
+        import nixfw.config as cfg
+        monkeypatch.setattr(cfg, "SCHEDULE_PATH", tmp_path / "schedule.json")
         monkeypatch.chdir(tmp_path)
         schedule_path = tmp_path / "schedule.json"
         schedule_path.write_text(json.dumps([{"source_ref": "C1#01", "time": "old"}]), encoding="utf-8")

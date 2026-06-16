@@ -30,8 +30,8 @@ ALLOWED_USERNAMES = os.environ.get("BOT_ALLOWED_USERNAMES", "").split(",")
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 AGENTS_MD = PROJECT_DIR / "AGENTS.md"
 DB_PATH = PROJECT_DIR / "bot" / "chat_history.db"
-SCHEDULE_PATH = PROJECT_DIR / "schedule.json"
-CURRICULUM_PATH = PROJECT_DIR / "curriculum_content.json"
+SCHEDULE_PATH = PROJECT_DIR / "accounts" / "aquarisamatiran" / "schedule.json"
+CURRICULUM_PATH = PROJECT_DIR / "accounts" / "aquarisamatiran" / "source_of_truth.json"
 FORBIDDEN_WORDS = ["lu", "gue", "lo", "elu", "gw"]
 
 GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"]
@@ -48,33 +48,34 @@ if AGENTS_MD.exists():
     system_prompt = AGENTS_MD.read_text(encoding="utf-8")
     system_prompt += "\n\nKamu adalah aku yang asli — personality, suara, gaya bicara, semuanya sama persis."
 
-# Inject terminology from curriculum_content.json (v5: nested per-category)
+# Inject terminology from source_of_truth.json (v5: categories → subcategories)
 if CURRICULUM_PATH.exists():
     try:
         cur_data = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
         topics = cur_data.get("topics", {})
-        seasons = cur_data.get("seasons", {})
+        categories = cur_data.get("categories", {})
         if topics:
-            term_lines = ["", "## Curriculum Terminology (live from curriculum_content.json)", ""]
-            for sid in sorted(seasons, key=int):
-                s = seasons[sid]
-                st = topics.get(str(sid), {})
-                levels = s.get("level_labels", {})
-                for lv in sorted(levels, key=int):
-                    label = levels[lv]
-                    lv_topics = sorted(
-                        [(k, st[k]) for k in st if st[k].get("level") == int(lv)],
+            term_lines = ["", "## Curriculum Terminology (live from source_of_truth.json)", ""]
+            for cid in sorted(categories, key=int):
+                c = categories[cid]
+                st = topics.get(str(cid), {})
+                subcats = c.get("subcategories", {})
+                for sc_key in sorted(subcats, key=int):
+                    sc = subcats[sc_key]
+                    label = sc.get("title", f"Level {sc_key}")
+                    sc_topics = sorted(
+                        [(k, st[k]) for k in st if st[k].get("subcategory") == sc_key],
                         key=lambda x: int(x[0]),
                     )
-                    if not lv_topics:
+                    if not sc_topics:
                         continue
-                    term_lines.append(f"Season {sid} Level {lv} ({label}):")
-                    for k, v in lv_topics:
+                    term_lines.append(f"Season {cid} — {label}:")
+                    for k, v in sc_topics:
                         status = v.get("status", "planned")
                         keywords = v.get("keywords", [])
                         kw_str = ", ".join(keywords) if keywords else "(no keywords)"
                         status_tag = " ✅" if status == "live" else (" 📅" if status == "scheduled" else "")
-                        term_lines.append(f"  S{sid}#{k} {v['title']}{status_tag}: {kw_str}")
+                        term_lines.append(f"  C{cid}#{k} {v['title']}{status_tag}: {kw_str}")
             system_prompt += "\n" + "\n".join(term_lines)
     except Exception:
         pass  # best-effort
@@ -298,13 +299,13 @@ async def topics_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
     except Exception:
-        await update.message.reply_text("❌ Gagal baca curriculum_content.json")
+        await update.message.reply_text("❌ Gagal baca source_of_truth.json")
         return
     topics = cc.get("topics", {})
-    seasons = cc.get("seasons", {})
+    categories = cc.get("categories", {})
     lines = ["**📚 Kurikulum Aquarisamatiran**\n"]
     for sid in sorted(topics, key=int):
-        sname = seasons.get(sid, {}).get("name", f"Season {sid}")
+        sname = categories.get(sid, {}).get("title", f"Category {sid}")
         lines.append(f"**{sname}**")
         for tnum in sorted(topics[sid], key=int):
             t = topics[sid][tnum]

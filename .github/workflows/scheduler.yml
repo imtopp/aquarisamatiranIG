@@ -35,14 +35,14 @@ jobs:
         run: |
           git config user.name "Nix Bot"
           git config user.email "nix@aquarisamatiran.dev"
-          git add schedule.json bio/index.html curriculum_content.json
+          git add accounts/aquarisamatiran/schedule.json accounts/aquarisamatiran/source_of_truth.json accounts/aquarisamatiran/bio/index.html
           git diff --cached --quiet || git commit -m "auto: post + update bio"
           git push origin main
 
       - name: Push bio to pages repo
         run: |
           git clone https://${{ secrets.PAGES_PAT }}@github.com/imtopp/aquarisamatiran-pages.git /tmp/pages-repo
-          cp bio/index.html /tmp/pages-repo/index.html
+          cp accounts/aquarisamatiran/bio/index.html /tmp/pages-repo/index.html
           cd /tmp/pages-repo
           git config user.name "Nix Bot"
           git config user.email "nix@aquarisamatiran.dev"

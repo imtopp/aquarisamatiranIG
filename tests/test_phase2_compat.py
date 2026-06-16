@@ -215,9 +215,11 @@ class TestSyncScheduleJson:
 
 class TestUpdateCurriculumContent:
     def test_update_with_v4(self, v4_content, monkeypatch, tmp_path):
+        import nixfw.config as cfg
         monkeypatch.chdir(tmp_path)
         content_path = tmp_path / "curriculum_content.json"
         content_path.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
+        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
 
         import main as main_mod
         main_mod._update_curriculum_content("aquarium-itu-apa", result_id="new_res_id", permalink="https://ig.example/p/new")
@@ -227,9 +229,11 @@ class TestUpdateCurriculumContent:
         assert updated["topics"]["1"]["01"]["permalink"] == "https://ig.example/p/new"
 
     def test_update_with_v4_status(self, v4_content, monkeypatch, tmp_path):
+        import nixfw.config as cfg
         monkeypatch.chdir(tmp_path)
         content_path = tmp_path / "curriculum_content.json"
         content_path.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
+        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
 
         import main as main_mod
         main_mod._update_curriculum_content("alga-musuh-atau-guru", status="live")
@@ -238,9 +242,11 @@ class TestUpdateCurriculumContent:
         assert updated["topics"]["1"]["06"]["status"] == "live"
 
     def test_update_with_v5(self, v5_content, monkeypatch, tmp_path):
+        import nixfw.config as cfg
         monkeypatch.chdir(tmp_path)
         content_path = tmp_path / "curriculum_content.json"
         content_path.write_text(json.dumps(v5_content, indent=2), encoding="utf-8")
+        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
 
         import main as main_mod
         main_mod._update_curriculum_content("aquarium-itu-apa", result_id="new_res_id")
@@ -249,9 +255,11 @@ class TestUpdateCurriculumContent:
         assert updated["topics"]["1"]["01"]["result_id"] == "new_res_id"
 
     def test_update_with_v5_status(self, v5_content, monkeypatch, tmp_path):
+        import nixfw.config as cfg
         monkeypatch.chdir(tmp_path)
         content_path = tmp_path / "curriculum_content.json"
         content_path.write_text(json.dumps(v5_content, indent=2), encoding="utf-8")
+        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
 
         import main as main_mod
         main_mod._update_curriculum_content("alga-musuh-atau-guru", status="live")

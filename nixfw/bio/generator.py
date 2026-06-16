@@ -99,5 +99,5 @@ def update_bio(schedule=None, account: str = "aquarisamatiran"):
 
 
 if __name__ == "__main__":
-    schedule = json.loads(Path("schedule.json").read_text(encoding="utf-8"))
+    schedule = json.loads((Path(__file__).resolve().parent.parent.parent / "accounts" / "aquarisamatiran" / "schedule.json").read_text(encoding="utf-8"))
     update_bio(schedule)

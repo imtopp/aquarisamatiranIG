@@ -442,13 +442,13 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ Error: {e}")
 
 
-def _latest_slides(curriculum_tag: str = "") -> tuple[str | None, list[Path]]:
+def _latest_slides(topic_ref: str = "") -> tuple[str | None, list[Path]]:
     """Detect carousel slides in PHOTO_DIR. 
-    If curriculum_tag given (e.g. C1#07), filter by topic slug.
+    If topic_ref given (e.g. C1#07), filter by topic slug.
     If it doesn't match tag format, treat as direct slug (e.g. puntius_denisonii)."""
     slides_dir = PHOTO_DIR
-    if curriculum_tag:
-        m = re.match(r'[CS](\d+)#(\d+)', curriculum_tag)
+    if topic_ref:
+        m = re.match(r'[CS](\d+)#(\d+)', topic_ref)
         if m:
             cur_data = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
             topic = cur_data.get("topics", {}).get(m.group(1), {}).get(m.group(2), {})
@@ -456,7 +456,7 @@ def _latest_slides(curriculum_tag: str = "") -> tuple[str | None, list[Path]]:
             if not slug:
                 return None, []
         else:
-            slug = curriculum_tag.replace("-", "_")
+            slug = topic_ref.replace("-", "_")
         sd = sorted(slides_dir.glob(f"{slug}_sd_*.png"))
         sd += sorted(slides_dir.glob(f"{slug}_sd_*.jpg"))
         if sd:
@@ -579,31 +579,31 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Upload slides + schedule carousel. Smart auto-detect + auto-caption."""
     args = context.args
-    curriculum_tag = ""
+    topic_ref = ""
     schedule_time = ""
     # Parse args: /post [slug/C1#07] [Kamis 19:00]
     for a in args:
         if a.startswith("#") or re.match(r"[CS]\d+#\d+", a):
-            curriculum_tag = a
+            topic_ref = a
         elif re.match(r"^(Mon|Tue|Wed|Thu|Fri|Sat|Sun|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu)", a, re.IGNORECASE) and len(args) > args.index(a) + 1:
             idx = list(args).index(a)
             schedule_time = f"{a} {args[idx+1]}"
-        elif not curriculum_tag:
-            curriculum_tag = a  # treat as direct slug
+        elif not topic_ref:
+            topic_ref = a  # treat as direct slug
 
-    # Auto-detect latest slides (filter by curriculum_tag if given)
-    slug, slides = _latest_slides(curriculum_tag)
+    # Auto-detect latest slides (filter by topic_ref if given)
+    slug, slides = _latest_slides(topic_ref)
     if not slug:
         await update.message.reply_text("❌ Ngga nemu slide carousel di resource/photos/")
         return
-    if not curriculum_tag:
+    if not topic_ref:
         cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
         for s_num, ts in cc.get("topics", {}).items():
             for t_num, t in ts.items():
                 if t.get("slug", "").replace("-", "_") == slug:
-                    curriculum_tag = f"C{s_num}#{t_num}"
+                    topic_ref = f"C{s_num}#{t_num}"
                     break
-            if curriculum_tag:
+            if topic_ref:
                 break
     if len(slides) > 10:
         await update.message.reply_text(f"❌ IG carousel maksimal 10 slide, ini ada {len(slides)} (cover + fakta + CTA). Generate ulang pake lebih dikit fakta ya~")
@@ -676,7 +676,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "schedule_time": schedule_time,
         "topic_display": topic_display,
         "facts_json": facts_json,
-        "curriculum_tag": curriculum_tag,
+        "topic_ref": topic_ref,
     }
 
 
@@ -713,21 +713,21 @@ async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Ngga ada pending post. Coba `/post` dulu~")
         return
     topic_display = pending["topic_display"]
-    curriculum_tag = pending.get("curriculum_tag", "")
-    if not curriculum_tag:
+    topic_ref = pending.get("topic_ref", "")
+    if not topic_ref:
         slug = pending["slug"]
         try:
             cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
             for s_num, ts in cc.get("topics", {}).items():
                 for t_num, t in ts.items():
                     if t.get("slug", "").replace("-", "_") == slug:
-                        curriculum_tag = f"C{s_num}#{t_num}"
+                        topic_ref = f"C{s_num}#{t_num}"
                         break
-                if curriculum_tag:
+                if topic_ref:
                     break
         except Exception:
             pass
-    topic_input = curriculum_tag if curriculum_tag else pending["slug"].replace("_", " ")
+    topic_input = topic_ref if topic_ref else pending["slug"].replace("_", " ")
     await update.message.reply_text(f"🔄 Generate ulang carousel \"{topic_display}\" (topic: {topic_input})...")
     _pending_posts.pop(user_id, None)
     try:

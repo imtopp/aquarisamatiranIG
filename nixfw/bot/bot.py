@@ -16,12 +16,12 @@ from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQu
 from telegram.request import HTTPXRequest
 
 from nixfw.config import (
+    AGENTS_MD,
+    CONTENT_PATH as CURRICULUM_PATH,
+    DB_PATH,
+    PHOTO_DIR,
     PROJECT_ROOT,
     SCHEDULE_PATH,
-    CONTENT_PATH as CURRICULUM_PATH,
-    PHOTO_DIR,
-    AGENTS_MD as _CFG_AGENTS_MD,
-    DB_PATH as _CFG_DB_PATH,
 )
 from nixfw.slot_manager import SlotManager, DAYS_ID
 
@@ -35,8 +35,6 @@ GEMINI_API_KEYS = [
     *[v for k, v in sorted(os.environ.items()) if k.startswith("GEMINI_API_KEY_") and v],
 ]
 ALLOWED_USERNAMES = os.environ.get("BOT_ALLOWED_USERNAMES", "").split(",")
-AGENTS_MD = _CFG_AGENTS_MD
-DB_PATH = _CFG_DB_PATH
 FORBIDDEN_WORDS = ["lu", "gue", "lo", "elu", "gw"]
 
 GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"]

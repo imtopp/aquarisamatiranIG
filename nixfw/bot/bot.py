@@ -517,16 +517,6 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # If no args at all, show guidance instead of silent auto-detect
-    if not curriculum_tag and not schedule_time and not non_flag:
-        lines = [
-            "Gunakan: `/post C1#07` — posting topik tertentu\n"
-            "Atau: `/topics` — liat daftar C1#XX yang tersedia\n\n"
-            "Contoh: `/post C1#07 Jumat 15:00`"
-        ]
-        await update.message.reply_text("\n".join(lines))
-        return
-
     # Auto-detect latest slides (filter by curriculum_tag if given)
     slug, slides = _latest_slides(curriculum_tag)
     if not slug:

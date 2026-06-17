@@ -90,7 +90,7 @@ jobs:
           git config user.name "Nix Bot"
           git config user.email "nix@aquarisamatiran.dev"
           git add accounts/aquarisamatiran/resource/photos/edu_*.json accounts/aquarisamatiran/resource/photos/*_sd_*
-          git diff --cached --quiet || git commit -m "auto: generated carousel for ${{ inputs.topic }}"
+          git diff --cached --quiet || git commit -m "auto: generated carousel"
           git pull --rebase origin main
           git remote set-url origin https://x-access-token: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@github.com/imtopp/aquarisamatiranIG.git
           git push origin main

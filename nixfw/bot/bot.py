@@ -170,7 +170,7 @@ HELP_TEXT = (
     "/run `<cmd>` — jalanin perintah (terbatas)\n"
     "/generate `C1#07` `[jml_fakta]` — trigger generate carousel SD\n"
     "/status — cek progress generate terakhir\n"
-    "/post `[C1#07]` `[hari jam]` — preview & jadwalin carousel\n"
+    "/post `[C1#07]` `[hari jam]` — post carousel (wajib pilih topik)\n"
     "/confirm — lanjutin posting setelah preview\n"
     "/editcaption `<instruksi>` — ganti caption\n"
     "/regenerate — generate ulang slide\n"
@@ -515,6 +515,16 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "❌ Argumen gak dikenal. Format: `/post C1#07` atau `/post` (auto-detect)\n"
             "Cek `/topics` buat liat daftar C1#XX yang tersedia."
         )
+        return
+
+    # If no args at all, show guidance instead of silent auto-detect
+    if not curriculum_tag and not schedule_time and not non_flag:
+        lines = [
+            "Gunakan: `/post C1#07` — posting topik tertentu\n"
+            "Atau: `/topics` — liat daftar C1#XX yang tersedia\n\n"
+            "Contoh: `/post C1#07 Jumat 15:00`"
+        ]
+        await update.message.reply_text("\n".join(lines))
         return
 
     # Auto-detect latest slides (filter by curriculum_tag if given)

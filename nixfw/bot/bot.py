@@ -494,7 +494,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Parse args: /post [C1#07] [Kamis 19:00]
     non_flag = []
     for a in args:
-        if a.startswith("#") or re.match(r"S\d+#\d+", a):
+        if a.startswith("#") or re.match(r"[CS]\d+#\d+", a):
             curriculum_tag = a
         elif re.match(r"^(Mon|Tue|Wed|Thu|Fri|Sat|Sun|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu)", a, re.IGNORECASE) and len(args) > args.index(a) + 1:
             idx = list(args).index(a)
@@ -503,6 +503,14 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             non_flag.append(args[idx+1])
         else:
             non_flag.append(a)
+
+    # If user gave args but none matched as curriculum tag, error
+    if non_flag and not curriculum_tag:
+        await update.message.reply_text(
+            "❌ Argumen gak dikenal. Format: `/post C1#07` atau `/post` (auto-detect)\n"
+            "Cek `/topics` buat liat daftar C1#XX yang tersedia."
+        )
+        return
 
     # Auto-detect latest slides (filter by curriculum_tag if given)
     slug, slides = _latest_slides(curriculum_tag)
@@ -514,7 +522,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for s_num, ts in cc.get("topics", {}).items():
             for t_num, t in ts.items():
                 if t.get("slug", "").replace("-", "_") == slug:
-                    curriculum_tag = f"S{s_num}#{t_num}"
+                    curriculum_tag = f"C{s_num}#{t_num}"
                     break
             if curriculum_tag:
                 break
@@ -634,7 +642,7 @@ async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             for s_num, ts in cc.get("topics", {}).items():
                 for t_num, t in ts.items():
                     if t.get("slug", "").replace("-", "_") == slug:
-                        curriculum_tag = f"S{s_num}#{t_num}"
+                        curriculum_tag = f"C{s_num}#{t_num}"
                         break
                 if curriculum_tag:
                     break

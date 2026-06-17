@@ -169,6 +169,9 @@ def draw_text_fallback(draw, xy, text, font_primary, font_fallback, fill):
     if font_fallback is None and img is not None:
         emoji_size = font_primary.size
         for char in text:
+            cp = ord(char)
+            if 0xFE00 <= cp <= 0xFE0F:
+                continue  # variation selectors = zero-width, skip
             if _is_emoji_or_special(char):
                 tw = _get_twemoji(char, emoji_size)
                 if tw:

@@ -1,0 +1,23 @@
+{
+  "topic": "Water Test Aquarium",
+  "display_name": "Pentingnya Water Test di Aquarium",
+  "subtitle": "Air Sehat, Ikan Bahagia!",
+  "scientific_name": "N/A",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Kenapa Harus Tes Air? 🧪",
+      "description": "Meskipun air di aquariummu terlihat jernih, parameter kimianya bisa saja beracun bagi ikan kesayanganmu. Tes air adalah alat penting untuk 'melihat' kondisi tak kasat mata seperti ammonia, nitrit, dan nitrat agar kamu bisa mengambil tindakan sebelum masalah muncul. Dengan rutin tes air, kamu menjaga lingkungan hidup ikan tetap optimal dan terhindar dari penyakit.",
+      "tags": [
+        "KualitasAir",
+        "pH",
+        "Ammonia",
+        "Nitrit",
+        "Nitrat",
+        "PemulaAquarium",
+        "AirSehat"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

@@ -324,6 +324,82 @@ async def topics_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
 
 
+async def slides_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """List available slide groups in resource/photos/, split curriculum vs adhoc."""
+    slides_dir = PHOTO_DIR
+    if not slides_dir.is_dir():
+        await update.message.reply_text("❌ Folder resource/photos/ gak ada.")
+        return
+
+    # Build slug → C{sid}#{tnum} mapping, ordered by curriculum
+    slug_to_tag = {}
+    cur_order = []  # (slug, tag) in curriculum order
+    try:
+        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        for sid in sorted(cc.get("topics", {}), key=int):
+            for tnum in sorted(cc["topics"][sid], key=int):
+                t = cc["topics"][sid][tnum]
+                slug = (t.get("slug", "") or "").replace("-", "_")
+                if slug:
+                    tag = f"C{sid}#{tnum}"
+                    slug_to_tag[slug] = tag
+                    cur_order.append((slug, tag))
+    except Exception:
+        pass
+
+    # Scan photo dir
+    groups = {}
+    for f in slides_dir.glob("*"):
+        if not f.is_file():
+            continue
+        stem = f.stem
+        if "_sd_" in stem:
+            prefix = stem.rsplit("_sd_", 1)[0]
+        elif "_slide_" in stem:
+            prefix = stem.rsplit("_slide_", 1)[0]
+        else:
+            continue
+        groups.setdefault(prefix, []).append(f.name)
+
+    if not groups:
+        await update.message.reply_text("📂 Gak ada slide di resource/photos/.")
+        return
+
+    def _prefix_mtime(p):
+        return max((Path(slides_dir / f).stat().st_mtime for f in groups[p]), default=0)
+
+    cur_lines = []
+    adhoc_groups = dict(groups)
+    for slug, tag in cur_order:
+        if slug not in groups:
+            continue
+        del adhoc_groups[slug]
+        count = len(groups[slug])
+        mtime = _prefix_mtime(slug)
+        time_str = datetime.datetime.fromtimestamp(mtime).strftime("%d/%m %H:%M")
+        cur_lines.append(f"  `{tag}` {slug} — {count} file ({time_str})")
+
+    adhoc_lines = []
+    for prefix in sorted(adhoc_groups, key=_prefix_mtime, reverse=True):
+        count = len(adhoc_groups[prefix])
+        mtime = _prefix_mtime(prefix)
+        time_str = datetime.datetime.fromtimestamp(mtime).strftime("%d/%m %H:%M")
+        adhoc_lines.append(f"  `{prefix}` — {count} file ({time_str})")
+
+    lines = ["**📸 Slide siap post:**\n"]
+    if cur_lines:
+        lines.append("**📚 Curriculum:**")
+        lines.extend(cur_lines)
+        lines.append("")
+    if adhoc_lines:
+        lines.append("**🎨 Adhoc:**")
+        lines.extend(adhoc_lines)
+        lines.append("")
+    lines.append(f"**Total: {sum(len(v) for v in groups.values())} file**")
+    lines.append("Gunakan: `/post <slug>` atau `/post C1#XX`")
+    await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
+
+
 async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Trigger GH Actions workflow to generate SD carousel."""
     if not GITHUB_PAT:
@@ -367,7 +443,9 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def _latest_slides(curriculum_tag: str = "") -> tuple[str | None, list[Path]]:
-    """Detect carousel slides in PHOTO_DIR. If curriculum_tag given (e.g. C1#07), filter by topic slug."""
+    """Detect carousel slides in PHOTO_DIR. 
+    If curriculum_tag given (e.g. C1#07), filter by topic slug.
+    If it doesn't match tag format, treat as direct slug (e.g. puntius_denisonii)."""
     slides_dir = PHOTO_DIR
     if curriculum_tag:
         m = re.match(r'[CS](\d+)#(\d+)', curriculum_tag)
@@ -375,16 +453,19 @@ def _latest_slides(curriculum_tag: str = "") -> tuple[str | None, list[Path]]:
             cur_data = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
             topic = cur_data.get("topics", {}).get(m.group(1), {}).get(m.group(2), {})
             slug = (topic.get("slug", "") or "").replace("-", "_")
-            if slug:
-                sd = sorted(slides_dir.glob(f"{slug}_sd_*.png"))
-                sd += sorted(slides_dir.glob(f"{slug}_sd_*.jpg"))
-                if sd:
-                    return slug, sd
-                legacy = sorted(slides_dir.glob(f"{slug}_slide_*.png"))
-                legacy += sorted(slides_dir.glob(f"{slug}_slide_*.jpg"))
-                if legacy:
-                    return slug, legacy
-            return None, []
+            if not slug:
+                return None, []
+        else:
+            slug = curriculum_tag.replace("-", "_")
+        sd = sorted(slides_dir.glob(f"{slug}_sd_*.png"))
+        sd += sorted(slides_dir.glob(f"{slug}_sd_*.jpg"))
+        if sd:
+            return slug, sd
+        legacy = sorted(slides_dir.glob(f"{slug}_slide_*.png"))
+        legacy += sorted(slides_dir.glob(f"{slug}_slide_*.jpg"))
+        if legacy:
+            return slug, legacy
+        return None, []
 
     slides = sorted(slides_dir.glob("*_slide_??.png"))
     slides += sorted(slides_dir.glob("edu_*_??.jpg"))
@@ -500,26 +581,15 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     curriculum_tag = ""
     schedule_time = ""
-    # Parse args: /post [C1#07] [Kamis 19:00]
-    non_flag = []
+    # Parse args: /post [slug/C1#07] [Kamis 19:00]
     for a in args:
         if a.startswith("#") or re.match(r"[CS]\d+#\d+", a):
             curriculum_tag = a
         elif re.match(r"^(Mon|Tue|Wed|Thu|Fri|Sat|Sun|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu)", a, re.IGNORECASE) and len(args) > args.index(a) + 1:
             idx = list(args).index(a)
             schedule_time = f"{a} {args[idx+1]}"
-            non_flag.append(a)
-            non_flag.append(args[idx+1])
-        else:
-            non_flag.append(a)
-
-    # If user gave args but none matched as curriculum tag, error
-    if non_flag and not curriculum_tag:
-        await update.message.reply_text(
-            "❌ Argumen gak dikenal. Format: `/post C1#07` atau `/post` (auto-detect)\n"
-            "Cek `/topics` buat liat daftar C1#XX yang tersedia."
-        )
-        return
+        elif not curriculum_tag:
+            curriculum_tag = a  # treat as direct slug
 
     # Auto-detect latest slides (filter by curriculum_tag if given)
     slug, slides = _latest_slides(curriculum_tag)
@@ -974,6 +1044,7 @@ def main():
     app.add_handler(CommandHandler("run", run_cmd))
     app.add_handler(CommandHandler("generate", generate_cmd))
     app.add_handler(CommandHandler("topics", topics_cmd))
+    app.add_handler(CommandHandler("slides", slides_cmd))
     app.add_handler(CommandHandler("status", status_cmd))
     app.add_handler(CommandHandler("post", post_cmd))
     app.add_handler(CommandHandler("confirm", confirm_cmd))

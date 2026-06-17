@@ -97,23 +97,28 @@ def _is_emoji_or_special(char: str) -> bool:
 
 
 def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
-    # Prioritize downloaded font (COLRv1 — renders color without embedded_color on Pillow 10.4+)
-    font_url = "https://raw.githubusercontent.com/googlefonts/noto-emoji/main/fonts/NotoColorEmoji.ttf"
+    # Try known CBDT/CBLC version first (bitmap color — embedded_color=True works everywhere)
+    # Pinned to pre-COLRv1 commit so Pillow can render with embedded_color on any FreeType
+    font_urls = [
+        "https://raw.githubusercontent.com/googlefonts/noto-emoji/ca2a5cc8a/fonts/NotoColorEmoji.ttf",
+        "https://raw.githubusercontent.com/googlefonts/noto-emoji/main/fonts/NotoColorEmoji.ttf",
+    ]
     cache_dir = Path(tempfile.gettempdir()) / "aquarisamatiran_emoji_fonts"
-    cache_path = cache_dir / "NotoColorEmoji.ttf"
-    if not cache_path.exists():
+    for url in font_urls:
+        cache_name = "NotoColorEmoji_cbdt.ttf" if "ca2a5cc8a" in url else "NotoColorEmoji_colrv1.ttf"
+        cache_path = cache_dir / cache_name
+        if not cache_path.exists():
+            try:
+                cache_dir.mkdir(parents=True, exist_ok=True)
+                r = requests.get(url, timeout=60)
+                if r.status_code == 200:
+                    cache_path.write_bytes(r.content)
+            except Exception:
+                continue
         try:
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            r = requests.get(font_url, timeout=60)
-            if r.status_code == 200:
-                cache_path.write_bytes(r.content)
+            return ImageFont.truetype(str(cache_path), size)
         except Exception:
-            pass
-    for try_path in [cache_path]:
-        try:
-            return ImageFont.truetype(str(try_path), size)
-        except Exception:
-            pass
+            continue
 
     # Fallback: system emoji fonts
     candidates = [

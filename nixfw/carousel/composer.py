@@ -97,7 +97,7 @@ def _is_emoji_or_special(char: str) -> bool:
 
 
 def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
-    # First, try to download/cache latest Noto Color Emoji (COLRv1 — best Pillow compat)
+    # Prioritize downloaded font (COLRv1 — renders color without embedded_color on Pillow 10.4+)
     font_url = "https://raw.githubusercontent.com/googlefonts/noto-emoji/main/fonts/NotoColorEmoji.ttf"
     cache_dir = Path(tempfile.gettempdir()) / "aquarisamatiran_emoji_fonts"
     cache_path = cache_dir / "NotoColorEmoji.ttf"
@@ -182,7 +182,7 @@ def draw_text_fallback(draw, xy, text, font_primary, font_fallback, fill):
         is_emoji_chunk = fnt == font_fallback
         ey = y + (y_offset if is_emoji_chunk else 0)
         if is_emoji_chunk:
-            draw.text((x, ey), chunk, font=fnt, embedded_color=True)
+            draw.text((x, ey), chunk, font=fnt)
         else:
             draw.text((x, ey), chunk, fill=fill, font=fnt)
         bb = draw.textbbox((0, 0), chunk, font=fnt)

@@ -8,6 +8,9 @@ from PIL import Image, ImageDraw, ImageFont
 
 from nixfw import config
 
+_TWEMOJI_CACHE = Path(tempfile.gettempdir()) / "aquarisamatiran_twemoji"
+_TWEMOJI_BASE = "https://twemoji.maxcdn.com/v/14.0.2/72x72"
+
 
 def _hex_to_rgb(h):
     h = h.lstrip("#")
@@ -97,36 +100,7 @@ def _is_emoji_or_special(char: str) -> bool:
 
 
 def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
-    def _try_load(path: str, s: int) -> ImageFont.FreeTypeFont | None:
-        """Two-step loading to avoid 'invalid pixel size' on COLRv1 fonts."""
-        try:
-            f = ImageFont.truetype(path)
-            return f.font_variant(size=s)
-        except Exception:
-            try:
-                return ImageFont.truetype(path, s)
-            except Exception:
-                return None
-
-    # Download known-good CBDT/CBLC NotoColorEmoji from pinned GitHub release
-    # v2.036 (2022-07-17) is pre-COLRv1 — works with embedded_color on any FreeType
-    font_url = "https://github.com/googlefonts/noto-emoji/releases/download/v2.036/NotoColorEmoji.ttf"
-    cache_dir = Path(tempfile.gettempdir()) / "aquarisamatiran_emoji_fonts"
-    cache_path = cache_dir / "NotoColorEmoji.ttf"  # single cached copy
-    if not cache_path.exists():
-        try:
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            r = requests.get(font_url, timeout=60)
-            if r.status_code == 200 and len(r.content) > 1000:
-                cache_path.write_bytes(r.content)
-        except Exception:
-            pass
-    if cache_path.exists() and cache_path.stat().st_size > 1000:
-        result = _try_load(str(cache_path), size)
-        if result:
-            return result
-
-    # Fallback: system color emoji fonts (COLRv1 — may fail on older FreeType)
+    """Find the best available emoji font. Needs system FreeType 2.13+ for COLRv1."""
     candidates = [
         "C:/Windows/Fonts/seguiemj.ttf",
         "C:/Windows/Fonts/seguisym.ttf",
@@ -134,6 +108,7 @@ def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
         "/usr/share/fonts/opentype/noto/NotoColorEmoji.ttf",
         "/usr/share/fonts/noto/NotoColorEmoji.ttf",
     ]
+    # Scan for any color emoji fonts
     for d in ["/usr/share/fonts/truetype", "/usr/share/fonts/opentype", "/usr/share/fonts"]:
         dp = Path(d)
         if dp.is_dir():
@@ -141,49 +116,76 @@ def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
                 p = str(f)
                 if p not in candidates:
                     candidates.append(p)
-    for path in candidates:
-        p = Path(path)
-        if p.exists():
-            result = _try_load(str(p), size)
-            if result:
-                return result
-
-    # Last resort: monochrome emoji font (NotoEmoji-Regular) — no color but no boxes
-    fallback = [
-        "/usr/share/fonts/truetype/noto/NotoEmoji-Regular.ttf",
-        "/usr/share/fonts/opentype/noto/NotoEmoji-Regular.ttf",
-        "/usr/share/fonts/noto/NotoEmoji-Regular.ttf",
-        "C:/Windows/Fonts/seguisym.ttf",
-    ]
+    # Then monochrome emoji as fallback
     for d in ["/usr/share/fonts/truetype", "/usr/share/fonts/opentype", "/usr/share/fonts"]:
         dp = Path(d)
         if dp.is_dir():
-            for f in dp.rglob("*[Ee]moji*[Rr]egular*"):
+            for f in dp.rglob("*[Ee]moji*"):
                 p = str(f)
-                if p not in fallback:
-                    fallback.append(p)
-    for path in fallback:
+                if p not in candidates:
+                    candidates.append(p)
+    for path in candidates:
         p = Path(path)
         if p.exists():
-            result = _try_load(str(p), size)
-            if result:
-                return result
-
+            try:
+                f = ImageFont.truetype(str(p), size)
+                return f
+            except Exception:
+                continue
     return None
 
 
+def _get_twemoji(char: str, size: int) -> Image.Image | None:
+    """Download & cache a Twemoji PNG for one emoji character, return resized RGBA."""
+    cp = f"{ord(char):x}"
+    cache_path = _TWEMOJI_CACHE / f"{cp}.png"
+    if not cache_path.exists():
+        _TWEMOJI_CACHE.mkdir(parents=True, exist_ok=True)
+        try:
+            r = requests.get(f"{_TWEMOJI_BASE}/{cp}.png", timeout=10)
+            if r.status_code != 200:
+                return None
+            cache_path.write_bytes(r.content)
+        except Exception:
+            return None
+    try:
+        im = Image.open(cache_path).convert("RGBA")
+        return im.resize((size, size), Image.LANCZOS)
+    except Exception:
+        return None
+
+
 def draw_text_fallback(draw, xy, text, font_primary, font_fallback, fill):
-    """Render text with emoji fallback — emoji pake emoji font, sisanya pake primary."""
-    if font_fallback is None:
+    """Render text with emoji fallback — emoji font -> Twemoji PNG -> plain text."""
+    x, y = xy
+    img = draw._image
+
+    # Helper: advance x by glyph width
+    def _advance(t, f):
+        bb = draw.textbbox((0, 0), t, font=f)
+        return bb[2] - bb[0]
+
+    # No emoji font at all -> use Twemoji download, or fall back to plain text (boxes)
+    if font_fallback is None and img is not None:
+        emoji_size = font_primary.size
+        for char in text:
+            if _is_emoji_or_special(char):
+                tw = _get_twemoji(char, emoji_size)
+                if tw:
+                    img.paste(tw, (round(x), round(y)), tw)
+                    x += emoji_size
+                    continue
+            draw.text((x, y), char, fill=fill, font=font_primary)
+            x += _advance(char, font_primary)
+        return
+    elif font_fallback is None:
         draw.text(xy, text, fill=fill, font=font_primary)
         return
 
-    x, y = xy
     chunks = []
     current = ""
     current_is_emoji = None
 
-    # Calculate baseline alignment: offset so emoji sits on same baseline as Nunito
     prim_ascent, prim_descent = font_primary.getmetrics()
     fall_ascent, fall_descent = font_fallback.getmetrics()
     y_offset = prim_ascent - fall_ascent
@@ -211,8 +213,7 @@ def draw_text_fallback(draw, xy, text, font_primary, font_fallback, fill):
             draw.text((x, ey), chunk, fill=fill, font=fnt, embedded_color=True)
         else:
             draw.text((x, ey), chunk, fill=fill, font=fnt)
-        bb = draw.textbbox((0, 0), chunk, font=fnt)
-        x += bb[2] - bb[0]
+        x += _advance(chunk, fnt)
 
 
 def draw_rounded_rect(draw, xy, radius, fill):

@@ -183,7 +183,10 @@ def draw_text_fallback(draw, xy, text, font_primary, font_fallback, fill):
     for chunk, fnt in chunks:
         is_emoji_chunk = fnt == font_fallback
         ey = y + (y_offset if is_emoji_chunk else 0)
-        draw.text((x, ey), chunk, fill=fill, font=fnt)
+        if is_emoji_chunk:
+            draw.text((x, ey), chunk, fill=fill, font=fnt, embedded_color=True)
+        else:
+            draw.text((x, ey), chunk, fill=fill, font=fnt)
         bb = draw.textbbox((0, 0), chunk, font=fnt)
         x += bb[2] - bb[0]
 

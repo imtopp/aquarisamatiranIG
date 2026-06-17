@@ -1,17 +1,17 @@
 {
   "topic": "Test Emoji",
-  "display_name": "Manfaatkan Emoji 💡",
-  "subtitle": "Komunikasi Akurat, Penuh Warna!",
-  "scientific_name": "N/A",
+  "display_name": "Test Emoji",
+  "subtitle": "Keindahan dalam Soliter 🐠",
+  "scientific_name": "Betta splendens",
   "facts": [
     {
       "number": "01",
-      "title": "Emoji Bantu Kenali Masalah 🆘",
-      "description": "Dalam dunia akuarium, emoji bukan cuma hiasan. Mereka bisa jadi alat komunikasi cepat! Bayangkan, daripada mengetik panjang lebar, cukup pakai emoji 🌡️ untuk suhu, 🧪 untuk parameter air, atau 🦠 untuk indikasi penyakit. Ini sangat membantu pemula memahami situasi tanpa jargon yang rumit, lho!",
+      "title": "Ikan Petarung Cantik ⚔️",
+      "description": "Betta splendens, atau ikan cupang, dikenal karena keindahan siripnya yang menjuntai dan warnanya yang memukau. Namun, sifat agresifnya membuat ikan ini sebaiknya dipelihara sendirian dalam satu akuarium, terutama antar jantan untuk mencegah perkelahian.",
       "tags": [
-        "Komunikasi Cepat",
-        "Visualisasi Data",
-        "Panduan Pemula"
+        "Agresif",
+        "Ikan Hias",
+        "Soliter"
       ]
     }
   ],

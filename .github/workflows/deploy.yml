@@ -22,10 +22,7 @@ jobs:
             cd /home/topp/projects/aquarisamatiran &&
             git fetch origin main &&
             git reset --hard origin/main &&
-            .venv/bin/pip install -r requirements.txt;
-            # Update systemd to use python -m nixfw.bot.bot instead of root bot/bot.py
-            sudo sed -i 's|ExecStart=.*|ExecStart=/home/topp/projects/aquarisamatiran/.venv/bin/python -m nixfw.bot.bot|' /etc/systemd/system/aquarisamatiran-bot.service;
-            sudo systemctl daemon-reload;
-            sudo systemctl restart aquarisamatiran-bot
+            .venv/bin/pip install -r requirements.txt &&
+            sudo systemctl restart nix-bot
             echo '✅ Deploy selesai'
           "

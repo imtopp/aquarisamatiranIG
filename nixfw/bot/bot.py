@@ -166,11 +166,12 @@ HELP_TEXT = (
     "**📋 Perintah:**\n"
     "/help — nampilin ini\n"
     "/topics — daftar topik kurikulum (`#XX`)\n"
+    "/slides — daftar slide yang siap post (curriculum + adhoc)\n"
     "/reset — hapus riwayat obrolan\n"
     "/run `<cmd>` — jalanin perintah (terbatas)\n"
     "/generate `C1#07` `[jml_fakta]` — trigger generate carousel SD\n"
     "/status — cek progress generate terakhir\n"
-    "/post `[C1#07]` `[hari jam]` — post carousel (wajib pilih topik)\n"
+    "/post `[C1#07 atau slug]` `[hari jam]` — post carousel (auto-detect kalo tanpa arg)\n"
     "/confirm — lanjutin posting setelah preview\n"
     "/editcaption `<instruksi>` — ganti caption\n"
     "/regenerate — generate ulang slide\n"
@@ -180,12 +181,16 @@ HELP_TEXT = (
     "/schedule — liat jadwal postingan\n\n"
     "**🧙 Wizard Interaktif:**\n"
     "Ketik `/setslot add` — bot tanya nama, pilih hari via tombol, jam → auto-sync cron-job.org!\n\n"
-    "**🚀 Cara pake:**\n"
+    "**🚀 Cara pake Curriculum:**\n"
     "1. `/topics` — liat daftar `C1#07` yang tersedia\n"
     "2. `/generate C1#07` — bikin carousel (10-30 menit di GH Actions)\n"
     "3. `/status` — cek udah selesai belum\n"
     "4. `/post C1#07` — preview slide + caption\n"
-    "5. `/confirm` — upload & jadwal otomatis"
+    "5. `/confirm` — upload & jadwal otomatis\n\n"
+    "**🚀 Cara pake Adhoc:**\n"
+    "1. `/slides` — liat slide yang siap post\n"
+    "2. `/post <slug>` — preview + caption\n"
+    "3. `/confirm` — upload & jadwal"
 )
 
 
@@ -377,7 +382,7 @@ async def slides_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         count = len(groups[slug])
         mtime = _prefix_mtime(slug)
         time_str = datetime.datetime.fromtimestamp(mtime).strftime("%d/%m %H:%M")
-        cur_lines.append(f"  `{tag}` {slug} — {count} file ({time_str})")
+        cur_lines.append(f"  `{tag}` `{slug}` — {count} file ({time_str})")
 
     adhoc_lines = []
     for prefix in sorted(adhoc_groups, key=_prefix_mtime, reverse=True):

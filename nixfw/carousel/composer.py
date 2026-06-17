@@ -17,7 +17,8 @@ def _hex_to_rgb(h):
 def _linux_fallback() -> str:
     for p in ["/usr/share/fonts/truetype/nunito/Nunito-Regular.ttf",
               "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-              "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"]:
+              "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+              "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf"]:
         if Path(p).exists():
             return p
     return ""
@@ -101,7 +102,22 @@ def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
         "C:/Windows/Fonts/seguisym.ttf",
         "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
         "/usr/share/fonts/opentype/noto/NotoColorEmoji.ttf",
+        "/usr/share/fonts/truetype/noto/NotoEmoji-Regular.ttf",
+        "/usr/share/fonts/opentype/noto/NotoEmoji-Regular.ttf",
+        "/usr/share/fonts/noto/NotoColorEmoji.ttf",
+        "/usr/share/fonts/noto/NotoEmoji-Regular.ttf",
     ]
+
+    # Scan common Linux font dirs for any file matching *Emoji*
+    for d in ["/usr/share/fonts/truetype/noto", "/usr/share/fonts/opentype/noto",
+              "/usr/share/fonts/truetype", "/usr/share/fonts/opentype"]:
+        dp = Path(d)
+        if dp.is_dir():
+            for f in dp.rglob("*[Ee]moji*"):
+                p = str(f)
+                if p not in candidates:
+                    candidates.append(p)
+
     for path in candidates:
         p = Path(path)
         if p.exists():
@@ -111,13 +127,13 @@ def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
                 continue
 
     # Fallback: download Noto Color Emoji
-    font_url = "https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf"
-    cache_dir = Path(tempfile.gettempdir()) / "aquarisamatiramoji_fonts"
+    font_url = "https://raw.githubusercontent.com/googlefonts/noto-emoji/main/fonts/NotoColorEmoji.ttf"
+    cache_dir = Path(tempfile.gettempdir()) / "aquarisamatiran_emoji_fonts"
     cache_path = cache_dir / "NotoColorEmoji.ttf"
     if not cache_path.exists():
         try:
             cache_dir.mkdir(parents=True, exist_ok=True)
-            r = requests.get(font_url, timeout=30)
+            r = requests.get(font_url, timeout=60)
             if r.status_code == 200:
                 cache_path.write_bytes(r.content)
         except Exception:

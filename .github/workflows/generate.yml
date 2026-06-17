@@ -45,7 +45,17 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq fonts-nunito || true
-          sudo apt-get install -y -qq fonts-noto-color-emoji || true
+          sudo apt-get install -y -qq fonts-noto-color-emoji fonts-noto-emoji || true
+          # Symlink emoji font to known path for _get_emoji_font()
+          sudo find /usr/share/fonts -name "*Emoji*" -o -name "*emoji*" 2>/dev/null | head -5 || true
+          if [ -f /usr/share/fonts/truetype/noto/NotoColorEmoji.ttf ]; then \
+            echo "NotoColorEmoji found at /usr/share/fonts/truetype/noto/"; \
+          elif [ -f /usr/share/fonts/opentype/noto/NotoColorEmoji.ttf ]; then \
+            echo "NotoColorEmoji found at /usr/share/fonts/opentype/noto/"; \
+          else \
+            echo "NotoColorEmoji not in standard paths, scanning..."; \
+            find /usr/share/fonts -name "NotoColorEmoji*" -exec echo Found: {} \; ; \
+          fi
           pip install -r requirements.txt
           pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
           pip install diffusers transformers accelerate pillow

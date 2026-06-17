@@ -370,7 +370,7 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def _latest_slides(curriculum_tag: str = "") -> tuple[str | None, list[Path]]:
     """Detect carousel slides in PHOTO_DIR. If curriculum_tag given (e.g. C1#07), filter by topic slug."""
-    slides_dir = _bot_cfg.PHOTO_DIR
+    slides_dir = PHOTO_DIR
     if curriculum_tag:
         m = re.match(r'[CS](\d+)#(\d+)', curriculum_tag)
         if m:

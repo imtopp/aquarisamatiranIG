@@ -40,7 +40,7 @@ def build_cta_slide(facts: dict, subject_img: Image.Image | None, palette: dict 
     # Subject image (smaller, center) — fallback ke logo kalo ga ada gambar
     img_to_show = subject_img
     if img_to_show is None:
-        logo_path = Path("resource") / "logo" / "logo-cta-square.png"
+        logo_path = config.RESOURCE_DIR / "logo" / "logo-cta-square.png"
         if logo_path.exists():
             try:
                 img_to_show = Image.open(logo_path).convert("RGBA")

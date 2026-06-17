@@ -27,6 +27,7 @@ def build_cover(facts: dict, subject_img: Image.Image | None, bg_image: Image.Im
     font_subtitle = _get_font("nunito", 30)
     font_tagline = _get_font("nunito", 28)
     font_emoji = _get_emoji_font(56)
+    font_emoji_sub = _get_emoji_font(30)
 
     # Handle
     draw.text((40, 60), config.IG_HANDLE, fill=accent + (255,), font=font_handle)
@@ -45,9 +46,7 @@ def build_cover(facts: dict, subject_img: Image.Image | None, bg_image: Image.Im
     subtitle = facts.get("subtitle", "")
     ct_y = img_y + 10
     if subtitle:
-        bbox = draw.textbbox((0, 0), subtitle, font=font_subtitle)
-        sw = bbox[2] - bbox[0]
-        draw.text(((W - sw) // 2, ct_y), subtitle, fill=text_sub + (255,), font=font_subtitle)
+        draw_text_fallback(draw, ((W - draw.textbbox((0, 0), subtitle, font=font_subtitle)[2]) // 2, ct_y), subtitle, font_subtitle, font_emoji_sub, fill=text_sub + (255,))
         ct_y += 50
 
     # Display name (large title)

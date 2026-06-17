@@ -401,7 +401,11 @@ def _latest_slides(curriculum_tag: str = "") -> tuple[str | None, list[Path]]:
             prefix = stem.rsplit("_sd_", 1)[0]
         else:
             prefix = stem.rsplit("_", 1)[0]
+        if not prefix:
+            continue
         groups.setdefault(prefix, []).append(s)
+    if not groups:
+        return None, []
     latest_prefix = max(groups, key=lambda k: max(groups[k], key=lambda f: f.stat().st_mtime).stat().st_mtime)
     return latest_prefix, sorted(groups[latest_prefix])
 

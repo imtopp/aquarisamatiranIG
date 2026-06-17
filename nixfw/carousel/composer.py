@@ -97,36 +97,7 @@ def _is_emoji_or_special(char: str) -> bool:
 
 
 def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
-    candidates = [
-        "C:/Windows/Fonts/seguiemj.ttf",
-        "C:/Windows/Fonts/seguisym.ttf",
-        "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
-        "/usr/share/fonts/opentype/noto/NotoColorEmoji.ttf",
-        "/usr/share/fonts/truetype/noto/NotoEmoji-Regular.ttf",
-        "/usr/share/fonts/opentype/noto/NotoEmoji-Regular.ttf",
-        "/usr/share/fonts/noto/NotoColorEmoji.ttf",
-        "/usr/share/fonts/noto/NotoEmoji-Regular.ttf",
-    ]
-
-    # Scan common Linux font dirs for any file matching *Emoji*
-    for d in ["/usr/share/fonts/truetype/noto", "/usr/share/fonts/opentype/noto",
-              "/usr/share/fonts/truetype", "/usr/share/fonts/opentype"]:
-        dp = Path(d)
-        if dp.is_dir():
-            for f in dp.rglob("*[Ee]moji*"):
-                p = str(f)
-                if p not in candidates:
-                    candidates.append(p)
-
-    for path in candidates:
-        p = Path(path)
-        if p.exists():
-            try:
-                return ImageFont.truetype(str(p), size)
-            except Exception:
-                continue
-
-    # Fallback: download Noto Color Emoji
+    # First, try to download/cache latest Noto Color Emoji (COLRv1 — best Pillow compat)
     font_url = "https://raw.githubusercontent.com/googlefonts/noto-emoji/main/fonts/NotoColorEmoji.ttf"
     cache_dir = Path(tempfile.gettempdir()) / "aquarisamatiran_emoji_fonts"
     cache_path = cache_dir / "NotoColorEmoji.ttf"
@@ -138,11 +109,38 @@ def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
                 cache_path.write_bytes(r.content)
         except Exception:
             pass
-    if cache_path.exists():
+    for try_path in [cache_path]:
         try:
-            return ImageFont.truetype(str(cache_path), size)
+            return ImageFont.truetype(str(try_path), size)
         except Exception:
             pass
+
+    # Fallback: system emoji fonts
+    candidates = [
+        "C:/Windows/Fonts/seguiemj.ttf",
+        "C:/Windows/Fonts/seguisym.ttf",
+        "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+        "/usr/share/fonts/opentype/noto/NotoColorEmoji.ttf",
+        "/usr/share/fonts/truetype/noto/NotoEmoji-Regular.ttf",
+        "/usr/share/fonts/opentype/noto/NotoEmoji-Regular.ttf",
+        "/usr/share/fonts/noto/NotoColorEmoji.ttf",
+        "/usr/share/fonts/noto/NotoEmoji-Regular.ttf",
+    ]
+    for d in ["/usr/share/fonts/truetype/noto", "/usr/share/fonts/opentype/noto",
+              "/usr/share/fonts/truetype", "/usr/share/fonts/opentype"]:
+        dp = Path(d)
+        if dp.is_dir():
+            for f in dp.rglob("*[Ee]moji*"):
+                p = str(f)
+                if p not in candidates:
+                    candidates.append(p)
+    for path in candidates:
+        p = Path(path)
+        if p.exists():
+            try:
+                return ImageFont.truetype(str(p), size)
+            except Exception:
+                continue
     return None
 
 

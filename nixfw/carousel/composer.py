@@ -97,59 +97,78 @@ def _is_emoji_or_special(char: str) -> bool:
 
 
 def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
-    # Try known CBDT/CBLC version first (bitmap color — embedded_color=True works everywhere)
-    # Pinned to pre-COLRv1 commit so Pillow can render with embedded_color on any FreeType
-    font_urls = [
-        "https://raw.githubusercontent.com/googlefonts/noto-emoji/ca2a5cc8a/fonts/NotoColorEmoji.ttf",
-        "https://raw.githubusercontent.com/googlefonts/noto-emoji/main/fonts/NotoColorEmoji.ttf",
-    ]
-    cache_dir = Path(tempfile.gettempdir()) / "aquarisamatiran_emoji_fonts"
-    for url in font_urls:
-        cache_name = "NotoColorEmoji_cbdt.ttf" if "ca2a5cc8a" in url else "NotoColorEmoji_colrv1.ttf"
-        cache_path = cache_dir / cache_name
-        if not cache_path.exists():
-            try:
-                cache_dir.mkdir(parents=True, exist_ok=True)
-                r = requests.get(url, timeout=60)
-                if r.status_code == 200:
-                    cache_path.write_bytes(r.content)
-            except Exception:
-                continue
+    def _try_load(path: str, s: int) -> ImageFont.FreeTypeFont | None:
+        """Two-step loading to avoid 'invalid pixel size' on COLRv1 fonts."""
         try:
-            return ImageFont.truetype(str(cache_path), size)
+            f = ImageFont.truetype(path)
+            return f.font_variant(size=s)
         except Exception:
-            continue
+            try:
+                return ImageFont.truetype(path, s)
+            except Exception:
+                return None
 
-    # Fallback: system emoji fonts
+    # Download known-good CBDT/CBLC NotoColorEmoji from pinned GitHub release
+    # v2.036 (2022-07-17) is pre-COLRv1 — works with embedded_color on any FreeType
+    font_url = "https://github.com/googlefonts/noto-emoji/releases/download/v2.036/NotoColorEmoji.ttf"
+    cache_dir = Path(tempfile.gettempdir()) / "aquarisamatiran_emoji_fonts"
+    cache_path = cache_dir / "NotoColorEmoji.ttf"  # single cached copy
+    if not cache_path.exists():
+        try:
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            r = requests.get(font_url, timeout=60)
+            if r.status_code == 200 and len(r.content) > 1000:
+                cache_path.write_bytes(r.content)
+        except Exception:
+            pass
+    if cache_path.exists() and cache_path.stat().st_size > 1000:
+        result = _try_load(str(cache_path), size)
+        if result:
+            return result
+
+    # Fallback: system color emoji fonts (COLRv1 — may fail on older FreeType)
     candidates = [
         "C:/Windows/Fonts/seguiemj.ttf",
         "C:/Windows/Fonts/seguisym.ttf",
         "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
         "/usr/share/fonts/opentype/noto/NotoColorEmoji.ttf",
-        "/usr/share/fonts/truetype/noto/NotoEmoji-Regular.ttf",
-        "/usr/share/fonts/opentype/noto/NotoEmoji-Regular.ttf",
         "/usr/share/fonts/noto/NotoColorEmoji.ttf",
-        "/usr/share/fonts/noto/NotoEmoji-Regular.ttf",
     ]
-    for d in ["/usr/share/fonts/truetype/noto", "/usr/share/fonts/opentype/noto",
-              "/usr/share/fonts/truetype", "/usr/share/fonts/opentype"]:
+    for d in ["/usr/share/fonts/truetype", "/usr/share/fonts/opentype", "/usr/share/fonts"]:
         dp = Path(d)
         if dp.is_dir():
-            for f in dp.rglob("*[Ee]moji*"):
+            for f in dp.rglob("*[Cc]olor*[Ee]moji*"):
                 p = str(f)
                 if p not in candidates:
                     candidates.append(p)
     for path in candidates:
         p = Path(path)
         if p.exists():
-            try:
-                f = ImageFont.truetype(str(p), size)
-                print(f"[debug] _get_emoji_font loaded: {p} (size={size})", flush=True)
-                return f
-            except Exception as e:
-                print(f"[debug] _get_emoji_font fail {p}: {e}", flush=True)
-                continue
-    print("[debug] _get_emoji_font: no font found!", flush=True)
+            result = _try_load(str(p), size)
+            if result:
+                return result
+
+    # Last resort: monochrome emoji font (NotoEmoji-Regular) — no color but no boxes
+    fallback = [
+        "/usr/share/fonts/truetype/noto/NotoEmoji-Regular.ttf",
+        "/usr/share/fonts/opentype/noto/NotoEmoji-Regular.ttf",
+        "/usr/share/fonts/noto/NotoEmoji-Regular.ttf",
+        "C:/Windows/Fonts/seguisym.ttf",
+    ]
+    for d in ["/usr/share/fonts/truetype", "/usr/share/fonts/opentype", "/usr/share/fonts"]:
+        dp = Path(d)
+        if dp.is_dir():
+            for f in dp.rglob("*[Ee]moji*[Rr]egular*"):
+                p = str(f)
+                if p not in fallback:
+                    fallback.append(p)
+    for path in fallback:
+        p = Path(path)
+        if p.exists():
+            result = _try_load(str(p), size)
+            if result:
+                return result
+
     return None
 
 

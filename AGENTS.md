@@ -8,6 +8,12 @@ Currently running `aquarisamatiran` (aquascape) as the primary account.
 Check `hostname` untuk tau lagi di VPS (`aquarisamatiranVM`, IP: `103.31.39.192`) atau laptop lokal.
 Gak pake file `.env` biar aman dari overwrite gak sengaja pas update token via SSH.
 
+## VPS Access
+
+- **Host**: `103.31.39.192` (idcloudhost), user: `topp`
+- **SSH Key**: tersimpan di `vps_key.pem` — extract pakai `$env:VPS_SSH_KEY` dari `.env` kalo perlu regenerate
+- Jangan SSH manual dari lokal kecuali perlu debug — deploy via GH Actions aja
+
 ## Tech Stack
 
 - **Python 3.14**, `requests`, `python-dotenv`, `moviepy`, `google-genai`

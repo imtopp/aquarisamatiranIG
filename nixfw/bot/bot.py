@@ -472,11 +472,16 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         topic = run.get("display_title", "?")
         html_url = run["html_url"]
         emoji = {"queued": "⏳", "in_progress": "🔄", "completed": {"success": "✅", "failure": "❌", "cancelled": "🚫"}.get(conclusion, "❓")}.get(status, "❓")
-        created = run["created_at"][:16].replace("T", " ")
+        created_utc = run["created_at"][:16].replace("T", " ")
+        try:
+            dt = datetime.datetime.strptime(created_utc, "%Y-%m-%d %H:%M") + datetime.timedelta(hours=7)
+            created_wib = dt.strftime("%Y-%m-%d %H:%M")
+        except Exception:
+            created_wib = created_utc
         msg = (
             f"{emoji} Generate: **{topic}**\n"
             f"Status: **{status}** ({conclusion})\n"
-            f"Dibuat: {created} WIB\n"
+            f"Dibuat: {created_wib} WIB\n"
             f"[Lihat di GitHub]({html_url})"
         )
         if slides := _latest_slides()[1]:

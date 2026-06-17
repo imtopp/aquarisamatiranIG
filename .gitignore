@@ -45,5 +45,5 @@ bot/bot.log
 resource/videos/*.mp4
 resource/published/*.mp4
 
-# Snapshots (pre-refactor baseline for diff comparison)
-.snapshot/
+# SSH key
+vps_key.pem

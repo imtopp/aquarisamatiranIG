@@ -1,19 +1,20 @@
 {
-  "topic": "Pentingnya Uji Kualitas Air Aquarium",
-  "display_name": "Uji Air Aquarium",
-  "subtitle": "Kunci Akuarium Sehatmu!",
-  "scientific_name": "Aquatic Parameter Monitoring",
+  "topic": "Pentingnya Test Air Aquarium",
+  "display_name": "Jangan Asal Tebak! Test Air Itu Kunci! 🔑",
+  "subtitle": "Air Sehat, Ikan Ceria!",
   "facts": [
     {
       "number": "01",
-      "title": "Kenapa Uji Air Itu Penting? 🧪",
-      "description": "Uji kualitas air adalah pondasi utama dalam memelihara akuarium yang sehat dan stabil. Tanpa pengujian rutin, parameter air vital seperti amonia, nitrit, dan nitrat bisa melonjak tak terkontrol, menciptakan lingkungan beracun yang mengancam nyawa ikanmu. Dengan menguji air, kamu dapat memahami kondisi lingkungan mereka dan mengambil tindakan preventif sebelum masalah muncul.",
+      "title": "Kenapa Mesti Test Air? 🧪",
+      "description": "Air di akuarium kita mungkin terlihat jernih, tapi kualitasnya bisa buruk dan berbahaya bagi ikan lho! Test air membantu kita \"melihat\" apa yang sebenarnya terjadi di dalam air, seperti kadar amonia, nitrit, dan nitrat yang tak kasat mata. Ini krusial untuk menjaga ikan tetap sehat, mencegah stres, dan menghindari masalah serius yang tak terduga.",
       "tags": [
-        "Siklus Nitrogen",
+        "Kualitas Air",
+        "Kesehatan Ikan",
         "Parameter Air",
-        "Kesehatan Ekosistem"
+        "Pemula Wajib Tahu"
       ]
     }
   ],
-  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!",
+  "scientific_name": "test"
 }

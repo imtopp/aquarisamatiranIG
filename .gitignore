@@ -47,3 +47,6 @@ resource/published/*.mp4
 
 # SSH key
 vps_key.pem
+
+# Snapshots (pre-refactor baseline for diff comparison)
+.snapshot/

@@ -388,8 +388,8 @@ def _latest_slides(curriculum_tag: str = "") -> tuple[str | None, list[Path]]:
 
     slides = sorted(slides_dir.glob("*_slide_??.png"))
     slides += sorted(slides_dir.glob("edu_*_??.jpg"))
-    slides += sorted(slides_dir.glob("*_sd_*.png"))
-    slides += sorted(slides_dir.glob("*_sd_*.jpg"))
+    slides += sorted(f for f in slides_dir.glob("*_sd_*.png") if not f.stem.endswith("_sd_bg"))
+    slides += sorted(f for f in slides_dir.glob("*_sd_*.jpg") if not f.stem.endswith("_sd_bg"))
     if not slides:
         return None, []
     groups = {}

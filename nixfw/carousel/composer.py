@@ -138,16 +138,18 @@ def _get_emoji_font(size: int) -> ImageFont.FreeTypeFont | None:
         p = Path(path)
         if p.exists():
             try:
-                return ImageFont.truetype(str(p), size)
-            except Exception:
+                f = ImageFont.truetype(str(p), size)
+                print(f"[debug] _get_emoji_font loaded: {p} (size={size})", flush=True)
+                return f
+            except Exception as e:
+                print(f"[debug] _get_emoji_font fail {p}: {e}", flush=True)
                 continue
+    print("[debug] _get_emoji_font: no font found!", flush=True)
     return None
 
 
 def draw_text_fallback(draw, xy, text, font_primary, font_fallback, fill):
-    """Render text with emoji fallback — emoji pake Segoe UI, sisanya pake Nunito.
-    Emoji rendered with embedded_color=True for colorful glyphs.
-    """
+    """Render text with emoji fallback — emoji pake emoji font, sisanya pake primary."""
     if font_fallback is None:
         draw.text(xy, text, fill=fill, font=font_primary)
         return
@@ -181,10 +183,7 @@ def draw_text_fallback(draw, xy, text, font_primary, font_fallback, fill):
     for chunk, fnt in chunks:
         is_emoji_chunk = fnt == font_fallback
         ey = y + (y_offset if is_emoji_chunk else 0)
-        if is_emoji_chunk:
-            draw.text((x, ey), chunk, font=fnt)
-        else:
-            draw.text((x, ey), chunk, fill=fill, font=fnt)
+        draw.text((x, ey), chunk, fill=fill, font=fnt)
         bb = draw.textbbox((0, 0), chunk, font=fnt)
         x += bb[2] - bb[0]
 

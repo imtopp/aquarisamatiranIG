@@ -64,8 +64,10 @@ jobs:
         run: rm -f accounts/aquarisamatiran/resource/photos/temp_*
 
       - name: Generate carousel
-        run: python main.py generate-carousel-sd "${{ inputs.topic }}" --num-facts ${{ inputs.num_facts }}
+        run: python main.py generate-carousel-sd "$TOPIC" --num-facts "$NUM_FACTS"
         env:
+          TOPIC: ${{ inputs.topic }}
+          NUM_FACTS: ${{ inputs.num_facts }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_API_KEY_1: ${{ secrets.BACKUP_GEMINI_API_KEY }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
@@ -99,5 +101,5 @@ jobs:
       - name: Trigger deploy
         run: gh workflow run deploy.yml
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAGES_PAT }}
         shell: bash

@@ -50,6 +50,3 @@ vps_key.pem
 
 # Snapshots (pre-refactor baseline for diff comparison)
 .snapshot/
-
-# Background image files (byproduct of SD generate, not slides)
-*_sd_bg.*

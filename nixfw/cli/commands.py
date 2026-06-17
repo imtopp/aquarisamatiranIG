@@ -888,10 +888,11 @@ def _search_pexels_image(query: str):
 # Stable Diffusion local
 # ---------------------------------------------------------------------------
 _sd_pipe_instance = None
+_sd_use_lcm = True
 
 
 def _sd_pipe():
-    global _sd_pipe_instance
+    global _sd_pipe_instance, _sd_use_lcm
     if _sd_pipe_instance is None:
         import time
         from diffusers import StableDiffusionPipeline
@@ -902,6 +903,15 @@ def _sd_pipe():
             "runwayml/stable-diffusion-v1-5", torch_dtype=torch.float32
         )
         print(f"   ✅ SD loaded in {time.time()-t0:.1f}s")
+        try:
+            print("   ⚡ Loading LCM-LoRA...")
+            t0 = time.time()
+            _sd_pipe_instance.load_lora_weights("latent-consistency/lcm-lora-sdv1-5")
+            _sd_pipe_instance.fuse_lora()
+            print(f"   ✅ LCM-LoRA loaded in {time.time()-t0:.1f}s")
+        except Exception as e:
+            _sd_use_lcm = False
+            print(f"   ⚠️  LCM-LoRA gagal (fallback 20 steps): {e}")
     return _sd_pipe_instance
 
 
@@ -911,7 +921,10 @@ def _sd_generate(prompt: str, size: tuple = (512, 512)) -> PIL.Image.Image | Non
         pipe = _sd_pipe()
         print(f"   🎨 SD generating: {prompt[:60]}...")
         t0 = time.time()
-        img = pipe(prompt, num_inference_steps=20, height=size[1], width=size[0]).images[0]
+        if _sd_use_lcm:
+            img = pipe(prompt, num_inference_steps=4, guidance_scale=2.0, height=size[1], width=size[0]).images[0]
+        else:
+            img = pipe(prompt, num_inference_steps=20, height=size[1], width=size[0]).images[0]
         print(f"   ✅ SD done in {time.time()-t0:.1f}s")
         return img
     except Exception as e:

@@ -1193,6 +1193,94 @@ async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Udah aku lupain obrolan kita~ Mau mulai lagi? 🫣")
 
 
+async def sync_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Sync VPS with remote repo — commit lokal, pull, push, restart."""
+    msg = await update.message.reply_text("⏳ Sync on progress...")
+    chat_id = update.effective_chat.id
+
+    steps = [
+        ("git add -A", ["git", "add", "-A"]),
+        ("git diff --cached --quiet || git commit -m 'auto: pre-sync save'",
+         ["git", "diff", "--cached", "--quiet"]),
+    ]
+
+    try:
+        subprocess.run(
+            ["git", "add", "-A"],
+            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=15,
+        )
+        diff = subprocess.run(
+            ["git", "diff", "--cached", "--quiet"],
+            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=15,
+        )
+        if diff.returncode != 0:
+            subprocess.run(
+                ["git", "commit", "-m", "auto: pre-sync save"],
+                cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=15,
+            )
+
+        subprocess.run(
+            ["git", "fetch", "origin", "main"],
+            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=30,
+        )
+        subprocess.run(
+            ["git", "rebase", "origin/main"],
+            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=30,
+        )
+        push = subprocess.run(
+            ["git", "push", "origin", "main"],
+            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=30,
+        )
+        if push.returncode != 0:
+            await msg.edit_text(f"❌ Sync failed — push error:\n{push.stderr[:300]}")
+            return
+
+        pip_res = subprocess.run(
+            [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
+            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=120,
+        )
+        if pip_res.returncode != 0:
+            await msg.edit_text(f"⚠️ pip install error:\n{pip_res.stderr[:300]}")
+
+        subprocess.run(
+            [sys.executable, "main.py", "curriculum", "sync"],
+            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=60,
+        )
+
+        # Save flag for restart notification
+        (PROJECT_ROOT / ".restart_flag").write_text(
+            json.dumps({"chat_id": chat_id}), encoding="utf-8"
+        )
+
+        await msg.edit_text("✅ Sync done!\n🔄 Restart bot system...")
+
+        # Restart via systemctl with small delay
+        subprocess.Popen(
+            ["nohup", "sh", "-c", "sleep 2 && sudo systemctl restart nix-bot"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )
+
+    except subprocess.TimeoutExpired:
+        await msg.edit_text("❌ Sync timeout — salah satu langkah terlalu lama")
+    except Exception as e:
+        await msg.edit_text(f"❌ Sync error: {e}")
+
+
+async def _notify_restart_done(app: Application) -> None:
+    flag = PROJECT_ROOT / ".restart_flag"
+    if not flag.exists():
+        return
+    try:
+        data = json.loads(flag.read_text(encoding="utf-8"))
+        await app.bot.send_message(
+            chat_id=data["chat_id"],
+            text="✅ Bot system is ready to serve!",
+        )
+    except Exception as e:
+        print(f"⚠️ Gagal notif restart: {e}")
+    flag.unlink(missing_ok=True)
+
+
 async def _delete_webhook(app: Application) -> None:
     """Force delete webhook to clear 409 conflict on restart."""
     try:
@@ -1200,6 +1288,7 @@ async def _delete_webhook(app: Application) -> None:
         print("✅ Webhook deleted, polling clean.")
     except Exception as e:
         print(f"⚠️  Gagal delete webhook: {e}")
+    await _notify_restart_done(app)
 
 
 def main():
@@ -1228,6 +1317,7 @@ def main():
     app.add_handler(CommandHandler("myid", myid_cmd))
     app.add_handler(CommandHandler("schedule", schedule_cmd))
     app.add_handler(CommandHandler("setslot", setslot_cmd))
+    app.add_handler(CommandHandler("sync", sync_cmd))
     app.add_handler(CallbackQueryHandler(wizard_callback, pattern="^wiz:"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 

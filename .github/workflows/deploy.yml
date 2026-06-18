@@ -20,10 +20,13 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
             cd /home/topp/projects/aquarisamatiran &&
+            git add -A &&
+            git diff --cached --quiet || git commit -m 'auto: pre-deploy save' &&
             git fetch origin main &&
-            git reset --hard origin/main &&
+            git rebase origin/main &&
+            git push origin main &&
             .venv/bin/pip install -r requirements.txt &&
             .venv/bin/python main.py curriculum sync &&
-            sudo systemctl restart nix-bot
+            sudo systemctl restart nix-bot &&
             echo '✅ Deploy selesai'
           "

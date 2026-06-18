@@ -699,6 +699,12 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Generate caption — cek dulu apakah udah ada di source_of_truth
     topic_display = _slug_to_topic(slug)
+    if topic_ref and re.match(r"C(\d+)#(\d+)", topic_ref):
+        m = re.match(r"C(\d+)#(\d+)", topic_ref)
+        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        t = cc.get("topics", {}).get(m.group(1), {}).get(m.group(2), {})
+        if t.get("title"):
+            topic_display = t["title"]
     facts_json = None
     existing_caption = _get_caption_from_curriculum(slug)
     if existing_caption:

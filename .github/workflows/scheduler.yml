@@ -37,6 +37,7 @@ jobs:
           git config user.email "nix@aquarisamatiran.dev"
           git add accounts/aquarisamatiran/schedule.json accounts/aquarisamatiran/source_of_truth.json accounts/aquarisamatiran/bio/index.html
           git diff --cached --quiet || git commit -m "auto: post + update bio"
+          git remote set-url origin https://x-access-token:${{ secrets.PAGES_PAT }}@github.com/${{ github.repository }}
           git push origin main
 
       - name: Push bio to pages repo

@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/checkout@v4
 
@@ -46,7 +47,7 @@ jobs:
       - name: Clean .uploaded.json stale entries
         run: python main.py clean clean-uploaded ${{ inputs.slug }}
 
-      - name: Commit and push
+      - name: Commit and push (with PAT to trigger deploy)
         run: |
           git config user.name 'nix-bot'
           git config user.email 'bot@nix.fw'
@@ -54,7 +55,12 @@ jobs:
           if git diff --staged --quiet; then
             echo 'No changes to commit'
           else
+            git remote set-url origin https://x-access-token:${{ secrets.PAGES_PAT }}@github.com/${{ github.repository }}
             git commit -m 'clean: remove ${{ inputs.slug }} slides'
             git push
             echo 'Clean committed and pushed'
           fi
+      - name: Trigger deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main

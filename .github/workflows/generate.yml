@@ -94,7 +94,7 @@ jobs:
           git stash --include-untracked || true
           git pull --rebase origin main
           git stash pop || true
-          git remote set-url origin https://x-access-token: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@github.com/imtopp/aquarisamatiranIG.git
+          git remote set-url origin https://x-access-token:${{ secrets.PAGES_PAT }}@github.com/${{ github.repository }}
           git push origin main
         shell: bash
 

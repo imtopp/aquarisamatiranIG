@@ -1,20 +1,89 @@
 {
-  "topic": "Pentingnya Test Air Aquarium",
-  "display_name": "Jangan Asal Tebak! Test Air Itu Kunci! 🔑",
-  "subtitle": "Air Sehat, Ikan Ceria!",
+  "topic": "Test Air Aquarium",
+  "display_name": "Pentingnya Tes Air Aquarium",
+  "subtitle": "Kunci Sukses Aquariummu!",
+  "scientific_name": "N/A",
   "facts": [
     {
       "number": "01",
-      "title": "Kenapa Mesti Test Air? 🧪",
-      "description": "Air di akuarium kita mungkin terlihat jernih, tapi kualitasnya bisa buruk dan berbahaya bagi ikan lho! Test air membantu kita \"melihat\" apa yang sebenarnya terjadi di dalam air, seperti kadar amonia, nitrit, dan nitrat yang tak kasat mata. Ini krusial untuk menjaga ikan tetap sehat, mencegah stres, dan menghindari masalah serius yang tak terduga.",
+      "title": "Kenapa Harus Tes Air? 🤔",
+      "description": "Air yang terlihat jernih belum tentu sehat lho! Tes air membantu kamu memahami kondisi kimiawi air yang tidak terlihat, memastikan lingkungan akuarium ideal untuk penghuninya.",
       "tags": [
         "Kualitas Air",
-        "Kesehatan Ikan",
-        "Parameter Air",
-        "Pemula Wajib Tahu"
+        "Indikator Masalah",
+        "Kesehatan Ikan"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Ammonia (NH3/NH4) ⚠️",
+      "description": "Ammonia adalah racun mematikan nomor satu bagi ikan, berasal dari sisa makanan dan kotoran. Pastikan levelnya selalu 0 ppm karena sangat toksik bahkan dalam konsentrasi rendah.",
+      "tags": [
+        "Sisa Pakan",
+        "Kotoran Ikan",
+        "Racun Mematikan"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Nitrit (NO2) ☠️",
+      "description": "Nitrit adalah racun tingkat dua yang terbentuk setelah ammonia diurai bakteri baik dalam siklus nitrogen. Sama berbahayanya dengan ammonia, level nitrit juga harus 0 ppm untuk menghindari masalah pernapasan pada ikan.",
+      "tags": [
+        "Siklus Nitrogen",
+        "Bakteri Pengurai",
+        "Ganguan Pernapasan"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Nitrat (NO3) ✅",
+      "description": "Nitrat adalah produk akhir siklus nitrogen yang relatif tidak berbahaya dalam jumlah kecil, namun level tinggi (>20 ppm) bisa memicu alga dan stres ikan. Kontrol dengan ganti air rutin dan tanaman air.",
+      "tags": [
+        "Produk Akhir",
+        "Penyebab Alga",
+        "Ganti Air Rutin"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Tingkat Keasaman (pH) 🧪",
+      "description": "pH mengukur seberapa asam atau basa air aquariummu. Setiap spesies ikan memiliki rentang pH idealnya sendiri, jadi penting untuk menjaga kestabilan pH agar ikan tidak stres dan tetap nyaman.",
+      "tags": [
+        "Asam Basa",
+        "Keseimbangan Kimia",
+        "Preferensi Spesies"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Kesadahan Air (GH/KH) ✨",
+      "description": "GH (General Hardness) mengukur mineral esensial, sedangkan KH (Carbonate Hardness) menjaga kestabilan pH. Keduanya penting untuk kesehatan ikan, tanaman, dan mencegah fluktuasi pH yang drastis.",
+      "tags": [
+        "Mineral Penting",
+        "Stabilitas pH",
+        "Kesehatan Biota"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Alat Tes Air Apa? 💧",
+      "description": "Ada dua pilihan utama: test kit cair yang lebih akurat dan test strip yang praktis. Untuk hasil terbaik, test kit cair lebih direkomendasikan, meski test strip bagus untuk pantauan cepat.",
+      "tags": [
+        "Test Kit Cair",
+        "Test Strip",
+        "Akurasi vs Praktis"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Seberapa Sering Tes Air? 🗓️",
+      "description": "Saat akuarium baru di-setup, tes setiap hari. Setelah siklus nitrogen stabil, minimal tes seminggu sekali atau kapanpun ada perubahan pada kondisi akuarium atau perilaku ikan.",
+      "tags": [
+        "Setup Baru",
+        "Mingguan",
+        "Pantau Perubahan"
       ]
     }
   ],
-  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!",
-  "scientific_name": "test"
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
 }

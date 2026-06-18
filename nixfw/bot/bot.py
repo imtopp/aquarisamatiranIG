@@ -529,7 +529,7 @@ def _save_caption_to_curriculum(slug: str, caption: str):
         pass
 
 
-def _build_caption_from_facts(topic: str, facts_json: dict | None = None) -> str:
+def _build_caption_from_facts(topic: str, facts_json: dict | None = None, handle: str = "@aquarisamatiran") -> str:
     """Build a caption locally from facts data (Gemini fallback)."""
     lines = [f"{topic} — Yuk belajar! 🐟"]
     if facts_json and "facts" in facts_json:
@@ -541,28 +541,50 @@ def _build_caption_from_facts(topic: str, facts_json: dict | None = None) -> str
                 lines.append(desc)
             elif title:
                 lines.append(f"\n{title}")
-        lines.append("\nFollow @aquarisamatiran untuk belajar aquarium dari nol! 🌱")
+        lines.append(f"\nFollow {handle} untuk belajar aquarium dari nol! 🌱")
     return "\n".join(lines)
 
 
 async def _generate_caption(facts_json: dict | None, topic: str) -> str:
     """Generate a caption using Gemini from facts data."""
     keys = [k for k in GEMINI_API_KEYS if k]
-    if not keys:
-        return _build_caption_from_facts(topic, facts_json)
 
-    prompt_parts = [f"Buat caption Instagram dalam bahasa Indonesia untuk konten aquarium dengan topik: {topic}."]
+    # Load account config for dynamic persona
+    config = {}
+    try:
+        config_path = PROJECT_ROOT / "accounts" / "aquarisamatiran" / "config.json"
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+    except Exception:
+        pass
+
+    niche = config.get("niche", "aquascape")
+    handle = config.get("handle", "@aquarisamatiran")
+    name = config.get("name", "Aquarisamatiran")
+    tone = config.get("tone", "santai, edukatif, engaging, akrab — pake bahasa Indonesia sehari-hari")
+    mission = config.get("mission", "ngajarin follower aquarium dari nol dengan cara yang asyik")
+
+    if not keys:
+        return _build_caption_from_facts(topic, facts_json, handle)
+
+    system_text = (
+        f"Kamu adalah asisten pembuat konten Instagram untuk akun {handle}.\n"
+        f"Gaya bicara: {tone}.\n"
+        "Beri informasi bermanfaat, ajak diskusi, jangan terlalu formal, jangan pake gaya genit/flirty.\n"
+        f"Tujuan: {mission}."
+    )
+
+    prompt_parts = [
+        f"Buat caption Instagram dalam bahasa Indonesia untuk konten {niche} dengan topik: {topic}."
+    ]
     if facts_json and "facts" in facts_json:
         prompt_parts.append("\nFakta-fakta dalam konten ini:")
         for f in facts_json["facts"]:
             prompt_parts.append(f"- {f.get('number','')}. {f.get('title','')}: {f.get('description','')[:100]}")
-    prompt_parts.append("\nGaya: santai, edukatif, engaging. Include ajakan diskusi. Maks 2000 karakter. Sertakan hashtag #Aquarisamatiran dan hashtag relevan lainnya di akhir.")
-    system_text = (
-        "Kamu adalah asisten pembuat konten Instagram untuk akun aquascape @aquarisamatiran. "
-        "Gaya bicara: santai, edukatif, engaging, akrab — pake bahasa Indonesia sehari-hari. "
-        "Beri informasi bermanfaat, ajak diskusi, jangan terlalu formal, jangan pake gaya genit/flirty. "
-        "Tujuan: ngajarin follower aquarium dari nol dengan cara yang asyik."
+    prompt_parts.append(
+        f"\nInclude ajakan diskusi. Maks 2000 karakter. "
+        f"Sertakan hashtag #{name} dan hashtag relevan lainnya di akhir."
     )
+
     text = _today_context() + "\n\n" + system_text + "\n\n" + "\n".join(prompt_parts)
 
     for key in keys:
@@ -580,7 +602,7 @@ async def _generate_caption(facts_json: dict | None, topic: str) -> str:
                 print(f"   ⚠️  Gemini {model} (key?): HTTP {resp.status_code}")
                 if resp.status_code in (429, 403):
                     break
-    return _build_caption_from_facts(topic, facts_json)
+    return _build_caption_from_facts(topic, facts_json, handle)
 
 
 def _format_run(run: dict) -> str:

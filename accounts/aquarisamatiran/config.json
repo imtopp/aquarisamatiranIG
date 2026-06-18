@@ -3,6 +3,8 @@
   "niche": "aquascape",
   "name": "Aquarisamatiran",
   "tagline": "Belajar aquarium dari nol, bareng-bareng! 🌱",
+  "tone": "santai, edukatif, engaging, akrab — pake bahasa Indonesia sehari-hari",
+  "mission": "ngajarin follower aquarium dari nol dengan cara yang asyik",
   "curriculum_version": 4,
   "bio_template": "default.html",
   "resource_dir": "resource"

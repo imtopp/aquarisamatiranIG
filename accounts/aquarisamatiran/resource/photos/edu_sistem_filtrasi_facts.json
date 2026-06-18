@@ -1,87 +1,87 @@
 {
   "topic": "Sistem Filtrasi",
-  "display_name": "Sistem Filtrasi Aquarium: Wajib Tahu!",
-  "subtitle": "Air Bersih, Ikan Sehat!",
+  "display_name": "@aquarisamatiran",
+  "subtitle": "Jernih, Sehat, Maksimal!",
   "scientific_name": "N/A",
   "facts": [
     {
       "number": "01",
-      "title": "Apa Itu Filtrasi? 💧",
-      "description": "Filtrasi adalah proses membersihkan air dari sisa makanan, kotoran ikan, dan zat berbahaya lainnya. Ini adalah tulang punggung kesehatan ekosistem aquarium kamu!",
+      "title": "Apa Itu Filtrasi? 💡",
+      "description": "Filtrasi adalah proses krusial untuk menjaga kualitas air aquarium tetap bersih dan sehat. Ini membantu menghilangkan kotoran fisik, zat kimia berbahaya, dan amonia yang beracun bagi ikan kesayanganmu.",
       "tags": [
-        "DasarAquarium",
-        "KualitasAir",
-        "AirBersih"
+        "Kualitas Air",
+        "Kesehatan Ikan",
+        "Ekosistem"
       ]
     },
     {
       "number": "02",
-      "title": "Filter Mekanik: Saringan Kasar 💪",
-      "description": "Fungsinya untuk menyaring partikel padat seperti kotoran ikan dan sisa pakan. Media seperti kapas filter atau busa akan menjebak kotoran agar air tidak cepat keruh.",
+      "title": "Filtrasi Mekanis ⚙️",
+      "description": "Ini adalah barisan pertahanan pertama yang menjebak partikel besar seperti sisa makanan, kotoran ikan, dan daun mati. Media filter seperti kapas, busa (foam), atau matala pad digunakan untuk 'menyaring' kekeruhan air.",
       "tags": [
-        "FisikFilter",
-        "KapasFilter",
-        "BusaFilter"
+        "Penyaring Fisik",
+        "Kotoran Kasar",
+        "Media Busa"
       ]
     },
     {
       "number": "03",
-      "title": "Filter Biologis: Rumah Bakteri Baik 🦠",
-      "description": "Ini bagian terpenting! Bakteri baik di sini mengurai amonia beracun (dari kotoran) menjadi nitrit, lalu nitrat yang lebih aman. Media berpori luas adalah sarang ideal mereka.",
+      "title": "Filtrasi Biologis 🌱",
+      "description": "Bagian terpenting dari filter! Di sini, bakteri baik mengurai amonia dan nitrit beracun menjadi nitrat yang jauh lebih tidak berbahaya. Media seperti bio-ball, ceramic ring, atau kaldnes menyediakan permukaan luas bagi bakteri ini.",
       "tags": [
-        "BakteriBaik",
-        "SiklusNitrogen",
-        "AmoniaNitrat"
+        "Bakteri Baik",
+        "Siklus Nitrogen",
+        "Amonia"
       ]
     },
     {
       "number": "04",
-      "title": "Filter Kimiawi: Pembersih Tersembunyi 🧪",
-      "description": "Bertugas menghilangkan zat terlarut yang tidak bisa diatasi filter lain, seperti bau tidak sedap, warna kuning pada air, atau sisa obat-obatan. Arang aktif adalah contoh yang populer.",
+      "title": "Filtrasi Kimiawi 🧪",
+      "description": "Fungsinya untuk menghilangkan zat terlarut yang tidak bisa diatasi filtrasi mekanis atau biologis, seperti bau tidak sedap, warna air, atau obat-obatan. Arang aktif (activated carbon) adalah media kimiawi paling umum digunakan.",
       "tags": [
-        "ArangAktif",
-        "MenghilangkanBau",
-        "WarnaAir"
+        "Penjernih Kimia",
+        "Arang Aktif",
+        "Bau & Warna"
       ]
     },
     {
       "number": "05",
-      "title": "Media Filter Andalan ✨",
-      "description": "Kapas/busa (mekanik), bioball/keramik ring/batu apung (biologis), dan arang aktif/purigen (kimiawi) adalah kombinasi media yang sangat direkomendasikan untuk aquarium kamu.",
+      "title": "Siklus Nitrogen Penting 🔄",
+      "description": "Filtrasi biologis bekerja sama dengan Siklus Nitrogen, yaitu proses alami di mana limbah beracun diubah menjadi bentuk yang lebih aman. Tanpa filtrasi biologis yang kuat, siklus ini akan terganggu dan membahayakan biota aquariummu.",
       "tags": [
-        "JenisMedia",
-        "Bioball",
-        "Purigen"
+        "Nitrifikasi",
+        "Siklus Air",
+        "Racun Aquarium"
       ]
     },
     {
       "number": "06",
-      "title": "Urutan Filter Penting! ➡️",
-      "description": "Idealnya, aliran air masuk ke filter mekanik dulu (kapas), lalu biologis (bioball), baru kimiawi (arang aktif). Urutan ini memaksimalkan efisiensi dan menjaga bakteri baik tetap optimal.",
+      "title": "Jenis Filter Populer ✨",
+      "description": "Ada berbagai tipe filter, mulai dari HOB (Hang-on-Back) yang praktis, Canister Filter untuk volume air besar, hingga Sump Filter untuk aquarium yang lebih kompleks. Tiap jenis punya kelebihan dan cocok untuk kebutuhan berbeda.",
       "tags": [
-        "FlowFilter",
-        "OptimasiFilter",
-        "SusunanFilter"
+        "HOB Filter",
+        "Canister Filter",
+        "Sump Filter"
       ]
     },
     {
       "number": "07",
-      "title": "Perawatan Filter Rutin 🧼",
-      "description": "Media mekanik (kapas) harus rutin dibersihkan/diganti. Media biologis cukup dibilas dengan air aquarium saat membersihkan agar bakteri baik tidak mati terkena air kran berklorin.",
+      "title": "Jangan Salah Membersihkan! ⚠️",
+      "description": "Saat membersihkan filter, hindari mencuci media biologis dengan air keran berklorin karena akan membunuh bakteri baik. Gunakan air aquarium yang sudah dikuras untuk membilas media biologis agar bakteri tetap hidup dan bekerja.",
       "tags": [
-        "RutinBersih",
-        "JagaBakteri",
-        "MaintenanceAquarium"
+        "Perawatan Filter",
+        "Bakteri Baik",
+        "Air Deklorin"
       ]
     },
     {
       "number": "08",
-      "title": "Investasi Kesehatan Ikan ⚠️",
-      "description": "Sistem filtrasi yang memadai adalah investasi terbaik untuk menjaga ikan tetap sehat dan aktif. Tanpa filter yang baik, kualitas air akan menurun drastis, menyebabkan ikan mudah stres dan sakit.",
+      "title": "Kapan Ganti Media Filter? ⏰",
+      "description": "Media filter mekanis seperti kapas biasanya diganti saat sudah sangat kotor. Untuk media biologis, jarang perlu diganti kecuali rusak. Media kimiawi seperti arang aktif perlu diganti secara berkala (misal tiap bulan) karena daya serapnya akan habis.",
       "tags": [
-        "InvestasiIkan",
-        "PilihFilter",
-        "KesehatanIkan"
+        "Penggantian Media",
+        "Filter Maintenance",
+        "Arang Aktif"
       ]
     }
   ],

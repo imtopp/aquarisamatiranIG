@@ -1,4 +1,4 @@
-name: Clean slides
+﻿name: Clean slides
 run-name: Clean ${{ inputs.slug }}
 
 on:
@@ -44,14 +44,14 @@ print('status=')
         run: |
           STATUS="${{ steps.resolve.outputs.status }}"
           if [ "$STATUS" = "live" ]; then
-            echo "âŒ Topic status live â€” cannot clean published content"
+            echo "Ã¢ÂÅ’ Topic status live Ã¢â‚¬â€ cannot clean published content"
             exit 1
           fi
 
       - name: Delete slide files
         run: |
           SLUG="${{ inputs.slug }}"
-          echo "ðŸ—‘ï¸ Mencari file dengan prefix: ${SLUG}"
+          echo "Ã°Å¸â€”â€˜Ã¯Â¸Â Mencari file dengan prefix: ${SLUG}"
           find accounts/ -path "*/resource/photos/${SLUG}_sd_*" -delete -print 2>/dev/null || true
           find accounts/ -path "*/resource/photos/${SLUG}_slide_*" -delete -print 2>/dev/null || true
           find accounts/ -path "*/resource/photos/edu_${SLUG}*" -delete -print 2>/dev/null || true
@@ -114,9 +114,9 @@ print(f'  .uploaded.json: removed {before - after} stale entries')
           git config user.email 'bot@nix.fw'
           git add -A
           if git diff --staged --quiet; then
-            echo 'â„¹ï¸  No changes to commit'
+            echo 'Ã¢â€žÂ¹Ã¯Â¸Â  No changes to commit'
           else
             git commit -m 'clean: remove ${{ inputs.slug }} slides'
             git push
-            echo 'âœ… Clean committed & pushed'
+            echo 'Ã¢Å“â€¦ Clean committed & pushed'
           fi

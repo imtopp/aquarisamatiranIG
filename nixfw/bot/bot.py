@@ -557,27 +557,29 @@ async def _generate_caption(facts_json: dict | None, topic: str) -> str:
         for f in facts_json["facts"]:
             prompt_parts.append(f"- {f.get('number','')}. {f.get('title','')}: {f.get('description','')[:100]}")
     prompt_parts.append("\nGaya: santai, edukatif, engaging. Include ajakan diskusi. Maks 2000 karakter. Sertakan hashtag #Aquarisamatiran dan hashtag relevan lainnya di akhir.")
-    caption_system = (
+    system_text = (
         "Kamu adalah asisten pembuat konten Instagram untuk akun aquascape @aquarisamatiran. "
         "Gaya bicara: santai, edukatif, engaging, akrab — pake bahasa Indonesia sehari-hari. "
         "Beri informasi bermanfaat, ajak diskusi, jangan terlalu formal, jangan pake gaya genit/flirty. "
         "Tujuan: ngajarin follower aquarium dari nol dengan cara yang asyik."
     )
-    text = _today_context() + "\n\n" + "\n".join(prompt_parts)
+    text = _today_context() + "\n\n" + system_text + "\n\n" + "\n".join(prompt_parts)
 
     for key in keys:
         for model in GEMINI_MODELS:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
-            body = {"contents": [{"role": "user", "parts": [{"text": text}]}]}
-            if caption_system:
-                body["system_instruction"] = {"parts": [{"text": caption_system}]}
-            try:
-                resp = await HTTPX_CLIENT.post(url, json=body)
+            for attempt in range(2):
+                url = f"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent?key={key}"
+                body = {"contents": [{"role": "user", "parts": [{"text": text}]}]}
+                try:
+                    resp = await HTTPX_CLIENT.post(url, json=body)
+                except (httpx.TimeoutException, httpx.ReadTimeout) as e:
+                    print(f"   ⚠️  Gemini {model} timeout: {e}")
+                    continue
                 if resp.status_code == 200:
                     return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
                 print(f"   ⚠️  Gemini {model} (key?): HTTP {resp.status_code}")
-            except Exception as e:
-                print(f"   ⚠️  Gemini {model} error: {e}")
+                if resp.status_code in (429, 403):
+                    break
     return _build_caption_from_facts(topic, facts_json)
 
 
@@ -728,7 +730,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"`/regenerate` → generate ulang slide\n"
         f"`/cancel` → batalin"
     )
-    await update.message.reply_text(msg, parse_mode="Markdown")
+    await update.message.reply_text(msg)
 
     # Save pending
     user_id = update.effective_user.id

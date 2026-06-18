@@ -589,8 +589,6 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         lines.append(f"\n{label}: — (belum pernah jalan)")
                 else:
                     lines.append(f"\n{label}: ❌ HTTP {resp.status_code}")
-        if slides := _latest_slides()[1]:
-            lines.append(f"\n📸 Slide siap: {len(slides)} file")
         await update.message.reply_text("\n".join(lines))
     except Exception as e:
         await update.message.reply_text(f"❌ Error: {e}")

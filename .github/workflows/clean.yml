@@ -47,7 +47,7 @@ jobs:
       - name: Clean .uploaded.json stale entries
         run: python main.py clean clean-uploaded ${{ inputs.slug }}
 
-      - name: Commit and push (with PAT to trigger deploy)
+      - name: Commit and push
         run: |
           git config user.name 'nix-bot'
           git config user.email 'bot@nix.fw'
@@ -55,7 +55,6 @@ jobs:
           if git diff --staged --quiet; then
             echo 'No changes to commit'
           else
-            git remote set-url origin https://x-access-token:${{ secrets.PAGES_PAT }}@github.com/${{ github.repository }}
             git commit -m 'clean: remove ${{ inputs.slug }} slides'
             git push
             echo 'Clean committed and pushed'

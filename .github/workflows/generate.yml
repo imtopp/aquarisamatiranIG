@@ -2,6 +2,7 @@ name: Generate Carousel (SD)
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: generate
@@ -94,12 +95,11 @@ jobs:
           git stash --include-untracked || true
           git pull --rebase origin main
           git stash pop || true
-          git remote set-url origin https://x-access-token:${{ secrets.PAGES_PAT }}@github.com/${{ github.repository }}
           git push origin main
         shell: bash
 
       - name: Trigger deploy
-        run: gh workflow run deploy.yml
         env:
-          GH_TOKEN: ${{ secrets.PAGES_PAT }}
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main
         shell: bash

@@ -111,7 +111,7 @@ class SlotManager:
                 "extendedData": {
                     "headers": {
                         "Accept": "application/vnd.github.v3+json",
-                        "Authorization": f"Bearer {os.environ.get('GITHUB_PAT', '')}",
+                        "Authorization": f"Bearer {os.environ.get('GH_PAT', '')}",
                         "Content-Type": "application/json",
                     },
                     "body": '{"ref":"main"}',

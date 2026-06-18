@@ -47,7 +47,7 @@ jobs:
 
       - name: Push bio to pages repo
         run: |
-          git clone https://${{ secrets.PAGES_PAT }}@github.com/imtopp/aquarisamatiran-pages.git /tmp/pages-repo
+          git clone https://${{ secrets.GH_PAT }}@github.com/imtopp/aquarisamatiran-pages.git /tmp/pages-repo
           cp accounts/aquarisamatiran/bio/index.html /tmp/pages-repo/index.html
           cd /tmp/pages-repo
           git config user.name "Nix Bot"

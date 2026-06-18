@@ -82,21 +82,9 @@ accounts/                 — 👤 Per-account data
 
 Nambah akun baru: copy folder dari `nixfw/templates/account/`, isi `config.json`, then `python -m nixfw curriculum sync --account <nama>`. Framework nyari data otomatis di `accounts/<nama>/`.
 
-## Environment (.env)
-
-```
-IG_ACCESS_TOKEN=IGAA...
-IG_USER_ID=17841471908091204
-IG_USERNAME=aquarisamatiran
-IG_APP_ID=1297085592205741
-IG_APP_SECRET=b6043cd5d1695b156e9d7332af56d749
-GEMINI_API_KEY=...
-PEXELS_API_KEY=...
-CRONJOB_TOKEN=...  # (opsional) buat /setslot sync
-CRONJOB_API_KEY=...  # alternatif (yang ada di VPS)
-```
-
 ## Constraints
+
+> Lihat `.env.example` untuk daftar lengkap environment variables yang dibutuhin. Copy ke `.env` dan isi value-nya.
 
 - All files, references, and config must reside within this repo directory.
 - Use `.venv\Scripts\python.exe` for all Python commands.
@@ -272,8 +260,7 @@ Tapi tetap infokan pilar default slot itu:
 - Access: `https://imtopp.github.io/aquarisamatiran-pages/ikan/neon-tetra/`
 - **Status**: Bio page deployed ✅ (2026-06-07)
 - **Auto-update**: Setiap kali `nixfw/runner.py` sukses posting, `nixfw/bio/generator.py` jalan → update `accounts/<name>/bio/index.html` → dicomit ke repo ini + dipush ke repo pages
-- **PAGES_PAT** (GitHub secret): Fine-grained PAT (`github_pat_...`) scoped ke `aquarisamatiran-pages` + `aquarisamatiranIG`, tersimpan di Settings → Secrets → PAGES_PAT
-  - Classic PAT cadangan: `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` (scope `repo`, fallback)
+- **GH_PAT** (GitHub secret): PAT dari `.env` (`GH_PAT`), tersimpan di Settings → Secrets → `GH_PAT`
 - **Mapping**: `schedule.json` tiap entry punya `"source_ref": "#XX"` → dipetakan ke card number di bio page
 
 ## Deployment
@@ -298,7 +285,7 @@ Tapi tetap infokan pilar default slot itu:
 
 ## Scheduling
 
-**cron-job.org** — nge-hit GitHub API `workflows/scheduler.yml/dispatches` dengan PAT (`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`). Trigger pas jam posting. Judul generik karena isi ditentukan `accounts/<name>/schedule.json`. Ada 3 grup cron:
+**cron-job.org** — nge-hit GitHub API `workflows/scheduler.yml/dispatches` dengan PAT dari `.env` (`GH_PAT`). Trigger pas jam posting. Judul generik karena isi ditentukan `accounts/<name>/schedule.json`. Ada 3 grup cron:
 
 | ID | Title | wdays | Jam WIB |
 |----|-------|-------|---------|
@@ -318,7 +305,7 @@ Slot jadwal dikelola via `nixfw/slots.json` + `nixfw/slot_manager.py`:
 
 Sync cron-job.org otomatis terjadi di 3 jalur:
 1. **`/setslot add/remove`** via Telegram → auto-sync (butuh VPS hidup + `CRONJOB_TOKEN`)
-2. **Push ke `nixfw/slots.json`** → GH Action `sync-slots.yml` jalan (butuh `CRONJOB_TOKEN` + `GITHUB_PAT` di secrets)
+2. **Push ke `nixfw/slots.json`** → GH Action `sync-slots.yml` jalan (butuh `CRONJOB_TOKEN` + `GH_PAT` di secrets)
 3. **Manual CLI** → `python main.py sync-slots` (dari lokal mana aja)
 
 `CRONJOB_TOKEN` di .env opsional — cuma dipake kalo sync ke cron-job.org API v2.

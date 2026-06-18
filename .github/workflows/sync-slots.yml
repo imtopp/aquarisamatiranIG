@@ -26,4 +26,4 @@ jobs:
         env:
           CRONJOB_TOKEN: ${{ secrets.CRONJOB_TOKEN }}
           CRONJOB_API_KEY: ${{ secrets.CRONJOB_API_KEY }}
-          GITHUB_PAT: ${{ secrets.PAT }}
+          GH_PAT: ${{ secrets.GH_PAT }}

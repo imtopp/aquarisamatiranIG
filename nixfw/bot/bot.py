@@ -40,7 +40,7 @@ FORBIDDEN_WORDS = ["lu", "gue", "lo", "elu", "gw"]
 GEMINI_MODELS = ["gemini-2.5-flash"]
 
 _pending_posts: dict[int, dict] = {}
-GITHUB_PAT = os.environ.get("GITHUB_PAT", "")
+GH_PAT = os.environ.get("GH_PAT", "")
 GH_REPO = "imtopp/aquarisamatiranIG"
 GH_API = "https://api.github.com"
 
@@ -408,8 +408,8 @@ async def slides_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Trigger GH Actions workflow to generate SD carousel."""
-    if not GITHUB_PAT:
-        await update.message.reply_text("GITHUB_PAT gak ada di .env, minta ke bebnya dulu~ 😏")
+    if not GH_PAT:
+        await update.message.reply_text("GH_PAT gak ada di .env, minta ke bebnya dulu~ 😏")
         return
     args = context.args
     if not args:
@@ -433,7 +433,7 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"{GH_API}/repos/{GH_REPO}/actions/workflows/295601892/dispatches",
                 headers={
                     "Accept": "application/vnd.github+json",
-                    "Authorization": f"Bearer {GITHUB_PAT}",
+                    "Authorization": f"Bearer {GH_PAT}",
                 },
                 json={"ref": "main", "inputs": {"topic": topic, "num_facts": num_facts}},
             )
@@ -627,8 +627,8 @@ def _format_run(run: dict) -> str:
 
 async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Check latest GH Actions runs (generate + clean)."""
-    if not GITHUB_PAT:
-        await update.message.reply_text("GITHUB_PAT gak ada, gak bisa cek~ 😏")
+    if not GH_PAT:
+        await update.message.reply_text("GH_PAT gak ada, gak bisa cek~ 😏")
         return
     workflow_ids = {
         "Generate": "295601892",
@@ -640,7 +640,7 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             for label, wf_id in workflow_ids.items():
                 resp = await client.get(
                     f"{GH_API}/repos/{GH_REPO}/actions/workflows/{wf_id}/runs?per_page=1",
-                    headers={"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GITHUB_PAT}"},
+                    headers={"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GH_PAT}"},
                 )
                 if resp.status_code == 200:
                     runs = resp.json().get("workflow_runs", [])
@@ -827,7 +827,7 @@ async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     _pending_posts.pop(user_id, None)
     try:
         body = json.dumps({"ref": "main", "inputs": {"topic": topic_input, "num_facts": "8", "force": str(force).lower()}})
-        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {os.environ.get('GITHUB_PAT', '')}", "Content-Type": "application/json"}
+        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {os.environ.get('GH_PAT', '')}", "Content-Type": "application/json"}
         resp = await HTTPX_CLIENT.post("https://api.github.com/repos/imtopp/aquarisamatiranIG/actions/workflows/generate.yml/dispatches", content=body, headers=headers)
         if resp.status_code == 204:
             await update.message.reply_text(f"✅ Generate ulang untuk \"{topic_display}\" udah di-trigger! Cek `/status` ~30 menit~")
@@ -918,13 +918,13 @@ async def clean_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ Gak nemu file dengan prefix `{slug}` di resource/photos/")
         return
 
-    if not GITHUB_PAT:
-        await update.message.reply_text("GITHUB_PAT gak ada di .env, minta ke bebnya dulu~ 😏")
+    if not GH_PAT:
+        await update.message.reply_text("GH_PAT gak ada di .env, minta ke bebnya dulu~ 😏")
         return
 
     try:
         body = json.dumps({"ref": "main", "inputs": {"slug": slug}})
-        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GITHUB_PAT}"}
+        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GH_PAT}"}
         resp = await HTTPX_CLIENT.post(
             "https://api.github.com/repos/imtopp/aquarisamatiranIG/actions/workflows/clean.yml/dispatches",
             content=body, headers=headers,

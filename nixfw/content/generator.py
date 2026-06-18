@@ -67,7 +67,8 @@ def generate_facts(topic: str, num_facts: int = 4) -> dict:
                 return json.loads(cache_path.read_text(encoding="utf-8"))
             print("   Regenerate...")
         else:
-            print("   ⚙️  Non-interactive, auto-regenerate...")
+            print(f"   📦 Reuse cached facts: {cache_path.name}")
+            return json.loads(cache_path.read_text(encoding="utf-8"))
 
     schema = _build_json_schema(niche, ct, num_facts)
 

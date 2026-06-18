@@ -20,6 +20,11 @@ on:
         required: false
         default: "8"
         type: string
+      force:
+        description: "Generate ulang fakta (hapus cache)"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   generate:
@@ -63,7 +68,7 @@ jobs:
         run: rm -f accounts/aquarisamatiran/resource/photos/temp_*
 
       - name: Generate carousel
-        run: python main.py generate-carousel-sd "$TOPIC" --num-facts "$NUM_FACTS"
+        run: python main.py generate-carousel-sd "$TOPIC" --num-facts "$NUM_FACTS" ${{ inputs.force && '--force' || '' }}
         env:
           TOPIC: ${{ inputs.topic }}
           NUM_FACTS: ${{ inputs.num_facts }}

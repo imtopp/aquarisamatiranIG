@@ -957,13 +957,15 @@ def cmd_generate_carousel_sd(_client, args):
     parser = argparse.ArgumentParser(prog="generate-carousel-sd", add_help=False)
     parser.add_argument("topic", nargs="?", help="topik konten")
     parser.add_argument("--num-facts", type=int, default=4, help="jumlah fakta (default: 4)")
+    parser.add_argument("--force", action="store_true", help="generate ulang fakta (hapus cache)")
     parsed = parser.parse_known_args(args)[0]
 
     if not parsed.topic:
-        print("Gunakan: python main.py generate-carousel-sd <topik> [--num-facts N]")
+        print("Gunakan: python main.py generate-carousel-sd <topik> [--num-facts N] [--force]")
         print()
         print("  topik       — topik konten (contoh: Ikan Cupang)")
         print("  --num-facts — jumlah fakta (default: 4)")
+        print("  --force     — generate ulang fakta (hapus cache)")
         print()
         print("Contoh:")
         print("  python main.py generate-carousel-sd 'Ikan Cupang'")
@@ -1003,6 +1005,13 @@ def cmd_generate_carousel_sd(_client, args):
     for f in list(PHOTO_DIR.glob(f"{slug}_sd_*")) + list(PHOTO_DIR.glob(f"{slug}_slide_*")):
         f.unlink(missing_ok=True)
         print(f"   🗑️  Hapus slide lama: {f.name}")
+
+    # Force regenerate facts? Hapus cache sebelum generate
+    if parsed.force:
+        cache_path = PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
+        if cache_path.exists():
+            cache_path.unlink()
+            print(f"   🗑️  Hapus cache facts: {cache_path.name}")
 
     print(f"📝 Generate facts untuk \"{topic_name}\"...")
     try:
@@ -1170,6 +1179,7 @@ def cmd_generate_carousel(_client, args):
     parser.add_argument("--type", default=None, help="tipe konten (edu, story, humor, dll)")
     parser.add_argument("--facts", help="pake file facts JSON yang udah ada (skip Gemini)")
     parser.add_argument("--num-facts", type=int, default=4, help="jumlah fakta (default: 4)")
+    parser.add_argument("--force", action="store_true", help="generate ulang fakta (hapus cache)")
     parser.add_argument("--force-image", help="paksa pake file foto lokal daripada dari Wikimedia")
     parsed, _ = parser.parse_known_args(args)
 
@@ -1223,6 +1233,11 @@ def cmd_generate_carousel(_client, args):
         facts = json.loads(facts_path.read_text(encoding="utf-8"))
         print(f"✅ Loaded facts dari {parsed.facts}")
     else:
+        if parsed.force:
+            cache_path = PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
+            if cache_path.exists():
+                cache_path.unlink()
+                print(f"   🗑️  Hapus cache facts: {cache_path.name}")
         print(f"📝 Generate facts untuk \"{topic}\"...")
         try:
             facts = generate_facts(topic, parsed.num_facts)

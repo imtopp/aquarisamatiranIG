@@ -14,31 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Resolve slug & validate
+      - name: Resolve slug and validate
         id: resolve
         run: |
-          SLUG="${{ inputs.slug }}"
-
-          # Find in source_of_truth.json
-          TAG=$(python3 -c "
-import json, re
-try:
-    d = json.load(open('accounts/aquarisamatiran/source_of_truth.json'))
-except:
-    exit(1)
-for sid in d.get('topics', {}):
-    for num, t in d['topics'][sid].items():
-        s = t.get('slug', '').replace('-', '_')
-        if s == '$SLUG':
-            tag = f'C{sid}#{num}'
-            status = t.get('status', '')
-            print(f'tag={tag}')
-            print(f'status={status}')
-            exit(0)
-print('tag=')
-print('status=')
-" 2>/dev/null || echo "tag=")
-          echo "$TAG" >> $GITHUB_OUTPUT
+          python3 .github/workflows/clean_helper.py resolve ${{ inputs.slug }} > /tmp/clean_out.txt
+          echo "tag=$(grep '^tag=' /tmp/clean_out.txt | cut -d= -f2)" >> $GITHUB_OUTPUT
+          echo "status=$(grep '^status=' /tmp/clean_out.txt | cut -d= -f2)" >> $GITHUB_OUTPUT
 
       - name: Validate not live
         run: |
@@ -57,58 +38,18 @@ print('status=')
           find accounts/ -path "*/resource/photos/edu_${SLUG}*" -delete -print 2>/dev/null || true
 
       - name: Clean schedule.json entry
-        run: |
-          TAG="${{ steps.resolve.outputs.tag }}"
-          if [ -n "$TAG" ]; then
-            python3 -c "
-import json
-s = json.load(open('accounts/aquarisamatiran/schedule.json'))
-before = len(s)
-s = [e for e in s if e.get('source_ref') != '$TAG']
-after = len(s)
-json.dump(s, open('accounts/aquarisamatiran/schedule.json', 'w'), indent=2, ensure_ascii=False)
-print(f'  schedule.json: removed {before - after} entries')
-"
-          fi
+        run: python3 .github/workflows/clean_helper.py clean-schedule ${{ steps.resolve.outputs.tag }}
+        shell: bash
 
       - name: Reset topic in source_of_truth.json
-        run: |
-          TAG="${{ steps.resolve.outputs.tag }}"
-          if [ -n "$TAG" ]; then
-            python3 -c "
-import json, re
-d = json.load(open('accounts/aquarisamatiran/source_of_truth.json'))
-m = re.match(r'C(\d+)#(\d+)', '$TAG')
-if m:
-    topic = d.get('topics', {}).get(m.group(1), {}).get(m.group(2))
-    if topic:
-        topic['status'] = 'planned'
-        for field in ['scheduled_time', 'display_name', 'subtitle', 'scientific_name', 'slides', 'result_id', 'permalink', 'caption']:
-            topic.pop(field, None)
-        json.dump(d, open('accounts/aquarisamatiran/source_of_truth.json', 'w'), indent=2, ensure_ascii=False)
-        print(f'  source_of_truth: reset topic {TAG} to planned')
-"
-          fi
+        run: python3 .github/workflows/clean_helper.py reset-topic ${{ steps.resolve.outputs.tag }}
+        shell: bash
 
       - name: Clean .uploaded.json stale entries
-        run: |
-          SLUG="${{ inputs.slug }}"
-          FPATH="accounts/aquarisamatiran/resource/.uploaded.json"
-          if [ -f "$FPATH" ]; then
-            python3 -c "
-import json
-u = json.load(open('$FPATH'))
-before = len(u)
-keys = [k for k, v in u.items() if '$SLUG' in v]
-for k in keys:
-    del u[k]
-after = len(u)
-json.dump(u, open('$FPATH', 'w'), indent=2, ensure_ascii=False)
-print(f'  .uploaded.json: removed {before - after} stale entries')
-"
-          fi
+        run: python3 .github/workflows/clean_helper.py clean-uploaded ${{ inputs.slug }}
+        shell: bash
 
-      - name: Commit & push
+      - name: Commit and push
         run: |
           git config user.name 'nix-bot'
           git config user.email 'bot@nix.fw'

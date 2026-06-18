@@ -37,7 +37,7 @@ GEMINI_API_KEYS = [
 ALLOWED_USERNAMES = os.environ.get("BOT_ALLOWED_USERNAMES", "").split(",")
 FORBIDDEN_WORDS = ["lu", "gue", "lo", "elu", "gw"]
 
-GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"]
+GEMINI_MODELS = ["gemini-2.5-flash"]
 
 _pending_posts: dict[int, dict] = {}
 GITHUB_PAT = os.environ.get("GITHUB_PAT", "")
@@ -502,16 +502,27 @@ def _slug_to_topic(slug: str) -> str:
     return slug.replace("_", " ").title()
 
 
+def _build_caption_from_facts(topic: str, facts_json: dict | None = None) -> str:
+    """Build a caption locally from facts data (Gemini fallback)."""
+    lines = [f"{topic} — Yuk belajar! 🐟"]
+    if facts_json and "facts" in facts_json:
+        for f in facts_json["facts"]:
+            title = f.get("title", "")
+            desc = f.get("description", "")[:120]
+            if title and desc:
+                lines.append(f"\n{title}")
+                lines.append(desc)
+            elif title:
+                lines.append(f"\n{title}")
+        lines.append("\nFollow @aquarisamatiran untuk belajar aquarium dari nol! 🌱")
+    return "\n".join(lines)
+
+
 async def _generate_caption(facts_json: dict | None, topic: str) -> str:
     """Generate a caption using Gemini from facts data."""
-    if not GEMINI_API_KEYS[0]:
-        # Fallback: build simple caption from facts
-        lines = [f"{topic} — Yuk belajar! 🐟"]
-        if facts_json and "facts" in facts_json:
-            for f in facts_json["facts"]:
-                lines.append(f"\n{f.get('number','?')}. {f.get('title','')}")
-            lines.append("\nFollow @aquarisamatiran untuk belajar aquarium dari nol! 🌱")
-        return "\n".join(lines)
+    keys = [k for k in GEMINI_API_KEYS if k]
+    if not keys:
+        return _build_caption_from_facts(topic, facts_json)
 
     prompt_parts = [f"Buat caption Instagram dalam bahasa Indonesia untuk konten aquarium dengan topik: {topic}."]
     if facts_json and "facts" in facts_json:
@@ -527,10 +538,9 @@ async def _generate_caption(facts_json: dict | None, topic: str) -> str:
     )
     text = _today_context() + "\n\n" + "\n".join(prompt_parts)
 
-    keys = [k for k in GEMINI_API_KEYS if k]
     for key in keys:
         for model in GEMINI_MODELS:
-            url = f"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent?key={key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
             body = {"contents": [{"role": "user", "parts": [{"text": text}]}]}
             if caption_system:
                 body["system_instruction"] = {"parts": [{"text": caption_system}]}
@@ -538,9 +548,10 @@ async def _generate_caption(facts_json: dict | None, topic: str) -> str:
                 resp = await HTTPX_CLIENT.post(url, json=body)
                 if resp.status_code == 200:
                     return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
-            except Exception:
-                continue
-    return f"{topic} — Yuk belajar bareng @aquarisamatiran! 🌱 #Aquarisamatiran #AquascapeIndonesia"
+                print(f"   ⚠️  Gemini {model} (key?): HTTP {resp.status_code}")
+            except Exception as e:
+                print(f"   ⚠️  Gemini {model} error: {e}")
+    return _build_caption_from_facts(topic, facts_json)
 
 
 def _format_run(run: dict) -> str:

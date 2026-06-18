@@ -128,18 +128,18 @@ def generate_facts(topic: str, num_facts: int = 4) -> dict:
                 err = str(e)
                 if "429" in err or "RESOURCE_EXHAUSTED" in err:
                     print(f"   ⛔ Key {key_idx} quota abis, coba key lain...")
-                    continue
-                if "503" in err:
+                elif "503" in err:
                     print(f"   ⏳ Gemini sibuk (key {key_idx}), coba key lain...")
-                    continue
-                print(f"   ❌ Gagal: {e}")
+                else:
+                    print(f"   ❌ Key {key_idx} gagal: {e}")
                 if attempt == 2 and key_idx == len(keys) - 1:
                     raise
                 time.sleep(3)
-                break
+                continue
         else:
-            print(f"   ⏳ Semua key sibuk/penuh, tunggu {5*(attempt+1)}s...")
-            time.sleep(5 * (attempt + 1))
+            wait = 5 * (attempt + 1)
+            print(f"   ⏳ Semua key gagal, tunggu {wait}s...")
+            time.sleep(wait)
             continue
         time.sleep(3)
 

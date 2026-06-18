@@ -19,7 +19,7 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 | # | Topik | Status |
 |---|-------|--------|
 | 07 | Macam-macam Filter | ⬜ |
-| 08 | Tanaman Dasar | ⬜ |
+| 08 | Tanaman Aquascape Pemula | ⬜ |
 | 09 | Ganti Air & Perawatan | ⬜ |
 | 10 | Penyakit Ikan | ⬜ |
 | 11 | Parameter Air | ⬜ |

@@ -1496,6 +1496,115 @@ def _list_files(label, directory):
             print(f"    - {f.name}")
 
 
+def cmd_clean(_client, args):
+    """Clean slides/topics yang gak jadi dipost.
+    Subcommands:
+      resolve <slug>          — cari topic, print tag=status=
+      delete-files <slug>     — hapus file slide dari resource/photos/
+      clean-schedule <tag>    — hapus entry dari schedule.json
+      reset-topic <tag>       — reset topic status ke planned
+      clean-uploaded <slug>   — bersihin .uploaded.json stale entries
+    """
+    if not args:
+        print(__doc__)
+        return
+    sub = args[0]
+    arg = args[1] if len(args) > 1 else ''
+    arg = arg.replace('-', '_')
+
+    if sub == 'resolve':
+        slug = arg
+        cpath = config.CONTENT_PATH
+        if not cpath.exists():
+            print('tag=')
+            print('status=')
+            return
+        try:
+            d = json.loads(cpath.read_text(encoding='utf-8'))
+        except Exception:
+            print('tag=')
+            print('status=')
+            return
+        for sid in d.get('topics', {}):
+            for num, t in d['topics'][sid].items():
+                s = t.get('slug', '').replace('-', '_')
+                if s == slug:
+                    tag = f'C{sid}#{num}'
+                    status = t.get('status', '')
+                    print(f'tag={tag}')
+                    print(f'status={status}')
+                    return
+        print('tag=')
+        print('status=')
+
+    elif sub == 'delete-files':
+        slug = arg
+        from pathlib import Path
+        photos = Path(config.PHOTO_DIR)
+        deleted = 0
+        for pattern in [f'{slug}_sd_*', f'{slug}_slide_*', f'edu_{slug[:20]}*']:
+            for f in photos.glob(pattern):
+                f.unlink(missing_ok=True)
+                print(f'  Hapus: {f.name}')
+                deleted += 1
+        if deleted == 0:
+            print(f'  Gak nemu file dengan prefix {slug}')
+        else:
+            print(f'  {deleted} file dihapus')
+
+    elif sub == 'clean-schedule':
+        tag = arg
+        if not tag:
+            return
+        spath = config.SCHEDULE_PATH
+        if not spath.exists():
+            return
+        s = json.loads(spath.read_text(encoding='utf-8'))
+        before = len(s)
+        s = [e for e in s if e.get('source_ref') != tag]
+        after = len(s)
+        spath.write_text(json.dumps(s, indent=2, ensure_ascii=False), encoding='utf-8')
+        print(f'  schedule.json: removed {before - after} entries')
+
+    elif sub == 'reset-topic':
+        tag = arg
+        if not tag:
+            return
+        import re
+        cpath = config.CONTENT_PATH
+        if not cpath.exists():
+            return
+        d = json.loads(cpath.read_text(encoding='utf-8'))
+        m = re.match(r'C(\d+)#(\d+)', tag)
+        if m:
+            topic = d.get('topics', {}).get(m.group(1), {}).get(m.group(2))
+            if topic:
+                topic['status'] = 'planned'
+                for field in ['scheduled_time', 'display_name', 'subtitle',
+                               'scientific_name', 'slides', 'result_id',
+                               'permalink', 'caption']:
+                    topic.pop(field, None)
+                cpath.write_text(json.dumps(d, indent=2, ensure_ascii=False), encoding='utf-8')
+                print(f'  source_of_truth: reset topic {tag} to planned')
+
+    elif sub == 'clean-uploaded':
+        slug = arg
+        fpath = config.RESOURCE_DIR / '.uploaded.json'
+        if not fpath.exists():
+            return
+        u = json.loads(fpath.read_text(encoding='utf-8'))
+        before = len(u)
+        keys = [k for k, v in u.items() if slug in v]
+        for k in keys:
+            del u[k]
+        after = len(u)
+        fpath.write_text(json.dumps(u, indent=2, ensure_ascii=False), encoding='utf-8')
+        print(f'  .uploaded.json: removed {before - after} stale entries')
+
+    else:
+        print(f'Subcommand tidak dikenal: {sub}')
+
+
 def main():
     # Parse --niche dulu sebelum dispatch (biar ga masuk ke args perintah)
     if "--niche" in sys.argv:
@@ -1534,6 +1643,12 @@ def main():
         print("  delete-post <media_id>     — hapus post dari IG + referensi published/")
         print("  file-map                   — tampilkan mapping URL → file lokal")
         print("  curriculum                 — kelola kurikulum (add/edit/delete season, level, topic, sync)")
+        print("  clean <sub> <args>         — bersihin slide/topic yang gagal dipost")
+        print("    clean resolve <slug>      cari topic, print tag+status")
+        print("    clean delete-files <slug>  hapus file slide")
+        print("    clean clean-schedule <tag> hapus dari schedule.json")
+        print("    clean reset-topic <tag>    reset status ke planned")
+        print("    clean clean-uploaded <slug> bersihin .uploaded.json")
         print("  sync-slots                 — sync slot jadwal ke cron-job.org")
         print()
         print("Opsi global:")
@@ -1543,7 +1658,7 @@ def main():
     cmd = sys.argv[1]
     args = sys.argv[2:]
 
-    no_ig_cmds = {"generate-carousel-sd", "compress-slides", "curriculum", "generate-caption", "sync-slots"}
+    no_ig_cmds = {"generate-carousel-sd", "compress-slides", "curriculum", "generate-caption", "sync-slots", "clean"}
     client = InstagramClient() if cmd not in no_ig_cmds else None
 
     cmds = {
@@ -1568,6 +1683,7 @@ def main():
         "curriculum": cmd_curriculum,
         "sync-slots": cmd_sync_slots,
         "refresh-token": cmd_refresh_token,
+        "clean": cmd_clean,
     }
 
     fn = cmds.get(cmd)

@@ -17,7 +17,7 @@ jobs:
       - name: Resolve slug and validate
         id: resolve
         run: |
-          python3 .github/workflows/clean_helper.py resolve ${{ inputs.slug }} > /tmp/clean_out.txt
+          python main.py clean resolve ${{ inputs.slug }} > /tmp/clean_out.txt
           echo "tag=$(grep '^tag=' /tmp/clean_out.txt | cut -d= -f2)" >> $GITHUB_OUTPUT
           echo "status=$(grep '^status=' /tmp/clean_out.txt | cut -d= -f2)" >> $GITHUB_OUTPUT
 
@@ -30,24 +30,16 @@ jobs:
           fi
 
       - name: Delete slide files
-        run: |
-          SLUG="${{ inputs.slug }}"
-          echo "Mencari file dengan prefix: ${SLUG}"
-          find accounts/ -path "*/resource/photos/${SLUG}_sd_*" -delete -print 2>/dev/null || true
-          find accounts/ -path "*/resource/photos/${SLUG}_slide_*" -delete -print 2>/dev/null || true
-          find accounts/ -path "*/resource/photos/edu_${SLUG}*" -delete -print 2>/dev/null || true
+        run: python main.py clean delete-files ${{ inputs.slug }}
 
       - name: Clean schedule.json entry
-        run: python3 .github/workflows/clean_helper.py clean-schedule ${{ steps.resolve.outputs.tag }}
-        shell: bash
+        run: python main.py clean clean-schedule ${{ steps.resolve.outputs.tag }}
 
       - name: Reset topic in source_of_truth.json
-        run: python3 .github/workflows/clean_helper.py reset-topic ${{ steps.resolve.outputs.tag }}
-        shell: bash
+        run: python main.py clean reset-topic ${{ steps.resolve.outputs.tag }}
 
       - name: Clean .uploaded.json stale entries
-        run: python3 .github/workflows/clean_helper.py clean-uploaded ${{ inputs.slug }}
-        shell: bash
+        run: python main.py clean clean-uploaded ${{ inputs.slug }}
 
       - name: Commit and push
         run: |

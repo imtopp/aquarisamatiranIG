@@ -837,10 +837,10 @@ async def clean_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
 
     slides_dir = PHOTO_DIR
-    files = list(slides_dir.glob(f"{slug}_sd_*"))
-    files += list(slides_dir.glob(f"{slug}_slide_*"))
-    files += list(slides_dir.glob(f"edu_{slug[:20]}*"))
-    if not files:
+    slide_files = list(slides_dir.glob(f"{slug}_sd_*"))
+    slide_files += list(slides_dir.glob(f"{slug}_slide_*"))
+    edu_files = list(slides_dir.glob(f"edu_{slug[:20]}*"))
+    if not slide_files and not edu_files:
         await update.message.reply_text(f"❌ Gak nemu file dengan prefix `{slug}` di resource/photos/")
         return
 
@@ -856,8 +856,15 @@ async def clean_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             content=body, headers=headers,
         )
         if resp.status_code == 204:
+            parts = []
+            if slide_files:
+                parts.append(f"{len(slide_files)} slide")
+            if edu_files:
+                parts.append(f"{len(edu_files)} data fakta")
+            total = len(slide_files) + len(edu_files)
+            detail = " + ".join(parts)
             await update.message.reply_text(
-                f"🗑️ Clean trigger buat `{slug}`! {len(files)} file bakal dihapus.\n"
+                f"🗑️ Clean trigger buat `{slug}`! {total} file ({detail}) bakal dihapus.\n"
                 "Proses ~2 menit, cek `/status` nanti ya~"
             )
         else:

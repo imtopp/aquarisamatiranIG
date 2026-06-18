@@ -284,7 +284,7 @@ def cmd_post_carousel(client, args):
         dt = datetime.fromtimestamp(schedule_ts)
         time_str = dt.strftime("%Y-%m-%d %H:%M")
         _add_schedule_entry(latest_prefix, "carousel", urls, caption, time_str)
-        _update_curriculum_content(latest_prefix, facts=_facts_for_cc, status="scheduled")
+        _update_curriculum_content(latest_prefix, facts=_facts_for_cc, status="scheduled", caption=caption)
         print(f"\n📅 Carousel masuk antrian schedule.json: {time_str}")
         return
 
@@ -294,7 +294,7 @@ def cmd_post_carousel(client, args):
         from datetime import datetime
         dt = datetime.fromtimestamp(schedule_ts)
         _add_schedule_entry(latest_prefix, "carousel", urls, caption, dt.strftime("%Y-%m-%d %H:%M"))
-        _update_curriculum_content(latest_prefix, facts=_facts_for_cc, status="scheduled")
+        _update_curriculum_content(latest_prefix, facts=_facts_for_cc, status="scheduled", caption=caption)
         print(f"\n📅 Carousel masuk antrian schedule.json: {dt.strftime('%Y-%m-%d %H:%M')}")
         return
 
@@ -307,7 +307,7 @@ def cmd_post_carousel(client, args):
         _save_to_published(p, media_id, group_slug=latest_prefix)
 
     # Update curriculum_content.json
-    _update_curriculum_content(latest_prefix, result_id=media_id, status="live")
+    _update_curriculum_content(latest_prefix, result_id=media_id, status="live", caption=caption)
 
 
 _UPLOAD_MAP = Path("resource") / ".uploaded.json"
@@ -1364,7 +1364,7 @@ def cmd_generate_carousel(_client, args):
 
 def _update_curriculum_content(slug: str, facts: dict | None = None,
                                 result_id: str | None = None, permalink: str | None = None,
-                                status: str | None = None):
+                                status: str | None = None, caption: str | None = None):
     """Update curriculum_content.json with generated facts or post result (v4 nested)."""
     import json
     cpath = config.CONTENT_PATH
@@ -1418,6 +1418,8 @@ def _update_curriculum_content(slug: str, facts: dict | None = None,
         topic["permalink"] = permalink
     if status:
         topic["status"] = status
+    if caption:
+        topic["caption"] = caption
     cpath.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"📝 curriculum_content.json diupdate untuk #{matched_num}")
 

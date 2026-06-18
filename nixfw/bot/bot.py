@@ -502,6 +502,33 @@ def _slug_to_topic(slug: str) -> str:
     return slug.replace("_", " ").title()
 
 
+def _get_caption_from_curriculum(slug: str) -> str | None:
+    """Cari caption existing di source_of_truth.json berdasarkan slug."""
+    try:
+        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        for s_num, ts in cc.get("topics", {}).items():
+            for t_num, t in ts.items():
+                if t.get("slug", "").replace("-", "_") == slug:
+                    return t.get("caption") or None
+    except Exception:
+        pass
+    return None
+
+
+def _save_caption_to_curriculum(slug: str, caption: str):
+    """Simpan caption ke source_of_truth.json."""
+    try:
+        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        for s_num, ts in cc.get("topics", {}).items():
+            for t_num, t in ts.items():
+                if t.get("slug", "").replace("-", "_") == slug:
+                    t["caption"] = caption
+                    CURRICULUM_PATH.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
+                    return
+    except Exception:
+        pass
+
+
 def _build_caption_from_facts(topic: str, facts_json: dict | None = None) -> str:
     """Build a caption locally from facts data (Gemini fallback)."""
     lines = [f"{topic} — Yuk belajar! 🐟"]
@@ -668,22 +695,28 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             await update.message.reply_text("⚠️ Gagal kirim preview, lanjut aja~")
 
-    # Generate caption
-    facts_json = None
-    facts_path = PHOTO_DIR / f"edu_{slug}_facts.json"
-    if facts_path.exists():
-        try:
-            facts_json = json.loads(facts_path.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+    # Generate caption — cek dulu apakah udah ada di source_of_truth
+    existing_caption = _get_caption_from_curriculum(slug)
+    if existing_caption:
+        await update.message.reply_text(f"💡 Caption udah ada, pake yang lama~")
+        caption = existing_caption
+    else:
+        facts_json = None
+        facts_path = PHOTO_DIR / f"edu_{slug}_facts.json"
+        if facts_path.exists():
+            try:
+                facts_json = json.loads(facts_path.read_text(encoding="utf-8"))
+            except Exception:
+                pass
 
-    topic_display = _slug_to_topic(slug)
-    await update.message.reply_text(f"💬 Generate caption buat \"{topic_display}\"...")
-    try:
-        caption = await asyncio.wait_for(_generate_caption(facts_json, topic_display), timeout=60)
-    except asyncio.TimeoutError:
-        caption = f"{topic_display} — Yuk belajar bareng @aquarisamatiran! 🌱 #Aquarisamatiran #AquascapeIndonesia"
-        await update.message.reply_text("⚠️ Caption generation timeout, pakai fallback~")
+        topic_display = _slug_to_topic(slug)
+        await update.message.reply_text(f"💬 Generate caption buat \"{topic_display}\"...")
+        try:
+            caption = await asyncio.wait_for(_generate_caption(facts_json, topic_display), timeout=60)
+        except asyncio.TimeoutError:
+            caption = f"{topic_display} — Yuk belajar bareng @aquarisamatiran! 🌱 #Aquarisamatiran #AquascapeIndonesia"
+            await update.message.reply_text("⚠️ Caption generation timeout, pakai fallback~")
+        _save_caption_to_curriculum(slug, caption)
 
     # Preview + confirm
     msg = (
@@ -730,6 +763,7 @@ async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         new_caption = await _call_gemini(messages, system=caption_system)
         pending["caption"] = new_caption
+        _save_caption_to_curriculum(pending["slug"], new_caption)
         await update.message.reply_text(f"✅ Caption baru:\n{new_caption[:1000]}\n\nKetik `/confirm` buat lanjut, atau `/editcaption` lagi~")
     except Exception as e:
         await update.message.reply_text(f"❌ Gagal edit caption: {e}")

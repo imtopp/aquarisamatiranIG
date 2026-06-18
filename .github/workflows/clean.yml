@@ -1,4 +1,4 @@
-﻿name: Clean slides
+name: Clean slides
 run-name: Clean ${{ inputs.slug }}
 
 on:

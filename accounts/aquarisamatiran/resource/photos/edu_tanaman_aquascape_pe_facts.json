@@ -1,0 +1,89 @@
+{
+  "topic": "Tanaman Aquascape Pemula",
+  "display_name": "Pilihan Tanaman Aquascape Pemula 🌱",
+  "subtitle": "Hijaukan Akuarium, Mudah Kok!",
+  "scientific_name": "Taxiphyllum barbieri (Java Moss)",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Manfaat Tanaman di Akuarium 🌿",
+      "description": "Tanaman bukan cuma mempercantik akuarium, tapi juga berfungsi sebagai filter alami yang membersihkan air. Mereka menghasilkan oksigen untuk ikan dan menjadi tempat sembunyi favorit bagi biota akuatikmu.",
+      "tags": [
+        "#OksigenAlami",
+        "#FilterBio",
+        "#EstetikaAkuarium"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Mulai dengan Tanaman Low Tech ✨",
+      "description": "Bagi pemula, sangat disarankan untuk memilih tanaman low tech. Jenis ini tidak membutuhkan injeksi CO2 tambahan, cahaya yang super terang, atau pupuk yang rumit, menjadikannya pilihan ideal untuk yang baru memulai hobi aquascape.",
+      "tags": [
+        "#LowTechFriendly",
+        "#TanpaCO2",
+        "#MudahRawat"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Pencahayaan yang Pas, Bukan Maksimal 💡",
+      "description": "Tanaman aquascape pemula umumnya membutuhkan cahaya sedang (medium light) untuk tumbuh optimal. Cahaya yang terlalu kuat justru bisa memicu pertumbuhan alga yang tidak diinginkan, jadi penting untuk menjaga intensitas cahaya agar seimbang.",
+      "tags": [
+        "#CahayaAkuarium",
+        "#HindariAlga",
+        "#MediumLight"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Substrat Penunjang Nutrisi Akar 🌱",
+      "description": "Beberapa tanaman aquascape mendapatkan nutrisi penting dari akarnya. Untuk itu, gunakan substrat khusus aquascape atau tambahkan pupuk dasar di bawah lapisan pasir agar akar tanaman dapat tumbuh sehat dan menyerap nutrisi dengan baik.",
+      "tags": [
+        "#SubstratAquascape",
+        "#NutrisiAkar",
+        "#PupukDasar"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "CO2 Tambahan Tidak Wajib! 💨",
+      "description": "Jangan khawatir soal kebutuhan CO2! Tanaman low tech bisa tumbuh dengan baik tanpa injeksi CO2 eksternal. CO2 yang dihasilkan dari pernapasan ikan atau dari permukaan air biasanya sudah cukup bagi mereka untuk berfotosintesis.",
+      "tags": [
+        "#TanpaCO2",
+        "#CO2Alami",
+        "#AquascapeSimpel"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Pupuk Cair Secukupnya Saja 🧪",
+      "description": "Pupuk cair boleh diberikan untuk melengkapi nutrisi, tapi penting untuk tidak berlebihan. Cukup gunakan seminggu sekali dengan dosis rendah atau saat tanaman menunjukkan gejala kekurangan nutrisi, agar tidak memicu alga.",
+      "tags": [
+        "#PupukAkuarium",
+        "#DosisTepat",
+        "#NutrisiMikro"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Kenali Para Jagoan Pemula 💚",
+      "description": "Contoh tanaman favorit dan mudah untuk pemula adalah Anubias Nana (mudah diletakkan di batu/kayu), Java Moss (menyebar cepat dan jadi tempat bersembunyi), serta Cryptocoryne (tanaman berakar kuat yang indah).",
+      "tags": [
+        "#AnubiasNana",
+        "#JavaMoss",
+        "#Cryptocoryne"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Cara Menanam & Merawat Sederhana ✂️",
+      "description": "Saat menanam Anubias, jangan kubur rimpangnya (batang tebalnya) di substrat, cukup ikat di dekorasi. Untuk Java Moss, ikat ke media seperti batu atau kayu. Lakukan pruning sesekali untuk menjaga bentuk dan kesehatan tanaman.",
+      "tags": [
+        "#PruningDasar",
+        "#MenanamMudah",
+        "#PerawatanRutinitas"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

@@ -178,7 +178,8 @@ HELP_TEXT = (
     "/cancel — batalin posting\n"
     "/myid — liat chat ID kamu\n"
     "/setslot — atur jadwal slot (`add` wizard, `remove`, `sync`)\n"
-    "/schedule — liat jadwal postingan\n\n"
+    "/schedule — liat jadwal postingan\n"
+    "/clean `<slug atau C1#XX>` — hapus slide yang gak jadi dipost\n\n"
     "**🧙 Wizard Interaktif:**\n"
     "Ketik `/setslot add` — bot tanya nama, pilih hari via tombol, jam → auto-sync cron-job.org!\n\n"
     "**🚀 Cara pake Curriculum:**\n"
@@ -779,6 +780,78 @@ async def cancel_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Oke, pending post dibatalin~ Mau `/post` lagi? 😏")
 
 
+async def clean_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Hapus slide yang gak jadi dipost via GH Actions clean.yml."""
+    args = context.args
+    if not args:
+        await update.message.reply_text(
+            "Gunakan: `/clean <slug>` atau `/clean C1#XX`\n"
+            "Cek `/slides` buat liat slug yang tersedia."
+        )
+        return
+
+    raw = args[0]
+    slug = ""
+    m = re.match(r'[CS](\d+)#(\d+)', raw)
+    if m:
+        try:
+            cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+            topic = cc.get("topics", {}).get(m.group(1), {}).get(m.group(2), {})
+            if not topic:
+                await update.message.reply_text("❌ Topic gak ditemukan di source_of_truth.")
+                return
+            if topic.get("status") == "live":
+                await update.message.reply_text("❌ Topic udah live (udah dipost). Gak bisa di-clean.")
+                return
+            slug = (topic.get("slug", "") or "").replace("-", "_")
+            if not slug:
+                await update.message.reply_text("❌ Topic gak punya slug.")
+                return
+        except Exception as e:
+            await update.message.reply_text(f"❌ Error: {e}")
+            return
+    else:
+        slug = raw.replace("-", "_")
+        try:
+            cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+            for sid, ts in cc.get("topics", {}).items():
+                for num, t in ts.items():
+                    if t.get("slug", "").replace("-", "_") == slug and t.get("status") == "live":
+                        await update.message.reply_text("❌ Topic udah live. Gak bisa di-clean.")
+                        return
+        except Exception:
+            pass
+
+    slides_dir = PHOTO_DIR
+    files = list(slides_dir.glob(f"{slug}_sd_*"))
+    files += list(slides_dir.glob(f"{slug}_slide_*"))
+    files += list(slides_dir.glob(f"edu_{slug[:20]}*"))
+    if not files:
+        await update.message.reply_text(f"❌ Gak nemu file dengan prefix `{slug}` di resource/photos/")
+        return
+
+    if not GITHUB_PAT:
+        await update.message.reply_text("GITHUB_PAT gak ada di .env, minta ke bebnya dulu~ 😏")
+        return
+
+    try:
+        body = json.dumps({"ref": "main", "inputs": {"slug": slug}})
+        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GITHUB_PAT}"}
+        resp = await HTTPX_CLIENT.post(
+            "https://api.github.com/repos/imtopp/aquarisamatiranIG/actions/workflows/clean.yml/dispatches",
+            content=body, headers=headers,
+        )
+        if resp.status_code == 204:
+            await update.message.reply_text(
+                f"🗑️ Clean trigger buat `{slug}`! {len(files)} file bakal dihapus.\n"
+                "Proses ~2 menit, cek `/status` nanti ya~"
+            )
+        else:
+            await update.message.reply_text(f"❌ Gagal trigger: HTTP {resp.status_code}")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Error: {e}")
+
+
 async def myid_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = update.effective_user.id
     await update.message.reply_text(f"Chat ID kamu: `{uid}`", parse_mode="Markdown")
@@ -1054,6 +1127,7 @@ def main():
     app.add_handler(CommandHandler("post", post_cmd))
     app.add_handler(CommandHandler("confirm", confirm_cmd))
     app.add_handler(CommandHandler("cancel", cancel_cmd))
+    app.add_handler(CommandHandler("clean", clean_cmd))
     app.add_handler(CommandHandler("editcaption", editcaption_cmd))
     app.add_handler(CommandHandler("regenerate", regenerate_cmd))
     app.add_handler(CommandHandler("myid", myid_cmd))

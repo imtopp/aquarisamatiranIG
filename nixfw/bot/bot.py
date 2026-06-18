@@ -543,41 +543,55 @@ async def _generate_caption(facts_json: dict | None, topic: str) -> str:
     return f"{topic} — Yuk belajar bareng @aquarisamatiran! 🌱 #Aquarisamatiran #AquascapeIndonesia"
 
 
+def _format_run(run: dict) -> str:
+    """Format a GH Actions run into a status line."""
+    status = run["status"]
+    conclusion = run.get("conclusion") or "—"
+    topic = run.get("display_title", "?")
+    emoji = {"queued": "⏳", "in_progress": "🔄", "completed": {"success": "✅", "failure": "❌", "cancelled": "🚫"}.get(conclusion, "❓")}.get(status, "❓")
+    created_utc = run["created_at"][:16].replace("T", " ")
+    try:
+        dt = datetime.datetime.strptime(created_utc, "%Y-%m-%d %H:%M") + datetime.timedelta(hours=7)
+        created_wib = dt.strftime("%Y-%m-%d %H:%M")
+    except Exception:
+        created_wib = created_utc
+    return (
+        f"{emoji} **{topic}**\n"
+        f"   Status: **{status}** ({conclusion})\n"
+        f"   Dibuat: {created_wib} WIB\n"
+        f"   [Lihat di GitHub]({run['html_url']})"
+    )
+
+
 async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Check latest GH Actions generate run status."""
+    """Check latest GH Actions runs (generate + clean)."""
     if not GITHUB_PAT:
         await update.message.reply_text("GITHUB_PAT gak ada, gak bisa cek~ 😏")
         return
+    workflow_ids = {
+        "Generate": "295601892",
+        "Clean": "297980876",
+    }
+    lines = ["📊 **Status Workflows**"]
     try:
         async with httpx.AsyncClient(timeout=15) as client:
-            resp = await client.get(
-                f"{GH_API}/repos/{GH_REPO}/actions/workflows/295601892/runs?per_page=1",
-                headers={"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GITHUB_PAT}"},
-            )
-        if resp.status_code != 200:
-            await update.message.reply_text(f"❌ Gagal cek status: HTTP {resp.status_code}")
-            return
-        run = resp.json()["workflow_runs"][0]
-        status = run["status"]
-        conclusion = run["conclusion"] or "—"
-        topic = run.get("display_title", "?")
-        html_url = run["html_url"]
-        emoji = {"queued": "⏳", "in_progress": "🔄", "completed": {"success": "✅", "failure": "❌", "cancelled": "🚫"}.get(conclusion, "❓")}.get(status, "❓")
-        created_utc = run["created_at"][:16].replace("T", " ")
-        try:
-            dt = datetime.datetime.strptime(created_utc, "%Y-%m-%d %H:%M") + datetime.timedelta(hours=7)
-            created_wib = dt.strftime("%Y-%m-%d %H:%M")
-        except Exception:
-            created_wib = created_utc
-        msg = (
-            f"{emoji} Generate: **{topic}**\n"
-            f"Status: **{status}** ({conclusion})\n"
-            f"Dibuat: {created_wib} WIB\n"
-            f"[Lihat di GitHub]({html_url})"
-        )
+            for label, wf_id in workflow_ids.items():
+                resp = await client.get(
+                    f"{GH_API}/repos/{GH_REPO}/actions/workflows/{wf_id}/runs?per_page=1",
+                    headers={"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GITHUB_PAT}"},
+                )
+                if resp.status_code == 200:
+                    runs = resp.json().get("workflow_runs", [])
+                    if runs:
+                        lines.append(f"\n{label}:")
+                        lines.append(_format_run(runs[0]))
+                    else:
+                        lines.append(f"\n{label}: — (belum pernah jalan)")
+                else:
+                    lines.append(f"\n{label}: ❌ HTTP {resp.status_code}")
         if slides := _latest_slides()[1]:
-            msg += f"\n📸 Slide siap: {len(slides)} file"
-        await update.message.reply_text(msg)
+            lines.append(f"\n📸 Slide siap: {len(slides)} file")
+        await update.message.reply_text("\n".join(lines))
     except Exception as e:
         await update.message.reply_text(f"❌ Error: {e}")
 

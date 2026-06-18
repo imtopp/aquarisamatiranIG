@@ -696,12 +696,13 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("⚠️ Gagal kirim preview, lanjut aja~")
 
     # Generate caption — cek dulu apakah udah ada di source_of_truth
+    topic_display = _slug_to_topic(slug)
+    facts_json = None
     existing_caption = _get_caption_from_curriculum(slug)
     if existing_caption:
         await update.message.reply_text(f"💡 Caption udah ada, pake yang lama~")
         caption = existing_caption
     else:
-        facts_json = None
         facts_path = PHOTO_DIR / f"edu_{slug}_facts.json"
         if facts_path.exists():
             try:
@@ -709,7 +710,6 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception:
                 pass
 
-        topic_display = _slug_to_topic(slug)
         await update.message.reply_text(f"💬 Generate caption buat \"{topic_display}\"...")
         try:
             caption = await asyncio.wait_for(_generate_caption(facts_json, topic_display), timeout=60)

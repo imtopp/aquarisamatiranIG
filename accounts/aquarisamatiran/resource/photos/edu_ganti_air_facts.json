@@ -1,0 +1,89 @@
+{
+  "topic": "Ganti Air & Perawatan Aquarium",
+  "display_name": "Ganti Air & Perawatan",
+  "subtitle": "Air Jernih, Ikan Sehat!",
+  "scientific_name": "",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Mengapa Ganti Air Penting? 💧",
+      "description": "Ganti air rutin adalah kunci kualitas air optimal. Ini membantu menghilangkan nitrat, amonia, dan polutan lain yang menumpuk, menjaga lingkungan ikanmu tetap bersih dan sehat.",
+      "tags": [
+        "KualitasAir",
+        "RacunAquarium",
+        "KesehatanIkan"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Berapa Sering & Berapa Banyak? 🗓️",
+      "description": "Untuk pemula, ganti 20-30% air seminggu sekali adalah aturan emas. Sesuaikan frekuensi dan volume berdasarkan ukuran aquarium dan jumlah ikan (beban biologis) di dalamnya.",
+      "tags": [
+        "FrekuensiGantiAir",
+        "VolumeAir",
+        "MaintenanceRutin"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Air Seperti Apa yang Aman? 🌡️",
+      "description": "Gunakan air yang sudah diendapkan minimal 24 jam atau air keran yang diberi water conditioner untuk menghilangkan klorin berbahaya. Pastikan suhu air pengganti mirip dengan suhu aquarium agar ikan tidak kaget.",
+      "tags": [
+        "AirEndapan",
+        "WaterConditioner",
+        "SuhuStabil"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Alat Wajib Ganti Air ✅",
+      "description": "Siapkan selang siphon khusus aquarium untuk menyedot air kotor dan sisa makanan dari dasar. Jangan lupa ember bersih dan water conditioner sebagai perlengkapan utamamu.",
+      "tags": [
+        "SiphonAquarium",
+        "AlatAquarium",
+        "KebersihanDasar"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Vakum Substrat Jangan Lupa! 🧹",
+      "description": "Saat menyedot air, arahkan ujung siphon ke dasar substrat (pasir/kerikil). Ini sangat efektif untuk mengangkat kotoran tersembunyi, sisa makanan, dan detritus yang menumpuk di sela-sela.",
+      "tags": [
+        "VakumDasar",
+        "SisaMakanan",
+        "SubstratBersih"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Rawat Filter Biologis dengan Tepat 🦠",
+      "description": "Penting: Jangan pernah mencuci media filter (spons, bioball) dengan air keran! Cukup bilas perlahan menggunakan air bekas aquarium saat kamu ganti air, agar koloni bakteri baik tidak mati.",
+      "tags": [
+        "FilterAquarium",
+        "BakteriBaik",
+        "MediaFilter"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Kaca Bersih, Pemandangan Apik ✨",
+      "description": "Sikat atau bersihkan lumut/alga yang menempel pada kaca aquarium saat ganti air. Gunakan pembersih magnetik atau algae scraper khusus untuk menjaga kejernihan pandanganmu.",
+      "tags": [
+        "AlgaeScraper",
+        "KacaAquarium",
+        "BersihLumut"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Jangan Bersihkan Semua Sekaligus! ⚠️",
+      "description": "Hindari membersihkan semua komponen aquarium (kaca, filter, dan ganti air besar-besaran) secara bersamaan. Tindakan ekstrem ini bisa menghilangkan terlalu banyak bakteri baik dan merusak siklus nitrogen, membahayakan ikanmu.",
+      "tags": [
+        "JanganOverclean",
+        "BakteriBaik",
+        "NitrogenCycle"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

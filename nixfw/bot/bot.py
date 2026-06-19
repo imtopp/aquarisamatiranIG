@@ -730,9 +730,9 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply = "\n".join(lines)
         if cancel_buttons:
             rows = [cancel_buttons[i:i+2] for i in range(0, len(cancel_buttons), 2)]
-            await update.message.reply_text(reply, reply_markup=InlineKeyboardMarkup(rows))
+            await update.message.reply_text(reply, reply_markup=InlineKeyboardMarkup(rows), disable_web_page_preview=True)
         else:
-            await update.message.reply_text(reply)
+            await update.message.reply_text(reply, disable_web_page_preview=True)
     except Exception as e:
         await update.message.reply_text(f"❌ Error: {e}")
 

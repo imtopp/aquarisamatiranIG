@@ -726,7 +726,6 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 else:
                     lines.append(f"\n{label}: ❌ HTTP {resp.status_code}")
 
-        lines.append("\n🟢 Semua lancar jaya, sayang~ 🫣")
         reply = "\n".join(lines)
         if cancel_buttons:
             rows = [cancel_buttons[i:i+2] for i in range(0, len(cancel_buttons), 2)]

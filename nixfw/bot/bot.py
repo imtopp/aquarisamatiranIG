@@ -24,6 +24,7 @@ from nixfw.config import (
     SCHEDULE_PATH,
 )
 from nixfw.slot_manager import SlotManager, DAYS_ID
+from nixfw.content.providers.facts_generator import generate_facts
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -407,7 +408,7 @@ async def slides_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Trigger GH Actions workflow to generate SD carousel."""
+    """Generate carousel with fact confirmation or fallback to direct dispatch."""
     if not GH_PAT:
         await update.message.reply_text("GH_PAT gak ada di .env, minta ke bebnya dulu~ 😏")
         return
@@ -426,26 +427,32 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not topic:
         await update.message.reply_text("Topiknya mana sayang? 😏")
         return
-    await update.message.reply_text(f"⚙️ Trigger generate \"{topic}\" ({num_facts} fakta) di GH Actions...")
-    try:
-        async with httpx.AsyncClient(timeout=30) as client:
-            resp = await client.post(
-                f"{GH_API}/repos/{GH_REPO}/actions/workflows/295601892/dispatches",
-                headers={
-                    "Accept": "application/vnd.github+json",
-                    "Authorization": f"Bearer {GH_PAT}",
-                },
-                json={"ref": "main", "inputs": {"topic": topic, "num_facts": num_facts}},
-            )
-        if resp.status_code == 204:
+
+    display_name, slug, topic_ref = _resolve_topic(topic)
+    if display_name and slug:
+        await update.message.reply_text(f"📋 Bikin fakta untuk \"{display_name}\" ({num_facts} fakta)...")
+        try:
+            facts_path = PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
+            if facts_path.exists():
+                facts_path.unlink()
+            facts = await asyncio.to_thread(generate_facts, display_name, int(num_facts))
+            preview = _format_facts_preview(facts)
             await update.message.reply_text(
-                f"✅ Generate \"{topic}\" berhasil ditrigger! 🎉\n"
-                f"Tunggu 10-30 menit, cek progress pake /status"
+                f"📋 **Fakta untuk \"{display_name}\":**\n\n{preview}\n\nSetuju sama faktanya?",
+                reply_markup=_fact_keyboard()
             )
-        else:
-            await update.message.reply_text(f"❌ Gagal: HTTP {resp.status_code}")
-    except Exception as e:
-        await update.message.reply_text(f"❌ Error: {e}")
+            context.user_data["pending_facts"] = {
+                "topic_display": display_name,
+                "slug": slug,
+                "num_facts": int(num_facts),
+                "facts_data": facts,
+                "topic_ref": topic_ref or topic,
+            }
+        except Exception as e:
+            await update.message.reply_text(f"❌ Gagal generate fakta di VPS: {e}\nFallback ke GH Actions...")
+            await _dispatch_workflow(topic, num_facts, False, update)
+    else:
+        await _dispatch_workflow(topic, num_facts, False, update)
 
 
 def _latest_slides(topic_ref: str = "") -> tuple[str | None, list[Path]]:
@@ -500,6 +507,67 @@ def _latest_slides(topic_ref: str = "") -> tuple[str | None, list[Path]]:
 def _slug_to_topic(slug: str) -> str:
     """Convert slug to readable topic name for caption generation."""
     return slug.replace("_", " ").title()
+
+
+def _resolve_topic(input_str: str) -> tuple[str | None, str | None, str | None]:
+    """Resolve topic input to (display_name, slug, topic_ref).
+    Returns (None, None, None) if unresolvable."""
+    try:
+        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return None, None, None
+    topics = cc.get("topics", {})
+
+    m = re.match(r'[CS](\d+)#(\d+)', input_str)
+    if m:
+        sid, tnum = m.group(1), m.group(2).zfill(2)
+        t = topics.get(sid, {}).get(tnum, {})
+        if t:
+            slug = (t.get("slug", "") or "").replace("-", "_")
+            return t.get("title") or t.get("display_name", input_str), slug or None, f"C{sid}#{tnum}"
+
+    m = re.match(r'#(\d+)', input_str)
+    if m:
+        tnum = m.group(1).zfill(2)
+        for sid in sorted(topics, key=int):
+            t = topics[sid].get(tnum, {})
+            if t:
+                slug = (t.get("slug", "") or "").replace("-", "_")
+                return t.get("title") or t.get("display_name", input_str), slug or None, f"C{sid}#{tnum}"
+
+    input_lower = input_str.lower().replace(" ", "_")
+    for sid in sorted(topics, key=int):
+        for tnum in sorted(topics[sid], key=int):
+            t = topics[sid][tnum]
+            slug = (t.get("slug", "") or "")
+            candidates = [t.get("title", "").lower(), t.get("display_name", "").lower(), slug.lower(), slug.replace("_", " ").lower()]
+            if input_lower in candidates:
+                return t.get("title") or t.get("display_name", input_str), slug.replace("-", "_") or None, f"C{sid}#{tnum}"
+
+    return None, None, None
+
+
+def _format_facts_preview(facts: dict) -> str:
+    """Format facts dict into readable preview text."""
+    lines = []
+    for f in facts.get("facts", []):
+        num = f.get("number", "?")
+        title = f.get("title", "")
+        desc = (f.get("description", "") or "")[:200]
+        lines.append(f"**{num}. {title}**")
+        if desc:
+            lines.append(f"   {desc}")
+        lines.append("")
+    return "\n".join(lines)
+
+
+def _fact_keyboard() -> InlineKeyboardMarkup:
+    keyboard = [
+        [InlineKeyboardButton("✅ Setuju, bikin slide", callback_data="fact:confirm")],
+        [InlineKeyboardButton("🔄 Bikin Ulang", callback_data="fact:retry")],
+        [InlineKeyboardButton("❌ Batal", callback_data="fact:cancel")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
 
 
 def _get_caption_from_curriculum(slug: str) -> str | None:
@@ -626,7 +694,7 @@ def _format_run(run: dict) -> str:
 
 
 async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Check latest GH Actions runs (generate + clean)."""
+    """Check latest GH Actions runs (generate + clean) + running workflows with cancel."""
     if not GH_PAT:
         await update.message.reply_text("GH_PAT gak ada, gak bisa cek~ 😏")
         return
@@ -635,6 +703,7 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Clean": "297980876",
     }
     lines = ["📊 **Status Workflows**"]
+    cancel_buttons = []
     try:
         async with httpx.AsyncClient(timeout=15) as client:
             for label, wf_id in workflow_ids.items():
@@ -645,13 +714,25 @@ async def status_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if resp.status_code == 200:
                     runs = resp.json().get("workflow_runs", [])
                     if runs:
+                        run = runs[0]
                         lines.append(f"\n{label}:")
-                        lines.append(_format_run(runs[0]))
+                        lines.append(_format_run(run))
+                        if run["status"] in ("in_progress", "queued"):
+                            cancel_buttons.append(
+                                InlineKeyboardButton(f"❌ Cancel {label}", callback_data=f"cancel:wf:{run['id']}")
+                            )
                     else:
                         lines.append(f"\n{label}: — (belum pernah jalan)")
                 else:
                     lines.append(f"\n{label}: ❌ HTTP {resp.status_code}")
-        await update.message.reply_text("\n".join(lines))
+
+        lines.append("\n🟢 Semua lancar jaya, sayang~ 🫣")
+        reply = "\n".join(lines)
+        if cancel_buttons:
+            rows = [cancel_buttons[i:i+2] for i in range(0, len(cancel_buttons), 2)]
+            await update.message.reply_text(reply, reply_markup=InlineKeyboardMarkup(rows))
+        else:
+            await update.message.reply_text(reply)
     except Exception as e:
         await update.message.reply_text(f"❌ Error: {e}")
 
@@ -799,6 +880,21 @@ async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ Gagal edit caption: {e}")
 
 
+async def _dispatch_workflow(topic: str, num_facts: str, force: bool, update: Update):
+    """Direct dispatch to GH Actions generate workflow (fallback)."""
+    await update.message.reply_text(f"⚙️ Trigger generate \"{topic}\" ({num_facts} fakta, force={force}) di GH Actions...")
+    try:
+        body = json.dumps({"ref": "main", "inputs": {"topic": topic, "num_facts": num_facts, "force": str(force).lower()}})
+        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GH_PAT}", "Content-Type": "application/json"}
+        resp = await HTTPX_CLIENT.post(f"{GH_API}/repos/{GH_REPO}/actions/workflows/295601892/dispatches", content=body, headers=headers)
+        if resp.status_code == 204:
+            await update.message.reply_text(f"✅ Generate \"{topic}\" berhasil ditrigger! 🎉\nTunggu 10-30 menit, cek progress pake /status")
+        else:
+            await update.message.reply_text(f"❌ Gagal: HTTP {resp.status_code}")
+    except Exception as e:
+        await update.message.reply_text(f"❌ Error: {e}")
+
+
 async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     pending = _pending_posts.get(user_id)
@@ -808,8 +904,8 @@ async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     force = "--force" in (context.args or [])
     topic_display = pending["topic_display"]
     topic_ref = pending.get("topic_ref", "")
+    slug = pending["slug"]
     if not topic_ref:
-        slug = pending["slug"]
         try:
             cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
             for s_num, ts in cc.get("topics", {}).items():
@@ -821,20 +917,35 @@ async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     break
         except Exception:
             pass
-    topic_input = topic_ref if topic_ref else pending["slug"].replace("_", " ")
-    label = " (force — fakta baru)" if force else " (slides aja)"
-    await update.message.reply_text(f"🔄 Generate ulang carousel \"{topic_display}\"{label}...")
-    _pending_posts.pop(user_id, None)
-    try:
-        body = json.dumps({"ref": "main", "inputs": {"topic": topic_input, "num_facts": "8", "force": str(force).lower()}})
-        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {os.environ.get('GH_PAT', '')}", "Content-Type": "application/json"}
-        resp = await HTTPX_CLIENT.post("https://api.github.com/repos/imtopp/aquarisamatiranIG/actions/workflows/generate.yml/dispatches", content=body, headers=headers)
-        if resp.status_code == 204:
-            await update.message.reply_text(f"✅ Generate ulang untuk \"{topic_display}\" udah di-trigger! Cek `/status` ~30 menit~")
-        else:
-            await update.message.reply_text(f"❌ Gagal trigger: {resp.status_code}")
-    except Exception as e:
-        await update.message.reply_text(f"❌ Error: {e}")
+    topic_input = topic_ref if topic_ref else slug.replace("_", " ")
+
+    if force and topic_ref:
+        await update.message.reply_text(f"📋 Bikin fakta baru untuk \"{topic_display}\"...")
+        try:
+            facts_path = PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
+            if facts_path.exists():
+                facts_path.unlink()
+            facts = await asyncio.to_thread(generate_facts, topic_display, 8)
+            preview = _format_facts_preview(facts)
+            await update.message.reply_text(
+                f"📋 **Fakta baru untuk \"{topic_display}\":**\n\n{preview}\n\nSetuju sama faktanya?",
+                reply_markup=_fact_keyboard()
+            )
+            context.user_data["pending_facts"] = {
+                "topic_display": topic_display,
+                "slug": slug,
+                "num_facts": 8,
+                "facts_data": facts,
+                "topic_ref": topic_ref,
+            }
+        except Exception as e:
+            await update.message.reply_text(f"❌ Gagal generate fakta di VPS: {e}\nFallback ke GH Actions...")
+            await _dispatch_workflow(topic_input, "8", True, update)
+    else:
+        label = " (force — fakta baru)" if force else " (slides aja)"
+        await update.message.reply_text(f"🔄 Generate ulang carousel \"{topic_display}\"{label}...")
+        _pending_posts.pop(user_id, None)
+        await _dispatch_workflow(topic_input, "8", force, update)
 
 
 async def confirm_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1067,6 +1178,95 @@ async def wizard_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         result = await SLOT_MANAGER.sync_cronjob()
         await query.edit_message_text(f"✅ Slot `{sid}` disimpan!\n📋 Sync selesai:\n{result}")
         return
+
+
+async def fact_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle fact confirmation (setuju / bikin ulang / batal)."""
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+    pending = context.user_data.get("pending_facts")
+
+    if not pending:
+        await query.edit_message_text("❌ Sesi kadaluarsa, ketik /generate lagi~")
+        return
+
+    if data == "fact:cancel":
+        context.user_data.pop("pending_facts", None)
+        await query.edit_message_text("Oke, dibatalin~ 🫣")
+        return
+
+    if data == "fact:retry":
+        await query.edit_message_text("🔄 Bikin ulang fakta...")
+        try:
+            facts_path = PHOTO_DIR / f"edu_{pending['slug'][:20]}_facts.json"
+            if facts_path.exists():
+                facts_path.unlink()
+            new_facts = await asyncio.to_thread(generate_facts, pending["topic_display"], pending["num_facts"])
+            pending["facts_data"] = new_facts
+            preview = _format_facts_preview(new_facts)
+            await query.edit_message_text(
+                f"📋 **Fakta baru untuk \"{pending['topic_display']}\":**\n\n{preview}\n\nSetuju sama faktanya?",
+                reply_markup=_fact_keyboard()
+            )
+        except Exception as e:
+            await query.edit_message_text(f"❌ Gagal generate ulang: {e}")
+        return
+
+    if data == "fact:confirm":
+        await query.edit_message_text("💾 Nyimpen fakta & trigger generate slide...")
+        try:
+            slug = pending["slug"]
+            facts_data = pending["facts_data"]
+            facts_path = PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
+            facts_path.write_text(json.dumps(facts_data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+            subprocess.run(["git", "add", str(facts_path)], cwd=PROJECT_ROOT, capture_output=True, timeout=10)
+            subprocess.run(
+                ["git", "commit", "-m", f"auto: facts confirmed for {slug}"],
+                cwd=PROJECT_ROOT, capture_output=True, timeout=10,
+            )
+            subprocess.run(
+                ["git", "pull", "--rebase", "origin", "main"],
+                cwd=PROJECT_ROOT, capture_output=True, timeout=30,
+            )
+            push = subprocess.run(
+                ["git", "push", "origin", "main"],
+                cwd=PROJECT_ROOT, capture_output=True, timeout=30,
+            )
+            if push.returncode != 0:
+                await query.edit_message_text(f"⚠️ Fakta disimpan, tapi push error: {push.stderr[:200]}\nCoba /sync nanti")
+                return
+
+            topic_ref = pending.get("topic_ref", "") or slug.replace("_", "-")
+            body = json.dumps({"ref": "main", "inputs": {"topic": topic_ref, "num_facts": str(pending["num_facts"]), "force": "false"}})
+            headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GH_PAT}", "Content-Type": "application/json"}
+            resp = await HTTPX_CLIENT.post(f"{GH_API}/repos/{GH_REPO}/actions/workflows/295601892/dispatches", content=body, headers=headers)
+            if resp.status_code == 204:
+                await query.edit_message_text(f"✅ Fakta disimpan & generate slide di-trigger! Cek /status nanti~")
+            else:
+                await query.edit_message_text(f"⚠️ Fakta disimpan, tapi trigger workflow gagal: HTTP {resp.status_code}")
+        except Exception as e:
+            await query.edit_message_text(f"❌ Error: {e}")
+        finally:
+            context.user_data.pop("pending_facts", None)
+        return
+
+
+async def cancel_wf_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Cancel a running GH Actions workflow."""
+    query = update.callback_query
+    await query.answer()
+    try:
+        run_id = query.data.split(":", 2)[2]
+        headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GH_PAT}"}
+        resp = await HTTPX_CLIENT.post(f"{GH_API}/repos/{GH_REPO}/actions/runs/{run_id}/cancel", headers=headers)
+        if resp.status_code == 202:
+            await query.edit_message_text(f"✅ Run #{run_id} dicancel!")
+        else:
+            await query.edit_message_text(f"❌ Gagal cancel: HTTP {resp.status_code}")
+    except Exception as e:
+        await query.edit_message_text(f"❌ Error: {e}")
 
 
 async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1319,6 +1519,8 @@ def main():
     app.add_handler(CommandHandler("setslot", setslot_cmd))
     app.add_handler(CommandHandler("sync", sync_cmd))
     app.add_handler(CallbackQueryHandler(wizard_callback, pattern="^wiz:"))
+    app.add_handler(CallbackQueryHandler(fact_callback, pattern="^fact:"))
+    app.add_handler(CallbackQueryHandler(cancel_wf_callback, pattern="^cancel:wf:"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
     print("Bot jalan di VPS... chat aku dari Telegram~")

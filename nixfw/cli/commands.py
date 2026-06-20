@@ -148,6 +148,23 @@ def _find_curriculum_key_by_slug(slug: str) -> str | None:
     return None
 
 
+def _find_topic_title_by_slug(slug: str) -> str | None:
+    """Cari title dari curriculum berdasarkan slug."""
+    cpath = config.CONTENT_PATH
+    if not cpath.exists():
+        return None
+    try:
+        cc = json.loads(cpath.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    for sid, st in cc.get("topics", {}).items():
+        for num, topic in st.items():
+            stored = topic.get("slug", "")
+            if stored == slug or stored.replace("-", "_") == slug or stored.replace("_", "-") == slug:
+                return topic.get("title") or topic.get("display_name")
+    return None
+
+
 def _add_schedule_entry(slug: str, ptype: str, urls_or_url: str | list[str],
                          caption: str, time_str: str):
     """Tambah entry ke schedule.json."""
@@ -264,7 +281,9 @@ def cmd_post_carousel(client, args):
         print(f"   ✅ {url}")
 
     # Load facts from cache for curriculum update
-    _facts_path = PHOTO_DIR / f"edu_{latest_prefix[:20]}_facts.json"
+    from nixfw.content.providers.facts_generator import facts_cache_path
+    topic_title = _find_topic_title_by_slug(latest_prefix)
+    _facts_path = facts_cache_path(topic_title or latest_prefix)
     _facts_for_cc = None
     if _facts_path.exists():
         try:
@@ -949,7 +968,7 @@ def cmd_generate_carousel_sd(_client, args):
     import re
     import time
     from pathlib import Path
-    from nixfw.content.providers.facts_generator import generate_facts
+    from nixfw.content.providers.facts_generator import facts_cache_path, generate_facts
     from nixfw.carousel.slides.cover import build_cover
     from nixfw.carousel.slides.fact import build_fact_slide
     from nixfw.carousel.slides.cta import build_cta_slide
@@ -1008,7 +1027,7 @@ def cmd_generate_carousel_sd(_client, args):
 
     # Force regenerate facts? Hapus cache sebelum generate
     if parsed.force:
-        cache_path = PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
+        cache_path = facts_cache_path(topic_name)
         if cache_path.exists():
             cache_path.unlink()
             print(f"   🗑️  Hapus cache facts: {cache_path.name}")
@@ -1211,7 +1230,7 @@ def cmd_generate_carousel(_client, args):
         print("  python main.py generate-carousel 'Perjalanan tank pertamaku' --type story")
         return
 
-    from nixfw.content.providers.facts_generator import generate_facts
+    from nixfw.content.providers.facts_generator import facts_cache_path, generate_facts
     from nixfw.content.providers.wikimedia import get_wikimedia_image
     from nixfw.content.providers.inaturalist import get_inaturalist_image
     from nixfw.content.providers.image_utils import prepare_subject_image
@@ -1234,7 +1253,7 @@ def cmd_generate_carousel(_client, args):
         print(f"✅ Loaded facts dari {parsed.facts}")
     else:
         if parsed.force:
-            cache_path = PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
+            cache_path = facts_cache_path(topic)
             if cache_path.exists():
                 cache_path.unlink()
                 print(f"   🗑️  Hapus cache facts: {cache_path.name}")
@@ -1557,9 +1576,16 @@ def cmd_clean(_client, args):
     elif sub == 'delete-files':
         slug = arg
         from pathlib import Path
+        from nixfw.content.providers.facts_generator import facts_cache_path
         photos = Path(config.PHOTO_DIR)
+        patterns = [f'{slug}_sd_*', f'{slug}_slide_*']
+        # Catch both curriculum-slug and topic-name-derived edu cache files
+        patterns.append(f'edu_{slug[:20]}*')
+        title = _find_topic_title_by_slug(slug)
+        if title:
+            patterns.append(f"edu_{facts_cache_path(title).stem}*")
         deleted = 0
-        for pattern in [f'{slug}_sd_*', f'{slug}_slide_*', f'edu_{slug[:20]}*']:
+        for pattern in patterns:
             for f in photos.glob(pattern):
                 f.unlink(missing_ok=True)
                 print(f'  Hapus: {f.name}')

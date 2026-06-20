@@ -36,6 +36,11 @@ def _build_json_schema(niche: config.NicheProfile, ct: config.ContentType, num_f
     return '\n'.join(schema_parts)
 
 
+def facts_cache_path(topic_name: str) -> Path:
+    slug = re.sub(r'[^\w\-]', '', topic_name.lower().replace(" ", "_").replace("-", "_"))
+    return config.PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
+
+
 def _gather_keys() -> list[str]:
     keys = [config.GEMINI_API_KEY] if config.GEMINI_API_KEY else []
     i = 1
@@ -56,8 +61,7 @@ def generate_facts(topic: str, num_facts: int = 4) -> dict:
     niche = config.current_niche
     ct = config.current_content_type
 
-    slug = re.sub(r'[^\w\-]', '', topic.lower().replace(" ", "_").replace("-", "_"))
-    cache_path = config.PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
+    cache_path = facts_cache_path(topic)
 
     if cache_path.exists():
         print(f"📦 Facts cache ditemukan: {cache_path.name}")

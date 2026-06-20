@@ -24,7 +24,7 @@ from nixfw.config import (
     SCHEDULE_PATH,
 )
 from nixfw.slot_manager import SlotManager, DAYS_ID
-from nixfw.content.providers.facts_generator import generate_facts
+from nixfw.content.providers.facts_generator import facts_cache_path, generate_facts
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -432,7 +432,7 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if display_name and slug:
         await update.message.reply_text(f"📋 Bikin fakta untuk \"{display_name}\" ({num_facts} fakta)...")
         try:
-            facts_path = PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
+            facts_path = facts_cache_path(display_name)
             if facts_path.exists():
                 facts_path.unlink()
             facts = await asyncio.to_thread(generate_facts, display_name, int(num_facts))
@@ -813,7 +813,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"💡 Caption udah ada, pake yang lama~")
         caption = existing_caption
     else:
-        facts_path = PHOTO_DIR / f"edu_{slug}_facts.json"
+        facts_path = facts_cache_path(topic_display)
         if facts_path.exists():
             try:
                 facts_json = json.loads(facts_path.read_text(encoding="utf-8"))
@@ -921,7 +921,7 @@ async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if force and topic_ref:
         await update.message.reply_text(f"📋 Bikin fakta baru untuk \"{topic_display}\"...")
         try:
-            facts_path = PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
+            facts_path = facts_cache_path(topic_display)
             if facts_path.exists():
                 facts_path.unlink()
             facts = await asyncio.to_thread(generate_facts, topic_display, 8)
@@ -1023,7 +1023,21 @@ async def clean_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     slides_dir = PHOTO_DIR
     slide_files = list(slides_dir.glob(f"{slug}_sd_*"))
     slide_files += list(slides_dir.glob(f"{slug}_slide_*"))
-    edu_files = list(slides_dir.glob(f"edu_{slug[:20]}*"))
+    edu_files = []
+    # Match both curriculum-slug and topic-name-derived cache filenames
+    for pattern in [f"edu_{slug[:20]}*"]:
+        edu_files.extend(slides_dir.glob(pattern))
+    # Also check topic-name-derived path if we have a curriculum ref
+    try:
+        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        for sid, ts in cc.get("topics", {}).items():
+            for num, t in ts.items():
+                if t.get("slug", "").replace("-", "_") == slug:
+                    title = t.get("title") or t.get("display_name")
+                    if title:
+                        edu_files.extend(slides_dir.glob(f"edu_{facts_cache_path(title).stem}*"))
+    except Exception:
+        pass
     if not slide_files and not edu_files:
         await update.message.reply_text(f"❌ Gak nemu file dengan prefix `{slug}` di resource/photos/")
         return
@@ -1198,7 +1212,7 @@ async def fact_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "fact:retry":
         await query.edit_message_text("🔄 Bikin ulang fakta...")
         try:
-            facts_path = PHOTO_DIR / f"edu_{pending['slug'][:20]}_facts.json"
+            facts_path = facts_cache_path(pending["topic_display"])
             if facts_path.exists():
                 facts_path.unlink()
             new_facts = await asyncio.to_thread(generate_facts, pending["topic_display"], pending["num_facts"])
@@ -1215,14 +1229,13 @@ async def fact_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "fact:confirm":
         await query.edit_message_text("💾 Nyimpen fakta & trigger generate slide...")
         try:
-            slug = pending["slug"]
             facts_data = pending["facts_data"]
-            facts_path = PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
+            facts_path = facts_cache_path(pending["topic_display"])
             facts_path.write_text(json.dumps(facts_data, indent=2, ensure_ascii=False), encoding="utf-8")
 
             subprocess.run(["git", "add", str(facts_path)], cwd=PROJECT_ROOT, capture_output=True, timeout=10)
             subprocess.run(
-                ["git", "commit", "-m", f"auto: facts confirmed for {slug}"],
+                ["git", "commit", "-m", f"auto: facts confirmed for {pending['topic_display']}"],
                 cwd=PROJECT_ROOT, capture_output=True, timeout=10,
             )
             subprocess.run(

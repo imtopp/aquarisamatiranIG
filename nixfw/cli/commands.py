@@ -221,7 +221,7 @@ def cmd_post_carousel(client, args):
     caption = " ".join(filtered) if filtered else ""
 
     # Auto-detect slide terbaru
-    slides = sorted(PHOTO_DIR.glob("*_slide_??.png")) + sorted(PHOTO_DIR.glob("edu_*_??.jpg")) + sorted(PHOTO_DIR.glob("*_sd_*.png"))
+    slides = sorted(PHOTO_DIR.glob("*_slide_??.png")) + sorted(PHOTO_DIR.glob("edu_*_??.jpg")) + sorted(PHOTO_DIR.glob("*_sd_*.png")) + sorted(PHOTO_DIR.glob("*_sd_*.jpg"))
     if not slides:
         print("❌ Ngga ada slide carousel di resource/photos/")
         print()

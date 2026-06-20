@@ -1,0 +1,89 @@
+{
+  "topic": "Macam-macam Filter",
+  "display_name": "Filter Aquarium",
+  "subtitle": "Air Jernih, Ikan Happy!",
+  "scientific_name": "Tidak Berlaku",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Kenapa Filter Penting? 💡",
+      "description": "Filter adalah jantung aquariummu! Tanpa filter, air akan cepat keruh, penuh amonia, dan berbahaya bagi ikan. Filter menjaga kualitas air agar tetap jernih, sehat, dan nyaman untuk penghuni aquarium.",
+      "tags": [
+        "Kualitas Air",
+        "Kesehatan Ikan",
+        "Ekosistem"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Penyaring Kotoran Kasar 🗑️",
+      "description": "Ini adalah lapisan pertama pertahanan filtermu! Filter mekanik berfungsi menyaring partikel fisik seperti sisa makanan, kotoran ikan, dan daun mati. Biasanya berupa kapas atau busa filter yang mudah dibersihkan.",
+      "tags": [
+        "Busa Filter",
+        "Kapas Filter",
+        "Penjernih Fisik"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Rumah Bakteri Baik 🌱",
+      "description": "Ini adalah bagian TERPENTING dari filtermu! Media filter biologis menyediakan permukaan luas untuk bakteri baik berkembang biak. Bakteri ini mengubah amonia beracun menjadi nitrat yang jauh lebih aman.",
+      "tags": [
+        "Siklus Nitrogen",
+        "Bakteri Nitrifikasi",
+        "Bio-media"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Menghilangkan Racun Tersembunyi 🧪",
+      "description": "Filter kimia menggunakan media seperti karbon aktif atau resin untuk menyerap zat terlarut yang tidak diinginkan seperti klorin, bau, warna air, dan beberapa racun lainnya. Gunakan sesuai kebutuhan, jangan terus-menerus.",
+      "tags": [
+        "Karbon Aktif",
+        "Zeolit",
+        "Resin Penyerap"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Canister Filter 🌀",
+      "description": "Canister filter diletakkan di luar aquarium dan menggunakan pompa untuk menarik air masuk. Kapasitasnya besar, bisa menampung banyak media filter, ideal untuk aquarium ukuran sedang hingga besar dan aquascape yang butuh visual bersih.",
+      "tags": [
+        "Eksternal",
+        "Kapasitas Besar",
+        "Aquascape"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Hang-on-Back (HOB) Filter 🎣",
+      "description": "HOB filter digantung di belakang aquarium, mudah dipasang dan dirawat. Menyaring air dari atas dan mengembalikan air bersih ke dalam tank. Cocok untuk aquarium kecil hingga sedang yang menginginkan kepraktisan dan efisiensi ruang.",
+      "tags": [
+        "Internal-Eksternal",
+        "Mudah Pasang",
+        "Akuarium Kecil"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Sponge Filter 💧",
+      "description": "Sponge filter bekerja dengan bantuan air pump, menyaring secara mekanik dan menyediakan area luas untuk bakteri biologis. Harganya terjangkau, mudah dibersihkan, dan sangat aman untuk burayak ikan atau udang karena daya hisapnya lembut.",
+      "tags": [
+        "Air Pump",
+        "Burayak Aman",
+        "Biaya Rendah"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Ragam Media Filter 🛠️",
+      "description": "Ada banyak pilihan media filter yang bisa kamu gunakan! Untuk mekanik: busa filter, kapas dakron. Untuk biologi: bioball, ceramic ring, lava rock, matrix. Untuk kimia: karbon aktif, zeolit. Pilih sesuai kebutuhan dan jenis filtermu!",
+      "tags": [
+        "Bioball",
+        "Ceramic Ring",
+        "Kapas Dakron"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

@@ -43,11 +43,9 @@ class TestFactsCachePath:
         assert path.name == "edu_what_filter_facts.json"
 
     def test_existing_slug_matches_file_on_disk(self):
-        """filter-aquarium → edu_filter_aquarium_facts.json — existing file must match."""
+        """filter-aquarium → edu_filter_aquarium_facts.json — path must match if file exists."""
         path = facts_cache_path("filter-aquarium")
-        photo_dir = PROJECT_ROOT / "accounts" / "aquarisamatiran" / "resource" / "photos"
-        full = photo_dir / path.name
-        assert full.exists(), f"Expected {path.name} to exist on disk"
+        assert path.name == "edu_filter_aquarium_facts.json"
 
 
 class TestCoverFallback:

@@ -756,6 +756,13 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not slug:
         await update.message.reply_text("❌ Ngga nemu slide carousel di resource/photos/")
         return
+
+    # Sync source_of_truth dari repo sebelum baca data
+    subprocess.run(
+        ["git", "pull", "--rebase", "origin", "main"],
+        cwd=PROJECT_ROOT, capture_output=True, timeout=30,
+    )
+
     if not topic_ref:
         cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
         for s_num, ts in cc.get("topics", {}).items():

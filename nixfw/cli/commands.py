@@ -266,19 +266,44 @@ def cmd_post_carousel(client, args):
     from PIL import Image
     import io
     for p in latest:
-        print(f"  Upload {p.name}...")
         upload_path = p
         # Auto-compress PNG >500KB ke JPEG biar IG gak timeout
-        if p.suffix.lower() == ".png" and p.stat().st_size > 500 * 1024:
-            jpg_path = p.with_suffix(".jpg")
-            if not jpg_path.exists():
-                Image.open(p).convert("RGB").save(jpg_path, "JPEG", quality=82, optimize=True)
-            upload_path = jpg_path
-            print(f"   🗜️  Kompres ke JPEG ({upload_path.stat().st_size // 1024} KB)")
-        url = upload_file(upload_path)
+        if p.suffix.lower() == ".png":
+            if p.stat().st_size > 500 * 1024:
+                jpg_path = p.with_suffix(".jpg")
+                if not jpg_path.exists() or jpg_path.stat().st_size == 0:
+                    if jpg_path.exists() and jpg_path.stat().st_size == 0:
+                        jpg_path.unlink()
+                        print(f"   🗑️  Hapus JPG corrupt: {jpg_path.name}")
+                    Image.open(p).convert("RGB").save(jpg_path, "JPEG", quality=82, optimize=True)
+                upload_path = jpg_path
+                print(f"   🗜️  {p.name} → {upload_path.name} ({upload_path.stat().st_size // 1024} KB)")
+            else:
+                # PNG kecil — upload langsung
+                pass
+        elif p.suffix.lower() in (".jpg", ".jpeg") and p.stat().st_size == 0:
+            png_path = p.with_suffix(".png")
+            if png_path.exists() and png_path.stat().st_size > 0:
+                upload_path = png_path
+                print(f"   ⚠️  {p.name} corrupt — fallback ke {png_path.name}")
+            else:
+                print(f"   ❌ {p.name} corrupt dan gak ada fallback PNG. Coba `/generate {latest_prefix}` ulang.")
+                continue
+
+        cached = _cached_upload_url(latest_prefix, upload_path)
+        if cached:
+            url = cached
+            print(f"  ⏩ {p.name}: cache")
+        else:
+            print(f"  📤 {p.name}...")
+            if upload_path.stat().st_size == 0:
+                print(f"   ❌ File {upload_path.name} kosong — skip. Coba regenerate.")
+                continue
+            url = upload_file(upload_path)
+            _cache_upload_url(latest_prefix, upload_path, url)
+            print(f"   ✅ {url}")
         _save_map(url, str(upload_path))
         urls.append(url)
-        print(f"   ✅ {url}")
 
     # Load facts from cache for curriculum update
     from nixfw.content.providers.facts_generator import facts_cache_path
@@ -329,6 +354,7 @@ def cmd_post_carousel(client, args):
 
 
 _UPLOAD_MAP = Path("resource") / ".uploaded.json"
+_URLS_CACHE = Path("resource") / ".urls_cache.json"
 
 
 def _map_file() -> dict:
@@ -341,6 +367,32 @@ def _save_map(url: str, local_path: str):
     data = _map_file()
     data[url] = str(local_path)
     _UPLOAD_MAP.write_text(json.dumps(data, indent=2))
+
+
+def _read_urls_cache() -> dict:
+    """Read slug-indexed URL cache. Structure: {slug: {local_path: url}}"""
+    if _URLS_CACHE.exists():
+        return json.loads(_URLS_CACHE.read_text(encoding="utf-8"))
+    return {}
+
+
+def _save_urls_cache(data: dict):
+    _URLS_CACHE.parent.mkdir(parents=True, exist_ok=True)
+    _URLS_CACHE.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+def _cached_upload_url(slug: str, local_path: str) -> str | None:
+    """Return cached URL for a (slug, local_path) pair, or None if not cached."""
+    cache = _read_urls_cache()
+    slug_cache = cache.get(slug, {})
+    return slug_cache.get(str(local_path))
+
+
+def _cache_upload_url(slug: str, local_path: str, url: str):
+    """Store a URL in the slug-indexed cache."""
+    cache = _read_urls_cache()
+    cache.setdefault(slug, {})[str(local_path)] = url
+    _save_urls_cache(cache)
 
 
 def cmd_post_reel(client, args):
@@ -1069,96 +1121,100 @@ def cmd_generate_carousel_sd(_client, args):
     topic_tag = f"[{season_tag}{display}]"
 
     _notify_telegram(f"{topic_tag} Proses dimulai untuk generate carousel.")
+    try:
+        # Prompt builder per slide type
+        def _bg_prompt(slide_type: str, fact: dict | None = None) -> str:
+            base = "aquascape aquarium, underwater planted tank, aquatic plant, "
+            if slide_type == "cover":
+                return base + f"beautiful {topic} as main subject, vibrant colors, professional aquarium photography, soft lighting, high detail, photorealistic"
+            elif slide_type == "fact":
+                return base + f"{fact.get('title', topic)}, {fact.get('description', '')[:80] if fact else topic}, detailed macro shot, natural aquascape environment, tranquil underwater scene"
+            else:  # cta
+                return base + "peaceful aquascape with lush greenery, gentle water flow, morning light, serene underwater garden, high quality"
 
-    # Prompt builder per slide type
-    def _bg_prompt(slide_type: str, fact: dict | None = None) -> str:
-        base = "aquascape aquarium, underwater planted tank, aquatic plant, "
-        if slide_type == "cover":
-            return base + f"beautiful {topic} as main subject, vibrant colors, professional aquarium photography, soft lighting, high detail, photorealistic"
-        elif slide_type == "fact":
-            return base + f"{fact.get('title', topic)}, {fact.get('description', '')[:80] if fact else topic}, detailed macro shot, natural aquascape environment, tranquil underwater scene"
-        else:  # cta
-            return base + "peaceful aquascape with lush greenery, gentle water flow, morning light, serene underwater garden, high quality"
+        total_slides = n_facts + 2  # cover + facts + cta
+        slide_idx = 0
 
-    total_slides = n_facts + 2  # cover + facts + cta
-    slide_idx = 0
+        def _notify_progress(label: str, title: str):
+            nonlocal slide_idx
+            slide_idx += 1
+            _notify_telegram(f"{topic_tag} Proses gambar {slide_idx}/{total_slides} — \"{title}\" dimulai...")
 
-    def _notify_progress(label: str, title: str):
-        nonlocal slide_idx
-        slide_idx += 1
-        _notify_telegram(f"{topic_tag} Proses gambar {slide_idx}/{total_slides} — \"{title}\" dimulai...")
+        def _notify_done(label: str, title: str):
+            _notify_telegram(f"{topic_tag} Generate gambar {slide_idx}/{total_slides} — \"{title}\" selesai!")
 
-    def _notify_done(label: str, title: str):
-        _notify_telegram(f"{topic_tag} Generate gambar {slide_idx}/{total_slides} — \"{title}\" selesai!")
-
-    # --- Cover slide ---
-    print(f"\n🖼️ [1/{n_facts+2}] Cover: {display}")
-    _notify_progress("cover", "Cover")
-    raw = _sd_generate(_bg_prompt("cover"))
-    if raw:
-        bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
-        slide = build_cover(facts, None, bg_image=bg)
-        fname = f"{slug}_sd_01_cover.png"
-        slide.save(PHOTO_DIR / fname)
-        saved.append(fname)
-        print(f"   ✅ {fname}")
-        _notify_done("cover", "Cover")
-    else:
-        print(f"   ⚠️  Cover gagal")
-
-    # --- Fact slides ---
-    for i, f in enumerate(facts.get("facts", [])):
-        title = f.get("title", f"Fakta {f['number']}")
-        print(f"\n🖼️ [{i+2}/{n_facts+2}] Fact {f['number']}: {title}")
-        _notify_progress("fact", title)
-        raw = _sd_generate(_bg_prompt("fact", f))
+        # --- Cover slide ---
+        print(f"\n🖼️ [1/{n_facts+2}] Cover: {display}")
+        _notify_progress("cover", "Cover")
+        raw = _sd_generate(_bg_prompt("cover"))
         if raw:
             bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
-            slide = build_fact_slide(f, None, bg_image=bg)
-            fname = f"{slug}_sd_{i+2:02d}_fact_{f['number']}.png"
+            slide = build_cover(facts, None, bg_image=bg)
+            fname = f"{slug}_sd_01_cover.png"
             slide.save(PHOTO_DIR / fname)
             saved.append(fname)
             print(f"   ✅ {fname}")
-            _notify_done("fact", title)
+            _notify_done("cover", "Cover")
         else:
-            print(f"   ⚠️  Fact {f['number']} gagal")
-        if i < n_facts - 1:
-            print("   ⏳ Cooldown 5s before next SD gen...")
-            time.sleep(5)
+            print(f"   ⚠️  Cover gagal")
 
-    # --- CTA slide ---
-    print(f"\n🖼️ [{n_facts+2}/{n_facts+2}] CTA")
-    _notify_progress("cta", "CTA")
-    raw = _sd_generate(_bg_prompt("cta"))
-    if raw:
-        bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
-        slide = build_cta_slide(facts, None, bg_image=bg)
-        fname = f"{slug}_sd_{n_facts+2:02d}_cta.png"
-        slide.save(PHOTO_DIR / fname)
-        saved.append(fname)
-        _notify_done("cta", "CTA")
-        print(f"   ✅ {fname}")
-    else:
-        print(f"   ⚠️  CTA gagal")
+        # --- Fact slides ---
+        for i, f in enumerate(facts.get("facts", [])):
+            title = f.get("title", f"Fakta {f['number']}")
+            print(f"\n🖼️ [{i+2}/{n_facts+2}] Fact {f['number']}: {title}")
+            _notify_progress("fact", title)
+            raw = _sd_generate(_bg_prompt("fact", f))
+            if raw:
+                bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
+                slide = build_fact_slide(f, None, bg_image=bg)
+                fname = f"{slug}_sd_{i+2:02d}_fact_{f['number']}.png"
+                slide.save(PHOTO_DIR / fname)
+                saved.append(fname)
+                print(f"   ✅ {fname}")
+                _notify_done("fact", title)
+            else:
+                print(f"   ⚠️  Fact {f['number']} gagal")
+            if i < n_facts - 1:
+                print("   ⏳ Cooldown 5s before next SD gen...")
+                time.sleep(5)
 
-    _notify_telegram(f"{topic_tag} Proses generate carousel selesai! 🎉")
-    _notify_telegram(f"Gunakan `/post` di Telegram buat review & posting.")
+        # --- CTA slide ---
+        print(f"\n🖼️ [{n_facts+2}/{n_facts+2}] CTA")
+        _notify_progress("cta", "CTA")
+        raw = _sd_generate(_bg_prompt("cta"))
+        if raw:
+            bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
+            slide = build_cta_slide(facts, None, bg_image=bg)
+            fname = f"{slug}_sd_{n_facts+2:02d}_cta.png"
+            slide.save(PHOTO_DIR / fname)
+            saved.append(fname)
+            _notify_done("cta", "CTA")
+            print(f"   ✅ {fname}")
+        else:
+            print(f"   ⚠️  CTA gagal")
 
-    # Sync facts ke curriculum_content.json
-    _update_curriculum_content(slug, facts)
-    print(f"📝 curriculum_content.json diupdate untuk {slug}")
+        _notify_telegram(f"{topic_tag} Proses generate carousel selesai! 🎉")
+        _notify_telegram(f"Gunakan `/post` di Telegram buat review & posting.")
 
-    print(f"\n{'='*40}")
-    if saved:
-        print(f"✅ {len(saved)} slide saved di {PHOTO_DIR}:")
-        for f in saved:
-            print(f"   - {f}")
-        print()
-        print("📋 Upload via:")
-        print(f"   python main.py post-carousel --upload-only --slug {slug}")
-    else:
-        print("❌ Nggak ada slide yang berhasil digenerate")
-    print(f"{'='*40}")
+        # Sync facts ke curriculum_content.json
+        _update_curriculum_content(slug, facts)
+        print(f"📝 curriculum_content.json diupdate untuk {slug}")
+
+        print(f"\n{'='*40}")
+        if saved:
+            print(f"✅ {len(saved)} slide saved di {PHOTO_DIR}:")
+            for f in saved:
+                print(f"   - {f}")
+            print()
+            print("📋 Upload via:")
+            print(f"   python main.py post-carousel --upload-only --slug {slug}")
+        else:
+            print("❌ Nggak ada slide yang berhasil digenerate")
+        print(f"{'='*40}")
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        _notify_telegram(f"❌ {topic_tag} Generate carousel gagal — cek log GH Actions")
 
 
 def cmd_compress_slides(_client, args):

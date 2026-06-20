@@ -25,6 +25,14 @@ from nixfw.config import (
 )
 from nixfw.slot_manager import SlotManager, DAYS_ID
 from nixfw.content.providers.facts_generator import facts_cache_path, generate_facts
+from nixfw.curriculum.manager import (
+    telegram_add_category,
+    telegram_add_subcategory,
+    telegram_add_topic,
+    telegram_edit_topic,
+    telegram_delete_topic,
+    telegram_move_topic,
+)
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -174,13 +182,23 @@ HELP_TEXT = (
     "/status — cek progress generate terakhir\n"
     "/post `[C1#07 atau slug]` `[hari jam]` — post carousel (auto-detect kalo tanpa arg)\n"
     "/confirm — lanjutin posting setelah preview\n"
-    "/editcaption `<instruksi>` — ganti caption\n"
+    "/editcaption `<instruksi>` — edit caption pending post\n"
+    "/editcaption `C1#XX <instruksi>` — edit caption topik tertentu\n"
+    "/peekcaption `C1#XX` — liat caption topik\n"
     "/regenerate — generate ulang slide\n"
     "/cancel — batalin posting\n"
     "/myid — liat chat ID kamu\n"
     "/setslot — atur jadwal slot (`add` wizard, `remove`, `sync`)\n"
     "/schedule — liat jadwal postingan\n"
-    "/clean `<slug atau C1#XX>` — hapus slide yang gak jadi dipost\n\n"
+    "/delete-schedule `C1#XX` — hapus jadwal dari antrian\n"
+    "/clean `<slug atau C1#XX>` — hapus slide yang gak jadi dipost\n"
+    "/addcategory `<nama>` — tambah category baru\n"
+    "/addsubcategory `<Cid id label>` — tambah subcategory [contoh: `/addsubcategory C2 1 Nama Sub`]\n"
+    "/addtopic `<Cid subcat judul>` — tambah topic baru [contoh: `/addtopic C2 1 Judul Topik`]\n"
+    "/showtopic `<ref>` — liat semua field topic [contoh: `/showtopic C1#07`]\n"
+    "/edittopic `<ref>` `[--field value]...` — edit topic [contoh: `/edittopic C1#07 --status live`]\n"
+    "/deletetopic `<ref>` — hapus topic (topics renumbered otomatis)\n"
+    "/movetopic `<ref>` `<target_cat>` `<target_sc>` — pindah topic [contoh: `/movetopic C1#07 C2 2`]\n\n"
     "**🧙 Wizard Interaktif:**\n"
     "Ketik `/setslot add` — bot tanya nama, pilih hari via tombol, jam → auto-sync cron-job.org!\n\n"
     "**🚀 Cara pake Curriculum:**\n"
@@ -754,7 +772,17 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Auto-detect latest slides (filter by topic_ref if given)
     slug, slides = _latest_slides(topic_ref)
     if not slug:
-        await update.message.reply_text("❌ Ngga nemu slide carousel di resource/photos/")
+        if topic_ref:
+            display_name, _, _ = _resolve_topic(topic_ref)
+            if display_name:
+                await update.message.reply_text(
+                    f"❌ Gak nemu slide buat {topic_ref}\n"
+                    f"Coba `/generate {topic_ref}` dulu buat bikin slide-nya~"
+                )
+            else:
+                await update.message.reply_text(f"❌ Gak kenal `{topic_ref}` dan gak ada slide dengan nama itu")
+        else:
+            await update.message.reply_text("❌ Gak ada slide carousel di resource/photos/")
         return
 
     # Sync source_of_truth dari repo sebelum baca data
@@ -859,29 +887,123 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
 
 
+async def peekcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Lihat caption topik tanpa trigger post flow."""
+    args = context.args
+    if not args:
+        await update.message.reply_text("Contoh: `/peekcaption C1#07` atau `/peekcaption filter-aquarium`")
+        return
+    topic_input = " ".join(args)
+    display_name, slug, topic_ref = _resolve_topic(topic_input)
+    if not topic_ref:
+        await update.message.reply_text(f"❌ `{topic_input}` gak dikenal sebagai topik")
+        return
+    label = topic_ref
+    caption = _get_caption_from_curriculum(slug)
+    if caption:
+        await update.message.reply_text(f"📝 **Caption buat {label}:**\n\n{caption[:3500]}")
+    else:
+        await update.message.reply_text(f"📝 Belum ada caption buat {label}. Coba `/generate {label}` dulu~")
+
+
+async def showtopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Tampilkan semua field topic dari curriculum."""
+    args = context.args
+    if not args:
+        await update.message.reply_text("Contoh: `/showtopic C1#07` atau `/showtopic filter-aquarium`")
+        return
+    topic_input = " ".join(args)
+    display_name, slug, topic_ref = _resolve_topic(topic_input)
+    if not topic_ref:
+        await update.message.reply_text(f"❌ `{topic_input}` gak dikenal sebagai topik")
+        return
+    topics = _load_curriculum()
+    topic = topics.get(topic_ref)
+    if not topic:
+        await update.message.reply_text(f"❌ {topic_ref} gak ditemukan di curriculum")
+        return
+    lines = [f"**📋 {topic_ref}:**"]
+    for key in ("title", "slug", "status", "subcategory", "display_name", "subtitle", "scheduled_time", "permalink", "result_id", "keywords"):
+        val = topic.get(key)
+        if val is not None:
+            val_str = ", ".join(val) if isinstance(val, list) else str(val)
+            lines.append(f"  `{key}`: {val_str}")
+    if topic.get("slides"):
+        lines.append(f"  `slides`: {len(topic['slides'])} file(s)")
+    await update.message.reply_text("\n".join(lines) or "ℹ️ Topic kosong")
+
+
 async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    pending = _pending_posts.get(user_id)
-    if not pending:
-        await update.message.reply_text("Ngga ada pending post. Coba `/post` dulu~")
+    args = context.args or []
+    if not args:
+        await update.message.reply_text(
+            "Gunakan:\n"
+            "`/editcaption <instruksi>` — edit caption pending post\n"
+            "`/editcaption C1#XX <instruksi>` — edit caption topik tertentu"
+        )
         return
-    instruction = " ".join(context.args) if context.args else ""
-    if not instruction:
-        await update.message.reply_text("Gunakan: `/editcaption <instruksi>`\nContoh: `/editcaption bikin lebih santai dan pake lebih banyak emoji`")
-        return
-    await update.message.reply_text(f"💬 Edit caption dengan instruksi: \"{instruction}\"...")
+
+    is_pending_mode = False
+    pending = None
+
+    display_name, slug, topic_ref = _resolve_topic(args[0])
+
+    if not topic_ref:
+        user_id = update.effective_user.id
+        pending = _pending_posts.get(user_id)
+        if not pending:
+            await update.message.reply_text(
+                "Ngga ada pending post. Coba:\n"
+                "`/post` dulu buat pending, atau\n"
+                "`/editcaption C1#XX <instruksi>` langsung ke topik"
+            )
+            return
+        is_pending_mode = True
+        slug = pending["slug"]
+        topic_ref = pending.get("topic_ref", slug.replace("_", "-"))
+
+    if is_pending_mode:
+        instruction = " ".join(args)
+    else:
+        if len(args) < 2:
+            await update.message.reply_text(f"Instruksinya mana sayang? Contoh: `/editcaption {topic_ref} bikin lebih santai`")
+            return
+        instruction = " ".join(args[1:])
+
+    await update.message.reply_text(f"💬 Edit caption buat {topic_ref}: \"{instruction}\"...")
+
+    existing_caption = _get_caption_from_curriculum(slug)
+    facts_path = facts_cache_path(slug)
+    facts_json = None
+    if facts_path.exists():
+        try:
+            facts_json = json.loads(facts_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
     caption_system = (
         "Kamu adalah asisten pembuat konten Instagram untuk akun aquascape @aquarisamatiran. "
         "Gaya bicara: santai, edukatif, engaging, akrab. Pake bahasa Indonesia sehari-hari, "
         "jangan genit/flirty. Tujuan: ngajarin follower aquarium dari nol dengan cara yang asyik."
     )
-    prompt = f"Instruksi: {instruction}\n\nCaption sebelumnya:\n{pending['caption'][:1500]}"
-    messages = [{"role": "user", "parts": [{"text": prompt}]}]
+
+    context_lines = [f"Instruksi: {instruction}"]
+    if existing_caption:
+        context_lines.append(f"\nCaption sekarang:\n{existing_caption[:1500]}")
+    elif facts_json and "facts" in facts_json:
+        context_lines.append("\nFakta dalam konten:")
+        for f in facts_json["facts"]:
+            context_lines.append(f"- {f.get('number','')}. {f.get('title','')}: {f.get('description','')[:100]}")
+    else:
+        context_lines.append("\n(Tidak ada caption atau fakta sebelumnya)")
+
+    messages = [{"role": "user", "parts": [{"text": "\n".join(context_lines)]}}]
     try:
         new_caption = await _call_gemini(messages, system=caption_system)
-        pending["caption"] = new_caption
-        _save_caption_to_curriculum(pending["slug"], new_caption)
-        await update.message.reply_text(f"✅ Caption baru:\n{new_caption[:1000]}\n\nKetik `/confirm` buat lanjut, atau `/editcaption` lagi~")
+        _save_caption_to_curriculum(slug, new_caption)
+        if is_pending_mode:
+            pending["caption"] = new_caption
+        await update.message.reply_text(f"✅ Caption buat {topic_ref} diupdate:\n\n{new_caption[:3500]}")
     except Exception as e:
         await update.message.reply_text(f"❌ Gagal edit caption: {e}")
 
@@ -974,9 +1096,9 @@ async def confirm_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         status = "✅" if result.returncode == 0 else "❌"
         await update.message.reply_text(f"{status} Result:\n```\n{out}\n```")
     except subprocess.TimeoutExpired:
-        await update.message.reply_text("⏳ Kelamaan (>5 menit), cek manual aja sayang~")
+        await update.message.reply_text("⏳ Kelamaan (>5 menit). Kalo gagal, tinggal `/post` lagi — slide yang udah keupload bakal di-skip dari cache~")
     except Exception as e:
-        await update.message.reply_text(f"❌ Error: {e}")
+        await update.message.reply_text(f"❌ Error: {e}\n\nTinggal `/post {slug}` lagi — slide yang udah keupload bakal di-skip dari cache")
 
 
 async def cancel_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1106,6 +1228,94 @@ def _confirm_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
+async def addcategory_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Tambah category baru via Telegram."""
+    args = context.args or []
+    if not args:
+        await update.message.reply_text("Contoh: `/addcategory Nama Category`")
+        return
+    title = " ".join(args)
+    result = telegram_add_category(title)
+    await update.message.reply_text(result)
+
+
+async def addsubcategory_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Tambah subcategory ke category tertentu."""
+    args = context.args or []
+    if len(args) < 2:
+        await update.message.reply_text("Contoh: `/addsubcategory C2 1 Nama Subkategori`")
+        return
+    cat_id = args[0].lstrip("C")
+    number = args[1]
+    label = " ".join(args[2:]) if len(args) > 2 else ""
+    result = telegram_add_subcategory(cat_id, number, label)
+    await update.message.reply_text(result)
+
+
+async def addtopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Tambah topic ke category/subcategory."""
+    args = context.args or []
+    if len(args) < 2:
+        await update.message.reply_text("Contoh: `/addtopic C2 1 Judul Topik Disini`")
+        return
+    cat_id = args[0].lstrip("C")
+    subcat = args[1]
+    title = " ".join(args[2:]) if len(args) > 2 else ""
+    result = telegram_add_topic(cat_id, subcat, title)
+    await update.message.reply_text(result)
+
+
+async def edittopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Edit topic fields via Telegram. Format: /edittopic C1#07 --title Nama --status live"""
+    args = context.args or []
+    if len(args) < 1:
+        await update.message.reply_text("Contoh: `/edittopic C1#07 --status live`\nField: title, slug, status, subcategory, display_name, subtitle, keywords")
+        return
+    topic_ref = args[0]
+    if not re.match(r'[CS]\d+#\d+', topic_ref):
+        await update.message.reply_text(f"❌ Format salah. Contoh: `/edittopic C1#07 --status live`")
+        return
+    fields = {}
+    i = 1
+    while i < len(args):
+        if args[i].startswith("--"):
+            field_name = args[i][2:]
+            i += 1
+            vals = []
+            while i < len(args) and not args[i].startswith("--"):
+                vals.append(args[i])
+                i += 1
+            fields[field_name] = " ".join(vals)
+        else:
+            i += 1
+    result = telegram_edit_topic(topic_ref, **fields)
+    await update.message.reply_text(result)
+
+
+async def deletetopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Hapus topic via Telegram."""
+    args = context.args or []
+    if not args:
+        await update.message.reply_text("Contoh: `/deletetopic C1#07`")
+        return
+    topic_ref = args[0]
+    result = telegram_delete_topic(topic_ref)
+    await update.message.reply_text(result)
+
+
+async def movetopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Pindah topic ke category/subcategory lain."""
+    args = context.args or []
+    if len(args) < 3:
+        await update.message.reply_text("Contoh: `/movetopic C1#07 C2 2`")
+        return
+    topic_ref = args[0]
+    target_cat = args[1].lstrip("C")
+    target_sc = args[2]
+    result = telegram_move_topic(topic_ref, target_cat, target_sc)
+    await update.message.reply_text(result)
+
+
 async def schedule_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sched = _read_schedule()
     if sched:
@@ -1113,6 +1323,46 @@ async def schedule_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(reply)
     else:
         await update.message.reply_text("❌ `schedule.json` gak bisa dibaca atau kosong.")
+
+
+async def delete_schedule_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Hapus entry dari schedule.json."""
+    args = context.args
+    if not args:
+        await update.message.reply_text("Contoh: `/delete-schedule C1#07`")
+        return
+
+    topic_input = args[0]
+    _, _, topic_ref = _resolve_topic(topic_input)
+    if not topic_ref:
+        await update.message.reply_text(f"❌ Topik `{topic_input}` gak dikenal")
+        return
+
+    try:
+        schedule = json.loads(SCHEDULE_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        await update.message.reply_text("❌ Gagal baca schedule.json")
+        return
+
+    found = None
+    for i, entry in enumerate(schedule):
+        ref = entry.get("source_ref") or entry.get("curriculum", "")
+        if ref == topic_ref:
+            found = i
+            break
+
+    if found is None:
+        await update.message.reply_text(f"❌ Gak ada jadwal buat {topic_ref}")
+        return
+
+    entry = schedule[found]
+    if entry.get("done"):
+        await update.message.reply_text(f"❌ {topic_ref} udah live, gak bisa dihapus jadwalnya")
+        return
+
+    del schedule[found]
+    SCHEDULE_PATH.write_text(json.dumps(schedule, indent=2, ensure_ascii=False), encoding="utf-8")
+    await update.message.reply_text(f"✅ Jadwal {topic_ref} dihapus dari antrian")
 
 
 async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1532,11 +1782,21 @@ def main():
     app.add_handler(CommandHandler("cancel", cancel_cmd))
     app.add_handler(CommandHandler("clean", clean_cmd))
     app.add_handler(CommandHandler("editcaption", editcaption_cmd))
+    app.add_handler(CommandHandler("peekcaption", peekcaption_cmd))
     app.add_handler(CommandHandler("regenerate", regenerate_cmd))
     app.add_handler(CommandHandler("myid", myid_cmd))
     app.add_handler(CommandHandler("schedule", schedule_cmd))
+    app.add_handler(CommandHandler("delete_schedule", delete_schedule_cmd))
+    app.add_handler(CommandHandler("deleteschedule", delete_schedule_cmd))
     app.add_handler(CommandHandler("setslot", setslot_cmd))
     app.add_handler(CommandHandler("sync", sync_cmd))
+    app.add_handler(CommandHandler("addcategory", addcategory_cmd))
+    app.add_handler(CommandHandler("addsubcategory", addsubcategory_cmd))
+    app.add_handler(CommandHandler("addtopic", addtopic_cmd))
+    app.add_handler(CommandHandler("showtopic", showtopic_cmd))
+    app.add_handler(CommandHandler("edittopic", edittopic_cmd))
+    app.add_handler(CommandHandler("deletetopic", deletetopic_cmd))
+    app.add_handler(CommandHandler("movetopic", movetopic_cmd))
     app.add_handler(CallbackQueryHandler(wizard_callback, pattern="^wiz:"))
     app.add_handler(CallbackQueryHandler(fact_callback, pattern="^fact:"))
     app.add_handler(CallbackQueryHandler(cancel_wf_callback, pattern="^cancel:wf:"))

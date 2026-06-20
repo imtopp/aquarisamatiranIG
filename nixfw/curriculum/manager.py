@@ -565,6 +565,122 @@ def _sync_bio_html(data):
         print("  ⚠️  Could not find card section in bio/index.html — manual update needed")
 
 
+# ──── Telegram-callable helpers ────
+
+
+def telegram_add_category(title: str, subtitle: str = "") -> str:
+    """Add a category. Returns result message."""
+    if not title:
+        return "❌ --title wajib diisi"
+    data = load()
+    categories = data.setdefault("categories", {})
+    existing_ids = [int(k) for k in categories]
+    new_id = str(max(existing_ids) + 1) if existing_ids else "1"
+    categories[new_id] = {
+        "title": title,
+        "subtitle": subtitle,
+        "subcategories": {"1": {"title": "New Subcategory 1"}},
+    }
+    save(data)
+    return f"✅ Category {new_id}: {title} ditambahkan"
+
+
+def telegram_add_subcategory(cat_id: str, number: str, label: str) -> str:
+    """Add a subcategory to a category. Returns result message."""
+    data = load()
+    if cat_id not in data.get("categories", {}):
+        return f"❌ Category {cat_id} tidak ditemukan"
+    data["categories"][cat_id].setdefault("subcategories", {})
+    data["categories"][cat_id]["subcategories"][str(int(number))] = {"title": label}
+    save(data)
+    return f"✅ Subcategory {number} ditambahkan ke Category {cat_id}"
+
+
+def telegram_add_topic(cat_id: str, subcat: str, title: str, slug: str | None = None, keywords: list | None = None) -> str:
+    """Add a topic. Returns topic_ref string on success, error on failure."""
+    if not cat_id:
+        return "❌ --category wajib diisi"
+    if not title:
+        return "❌ --title wajib diisi"
+    data = load()
+    new_key = _next_topic_num(data, cat_id)
+    slug = slug or title.lower().replace(" ", "-").replace(":", "").replace("?", "")[:30]
+    topic = {
+        "slug": slug,
+        "title": title,
+        "subcategory": str(subcat),
+        "status": "planned",
+        "keywords": keywords or [],
+    }
+    _get_category_topics(data, cat_id)[new_key] = topic
+    save(data)
+    ref = f"C{cat_id}#{new_key}"
+    return f"✅ {ref}: {title} ditambahkan ke Category {cat_id}"
+
+
+def telegram_edit_topic(topic_ref: str, **fields) -> str:
+    """Edit topic fields. Supported: title, slug, status, subcategory, display_name, subtitle, keywords, scheduled_time."""
+    m = re.match(r'[CS](\d+)#(\d+)', topic_ref)
+    if not m:
+        return f"❌ Format topic_ref salah: {topic_ref}"
+    cat_id, num = m.group(1), m.group(2).zfill(2)
+    data = load()
+    st = _get_category_topics(data, cat_id)
+    if num not in st:
+        return f"❌ {topic_ref} tidak ditemukan"
+    topic = st[num]
+    for field in ("title", "slug", "status", "display_name", "subtitle", "scheduled_time"):
+        if field in fields and fields[field] is not None:
+            topic[field] = fields[field]
+    if "subcategory" in fields and fields["subcategory"] is not None:
+        topic["subcategory"] = str(fields["subcategory"])
+    if "keywords" in fields and fields["keywords"] is not None:
+        topic["keywords"] = fields["keywords"]
+    save(data)
+    return f"✅ {topic_ref} diupdate"
+
+
+def telegram_delete_topic(topic_ref: str) -> str:
+    """Delete a topic and renumber. Returns result message."""
+    m = re.match(r'[CS](\d+)#(\d+)', topic_ref)
+    if not m:
+        return f"❌ Format topic_ref salah: {topic_ref}"
+    cat_id, num = m.group(1), m.group(2).zfill(2)
+    data = load()
+    st = _get_category_topics(data, cat_id)
+    if num not in st:
+        return f"❌ {topic_ref} tidak ditemukan"
+    title = st[num].get("title", "")
+    del st[num]
+    _renumber_topics(data)
+    save(data)
+    return f"✅ {topic_ref} ({title}) dihapus (topics renumbered)"
+
+
+def telegram_move_topic(topic_ref: str, target_cat: str, target_sc: str) -> str:
+    """Move a topic to another category/subcategory. Returns result message."""
+    m = re.match(r'[CS](\d+)#(\d+)', topic_ref)
+    if not m:
+        return f"❌ Format topic_ref salah: {topic_ref}"
+    src_cat, num = m.group(1), m.group(2).zfill(2)
+    data = load()
+    if target_cat not in data.get("categories", {}):
+        return f"❌ Category {target_cat} tidak ditemukan"
+    src_topics = _get_category_topics(data, src_cat)
+    if num not in src_topics:
+        return f"❌ {topic_ref} tidak ditemukan"
+    topic = src_topics.pop(num)
+    topic["subcategory"] = str(target_sc)
+    # Renumber source
+    data = _renumber_topics(data)
+    # Add to target
+    target_topics = _get_category_topics(data, target_cat)
+    new_key = _next_topic_num(data, target_cat)
+    target_topics[new_key] = topic
+    save(data)
+    return f"✅ {topic_ref} dipindah ke C{target_cat}#{new_key}"
+
+
 # ──── arg helpers ────
 
 

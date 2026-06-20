@@ -50,7 +50,7 @@ def build_cover(facts: dict, subject_img: Image.Image | None, bg_image: Image.Im
         ct_y += 50
 
     # Display name (large title)
-    display = facts.get("display_name", facts.get("topic", ""))
+    display = facts.get("display_name") or facts.get("topic", "")
     lines = wrap_text(display, font_title, W - 80, draw)
     ly = ct_y + 10
     for line in lines:
@@ -61,7 +61,7 @@ def build_cover(facts: dict, subject_img: Image.Image | None, bg_image: Image.Im
 
     # Scientific name
     scientific = facts.get("scientific_name", "")
-    if scientific:
+    if scientific and scientific not in ("N/A", "None", ""):
         bbox = draw.textbbox((0, 0), scientific, font=font_subtitle)
         sw = bbox[2] - bbox[0]
         draw.text(((W - sw) // 2, ly + 10), scientific, fill=text_sub + (255,), font=font_subtitle)

@@ -36,9 +36,10 @@ def _build_json_schema(niche: config.NicheProfile, ct: config.ContentType, num_f
     return '\n'.join(schema_parts)
 
 
-def facts_cache_path(topic_name: str) -> Path:
-    slug = re.sub(r'[^\w\-]', '', topic_name.lower().replace(" ", "_").replace("-", "_"))
-    return config.PHOTO_DIR / f"edu_{slug[:20]}_facts.json"
+def facts_cache_path(slug: str) -> Path:
+    key = slug.lower().replace("-", "_").replace(" ", "_")
+    key = re.sub(r'[^\w_]', '', key)[:20]
+    return config.PHOTO_DIR / f"edu_{key}_facts.json"
 
 
 def _gather_keys() -> list[str]:
@@ -53,7 +54,7 @@ def _gather_keys() -> list[str]:
     return keys
 
 
-def generate_facts(topic: str, num_facts: int = 4) -> dict:
+def generate_facts(topic: str, num_facts: int = 4, slug: str | None = None) -> dict:
     keys = _gather_keys()
     if not keys:
         raise ValueError("GEMINI_API_KEY ngga ditemukan di .env")
@@ -61,7 +62,7 @@ def generate_facts(topic: str, num_facts: int = 4) -> dict:
     niche = config.current_niche
     ct = config.current_content_type
 
-    cache_path = facts_cache_path(topic)
+    cache_path = facts_cache_path(slug or topic)
 
     if cache_path.exists():
         print(f"📦 Facts cache ditemukan: {cache_path.name}")
@@ -114,6 +115,8 @@ def generate_facts(topic: str, num_facts: int = 4) -> dict:
                         raise ValueError(f"Field '{field}' ngga ada di response Gemini")
                 if not isinstance(data["facts"], list) or len(data["facts"]) == 0:
                     raise ValueError("Facts harus list minimal 1")
+                if not data.get("display_name", "").strip():
+                    raise ValueError("Field 'display_name' kosong dari Gemini")
 
                 data.setdefault("scientific_name", topic if ct.has_scientific_name or niche.has_scientific_name else "")
                 data.setdefault("subtitle", "")

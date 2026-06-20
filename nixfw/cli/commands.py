@@ -282,8 +282,7 @@ def cmd_post_carousel(client, args):
 
     # Load facts from cache for curriculum update
     from nixfw.content.providers.facts_generator import facts_cache_path
-    topic_title = _find_topic_title_by_slug(latest_prefix)
-    _facts_path = facts_cache_path(topic_title or latest_prefix)
+    _facts_path = facts_cache_path(latest_prefix)
     _facts_for_cc = None
     if _facts_path.exists():
         try:
@@ -1027,14 +1026,14 @@ def cmd_generate_carousel_sd(_client, args):
 
     # Force regenerate facts? Hapus cache sebelum generate
     if parsed.force:
-        cache_path = facts_cache_path(topic_name)
+        cache_path = facts_cache_path(slug)
         if cache_path.exists():
             cache_path.unlink()
             print(f"   🗑️  Hapus cache facts: {cache_path.name}")
 
     print(f"📝 Generate facts untuk \"{topic_name}\"...")
     try:
-        facts = generate_facts(topic_name, parsed.num_facts)
+        facts = generate_facts(topic_name, parsed.num_facts, slug=slug)
     except Exception as e:
         print(f"❌ Gagal generate facts: {e}")
         return
@@ -1253,13 +1252,13 @@ def cmd_generate_carousel(_client, args):
         print(f"✅ Loaded facts dari {parsed.facts}")
     else:
         if parsed.force:
-            cache_path = facts_cache_path(topic)
+            cache_path = facts_cache_path(slug)
             if cache_path.exists():
                 cache_path.unlink()
                 print(f"   🗑️  Hapus cache facts: {cache_path.name}")
         print(f"📝 Generate facts untuk \"{topic}\"...")
         try:
-            facts = generate_facts(topic, parsed.num_facts)
+            facts = generate_facts(topic, parsed.num_facts, slug=slug)
         except Exception as e:
             print(f"❌ Gagal generate facts: {e}")
             return
@@ -1432,10 +1431,12 @@ def _update_curriculum_content(slug: str, facts: dict | None = None,
 
     topic = all_topics[matched_sid][matched_num]
     if facts:
-        topic["display_name"] = facts.get("display_name", topic.get("display_name", ""))
+        dn = facts.get("display_name", "")
+        topic["display_name"] = dn if dn else topic.get("display_name", "")
         topic["subtitle"] = facts.get("subtitle", "")
-        topic["scientific_name"] = facts.get("scientific_name", "")
-        slides = [{"type": "cover", "title": facts.get("display_name", ""),
+        sn = facts.get("scientific_name", "")
+        topic["scientific_name"] = sn if sn and sn not in ("N/A", "None") else topic.get("scientific_name", "")
+        slides = [{"type": "cover", "title": topic["display_name"],
                    "subtitle": facts.get("subtitle", "")}]
         for f in facts.get("facts", []):
             slides.append({

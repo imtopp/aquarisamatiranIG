@@ -432,10 +432,10 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if display_name and slug:
         await update.message.reply_text(f"📋 Bikin fakta untuk \"{display_name}\" ({num_facts} fakta)...")
         try:
-            facts_path = facts_cache_path(display_name)
+            facts_path = facts_cache_path(slug)
             if facts_path.exists():
                 facts_path.unlink()
-            facts = await asyncio.to_thread(generate_facts, display_name, int(num_facts))
+            facts = await asyncio.to_thread(generate_facts, display_name, int(num_facts), slug=slug)
             preview = _format_facts_preview(facts)
             await update.message.reply_text(
                 f"📋 **Fakta untuk \"{display_name}\":**\n\n{preview}\n\nSetuju sama faktanya?",
@@ -813,7 +813,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"💡 Caption udah ada, pake yang lama~")
         caption = existing_caption
     else:
-        facts_path = facts_cache_path(topic_display)
+        facts_path = facts_cache_path(slug)
         if facts_path.exists():
             try:
                 facts_json = json.loads(facts_path.read_text(encoding="utf-8"))
@@ -921,10 +921,10 @@ async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if force and topic_ref:
         await update.message.reply_text(f"📋 Bikin fakta baru untuk \"{topic_display}\"...")
         try:
-            facts_path = facts_cache_path(topic_display)
+            facts_path = facts_cache_path(slug)
             if facts_path.exists():
                 facts_path.unlink()
-            facts = await asyncio.to_thread(generate_facts, topic_display, 8)
+            facts = await asyncio.to_thread(generate_facts, topic_display, 8, slug=slug)
             preview = _format_facts_preview(facts)
             await update.message.reply_text(
                 f"📋 **Fakta baru untuk \"{topic_display}\":**\n\n{preview}\n\nSetuju sama faktanya?",
@@ -1212,10 +1212,10 @@ async def fact_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "fact:retry":
         await query.edit_message_text("🔄 Bikin ulang fakta...")
         try:
-            facts_path = facts_cache_path(pending["topic_display"])
+            facts_path = facts_cache_path(pending["slug"])
             if facts_path.exists():
                 facts_path.unlink()
-            new_facts = await asyncio.to_thread(generate_facts, pending["topic_display"], pending["num_facts"])
+            new_facts = await asyncio.to_thread(generate_facts, pending["topic_display"], pending["num_facts"], slug=pending["slug"])
             pending["facts_data"] = new_facts
             preview = _format_facts_preview(new_facts)
             await query.edit_message_text(
@@ -1230,7 +1230,7 @@ async def fact_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("💾 Nyimpen fakta & trigger generate slide...")
         try:
             facts_data = pending["facts_data"]
-            facts_path = facts_cache_path(pending["topic_display"])
+            facts_path = facts_cache_path(pending["slug"])
             facts_path.write_text(json.dumps(facts_data, indent=2, ensure_ascii=False), encoding="utf-8")
 
             subprocess.run(["git", "add", str(facts_path)], cwd=PROJECT_ROOT, capture_output=True, timeout=10)

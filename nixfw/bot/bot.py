@@ -997,7 +997,7 @@ async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         context_lines.append("\n(Tidak ada caption atau fakta sebelumnya)")
 
-    messages = [{"role": "user", "parts": [{"text": "\n".join(context_lines)]}}]
+    messages = [{"role": "user", "parts": [{"text": "\n".join(context_lines)}]}]
     try:
         new_caption = await _call_gemini(messages, system=caption_system)
         _save_caption_to_curriculum(slug, new_caption)

@@ -819,10 +819,17 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ IG carousel maksimal 10 slide, ini ada {len(slides)} (cover + fakta + CTA). Generate ulang pake lebih dikit fakta ya~")
         return
 
-    # Determine schedule time
+    # Determine schedule time — skip slot yang udah diambil
     if not schedule_time:
-        # Map day to nearest slot
-        nearest = SLOT_MANAGER.nearest_slot()
+        occupied = set()
+        try:
+            existing = json.loads(SCHEDULE_PATH.read_text(encoding="utf-8"))
+            for e in existing:
+                if e.get("done") is False and e.get("time"):
+                    occupied.add(e["time"])
+        except Exception:
+            pass
+        nearest = SLOT_MANAGER.nearest_slot(occupied=occupied)
         dt = datetime.datetime.strptime(nearest, "%Y-%m-%d %H:%M")
         day_name = DAYS_ID[dt.weekday()]
         time_str = dt.strftime("%H:%M")

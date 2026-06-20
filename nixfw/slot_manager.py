@@ -37,9 +37,10 @@ class SlotManager:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.path.write_text(json.dumps({"slots": self.slots}, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    def nearest_slot(self, now: datetime.datetime | None = None) -> str:
-        """Return nearest upcoming slot as 'YYYY-MM-DD HH:MM'."""
+    def nearest_slot(self, now: datetime.datetime | None = None, occupied: set | None = None) -> str:
+        """Return nearest upcoming slot as 'YYYY-MM-DD HH:MM', skipping occupied times."""
         now = now or datetime.datetime.now()
+        occupied = occupied or set()
         wday = now.weekday()
         hour = now.hour
         minute = now.minute
@@ -56,6 +57,9 @@ class SlotManager:
                     days_ahead += 7
                 target = now + datetime.timedelta(days=days_ahead)
                 target = target.replace(hour=h, minute=m, second=0, microsecond=0)
+                ts = target.strftime("%Y-%m-%d %H:%M")
+                if ts in occupied:
+                    continue
                 if best_dt is None or target < best_dt:
                     best_dt = target
                     best_time = slot["time"]

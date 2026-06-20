@@ -800,15 +800,19 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     break
             if topic_ref:
                 break
-    # Cek kalo udah live
+    # Cek kalo udah live atau scheduled
     if topic_ref:
         cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
         parts = topic_ref.lstrip("CS").split("#")
         if len(parts) == 2:
             s_num, t_num = parts
             t = cc.get("topics", {}).get(s_num, {}).get(t_num, {})
-            if t.get("status") == "live":
+            st = t.get("status")
+            if st == "live":
                 await update.message.reply_text(f"❌ `{topic_ref}` udah live, gak bisa dipost lagi~")
+                return
+            if st == "scheduled":
+                await update.message.reply_text(f"❌ `{topic_ref}` udah terjadwal, gak perlu dipost ulang~")
                 return
 
     if len(slides) > 10:

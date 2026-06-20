@@ -294,19 +294,29 @@ def cmd_post_carousel(client, args):
             upload_path = jpg_path
             print(f"   🗜️  {p.name} → {upload_path.name} ({upload_path.stat().st_size // 1024} KB)")
 
-        # JPG corrupt (0 bytes) → regenerate from PNG
-        elif p.suffix.lower() in (".jpg", ".jpeg") and p.stat().st_size == 0:
-            png_path = p.with_suffix(".png")
-            if png_path.exists() and png_path.stat().st_size > 0:
-                try:
-                    Image.open(png_path).convert("RGB").save(p, "JPEG", quality=82, optimize=True)
-                    print(f"   ♻️  {p.name} corrupt — regenerate dari {png_path.name}")
-                except Exception as e:
-                    print(f"   ❌ {p.name} gagal regenerate dari PNG: {e}")
+        # JPG corrupt (invalid / 0 bytes / terlalu kecil) → regenerate dari PNG
+        elif p.suffix.lower() in (".jpg", ".jpeg"):
+            corrupt = False
+            try:
+                Image.open(p).verify()
+            except Exception:
+                corrupt = True
+            if corrupt or p.stat().st_size < 1024:
+                png_path = p.with_suffix(".png")
+                if png_path.exists() and png_path.stat().st_size > 0:
+                    try:
+                        img = Image.open(png_path)
+                        img.convert("RGB").save(p, "JPEG", quality=82, optimize=True)
+                        print(f"   ♻️  {p.name} corrupt — regenerate dari {png_path.name}")
+                    except Exception as e:
+                        print(f"   ❌ {p.name} gagal regenerate dari PNG: {e}")
+                        continue
+                elif png_path.exists():
+                    print(f"   ❌ {p.name} corrupt — pake PNG fallback langsung")
+                    upload_path = png_path
+                else:
+                    print(f"   ❌ {p.name} corrupt — gak ada PNG fallback. Coba regenerate.")
                     continue
-            else:
-                print(f"   ❌ {p.name} corrupt — gak ada PNG fallback. Coba regenerate.")
-                continue
 
         # Final zero-byte guard
         if upload_path.stat().st_size == 0:
@@ -322,7 +332,24 @@ def cmd_post_carousel(client, args):
             if upload_path.stat().st_size == 0:
                 print(f"   ❌ File {upload_path.name} kosong — skip. Coba regenerate.")
                 continue
-            url = upload_file(upload_path)
+            url = None
+            # Try Catbox first
+            try:
+                url = upload_file(upload_path)
+            except Exception as e:
+                import requests as _req
+                is_catbox_blocked = isinstance(e, _req.exceptions.HTTPError) and hasattr(e, 'response') and e.response is not None and "Invalid uploader" in e.response.text
+                if is_catbox_blocked:
+                    gh_url = _github_raw_url(upload_path)
+                    if gh_url:
+                        print(f"   ⚠️  Catbox blokir VPS — pake GitHub raw URL")
+                        url = gh_url
+                    else:
+                        print(f"   ❌ Catbox gagal & gak bisa bikin GitHub URL — coba `/generate {latest_prefix}` ulang.")
+                else:
+                    raise
+            if not url:
+                continue
             _cache_upload_url(latest_prefix, upload_path, url)
             print(f"   ✅ {url}")
         _save_map(url, str(upload_path))
@@ -402,6 +429,30 @@ def _read_urls_cache() -> dict:
 def _save_urls_cache(data: dict):
     _URLS_CACHE.parent.mkdir(parents=True, exist_ok=True)
     _URLS_CACHE.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+_GITHUB_RAW_BASE: str | None = None
+
+
+def _github_raw_url(upload_path: Path) -> str | None:
+    """Construct raw GitHub URL for a committed file."""
+    global _GITHUB_RAW_BASE
+    if _GITHUB_RAW_BASE is None:
+        try:
+            remote = subprocess.check_output(["git", "config", "--get", "remote.origin.url"], text=True).strip()
+            m = __import__("re").search(r'github\.com[/:](.+?)(?:\.git)?$', remote.replace("https://", "").split("@")[-1])
+            if m:
+                owner_repo = m.group(1)
+                _GITHUB_RAW_BASE = f"https://raw.githubusercontent.com/{owner_repo}/main/"
+        except Exception:
+            pass
+        if not _GITHUB_RAW_BASE:
+            _GITHUB_RAW_BASE = "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/"
+    try:
+        rel = str(upload_path.relative_to(config.PROJECT_ROOT)).replace("\\", "/")
+    except ValueError:
+        return None
+    return f"{_GITHUB_RAW_BASE}{rel}"
 
 
 def _cached_upload_url(slug: str, local_path: str) -> str | None:

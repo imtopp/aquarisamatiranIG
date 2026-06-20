@@ -250,6 +250,18 @@ def cmd_post_carousel(client, args):
         latest_prefix = max(groups, key=lambda k: max(groups[k], key=lambda f: f.stat().st_mtime).stat().st_mtime)
 
     latest = sorted(groups[latest_prefix])
+    # Dedup: kalo ada .png + .jpg buat slide yang sama, keep .jpg aja
+    seen = {}
+    for f in list(latest):
+        base = f.stem
+        if base in seen:
+            if seen[base].suffix.lower() == ".jpg" or f.suffix.lower() != ".jpg":
+                latest.remove(f)
+            else:
+                latest.remove(seen[base])
+                seen[base] = f
+        else:
+            seen[base] = f
     if len(latest) > 10:
         print(f"❌ IG carousel maksimal 10 slide, ini ada {len(latest)} (cover + fakta + CTA). Kurangin jumlah fakta atau pisahin.")
         return
@@ -266,20 +278,40 @@ def cmd_post_carousel(client, args):
     from PIL import Image
     import io
     for p in latest:
-        # Selalu upload PNG asli ke Catbox — JPG cuma dipake kalo publish langsung ke IG
-        if p.suffix.lower() in (".jpg", ".jpeg"):
+        upload_path = p
+
+        # PNG >500KB → convert to JPEG (IG timeout safeguard)
+        if p.suffix.lower() == ".png" and p.stat().st_size > 500 * 1024:
+            jpg_path = p.with_suffix(".jpg")
+            if not jpg_path.exists() or jpg_path.stat().st_size == 0:
+                if jpg_path.exists():
+                    jpg_path.unlink()
+                try:
+                    Image.open(p).convert("RGB").save(jpg_path, "JPEG", quality=82, optimize=True)
+                except Exception as e:
+                    print(f"   ❌ Gagal konversi {p.name} ke JPEG: {e}. Upload PNG langsung.")
+                    jpg_path = p
+            upload_path = jpg_path
+            print(f"   🗜️  {p.name} → {upload_path.name} ({upload_path.stat().st_size // 1024} KB)")
+
+        # JPG corrupt (0 bytes) → regenerate from PNG
+        elif p.suffix.lower() in (".jpg", ".jpeg") and p.stat().st_size == 0:
             png_path = p.with_suffix(".png")
             if png_path.exists() and png_path.stat().st_size > 0:
-                upload_path = png_path
-                print(f"   ⚠️  {p.name} skip — pake {png_path.name} asli")
+                try:
+                    Image.open(png_path).convert("RGB").save(p, "JPEG", quality=82, optimize=True)
+                    print(f"   ♻️  {p.name} corrupt — regenerate dari {png_path.name}")
+                except Exception as e:
+                    print(f"   ❌ {p.name} gagal regenerate dari PNG: {e}")
+                    continue
             else:
-                print(f"   ❌ {p.name} gak punya PNG fallback. Coba `/generate {latest_prefix}` ulang.")
+                print(f"   ❌ {p.name} corrupt — gak ada PNG fallback. Coba regenerate.")
                 continue
-        else:
-            upload_path = p
-            if upload_path.stat().st_size == 0:
-                print(f"   ❌ {upload_path.name} kosong (0 bytes). Coba `/generate {latest_prefix}` ulang.")
-                continue
+
+        # Final zero-byte guard
+        if upload_path.stat().st_size == 0:
+            print(f"   ❌ {upload_path.name} kosong (0 bytes). Skip.")
+            continue
 
         cached = _cached_upload_url(latest_prefix, upload_path)
         if cached:

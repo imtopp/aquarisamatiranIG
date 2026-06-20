@@ -800,6 +800,17 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     break
             if topic_ref:
                 break
+    # Cek kalo udah live
+    if topic_ref:
+        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        parts = topic_ref.lstrip("CS").split("#")
+        if len(parts) == 2:
+            s_num, t_num = parts
+            t = cc.get("topics", {}).get(s_num, {}).get(t_num, {})
+            if t.get("status") == "live":
+                await update.message.reply_text(f"❌ `{topic_ref}` udah live, gak bisa dipost lagi~")
+                return
+
     if len(slides) > 10:
         await update.message.reply_text(f"❌ IG carousel maksimal 10 slide, ini ada {len(slides)} (cover + fakta + CTA). Generate ulang pake lebih dikit fakta ya~")
         return

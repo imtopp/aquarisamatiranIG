@@ -1,0 +1,89 @@
+{
+  "topic": "Macam-macam Filter",
+  "display_name": "Dunia Filter Aquarium",
+  "subtitle": "Jaga Air Sehat Selalu!",
+  "scientific_name": "",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Pentingnya Filter 💧",
+      "description": "Filter adalah jantung ekosistem aquariummu! Ia bekerja membersihkan air dari kotoran, sisa pakan, dan senyawa berbahaya yang tak kasat mata, memastikan ikanmu hidup nyaman dan sehat.",
+      "tags": [
+        "SirkulasiAir",
+        "KualitasAir",
+        "PencegahPenyakit"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Filter Mekanis 🌫️",
+      "description": "Ini adalah baris pertahanan pertama! Filter mekanis seperti spons, kapas filter, atau dakron bertugas menyaring partikel fisik seperti sisa makanan atau kotoran ikan dari air, menjernihkan visual aquarium.",
+      "tags": [
+        "Fisik",
+        "PenyaringKotoran",
+        "SponsFilter"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Filter Biologis 🦠",
+      "description": "Pahlawan tak terlihat ini sangat vital! Media filter biologis (bio-ring, bio-ball, ceramic ring) menyediakan permukaan luas untuk koloni bakteri baik berkembang biak. Bakteri ini mengubah amonia dan nitrit beracun menjadi nitrat yang lebih aman.",
+      "tags": [
+        "SiklusNitrogen",
+        "BakteriBaik",
+        "MediaBio"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Filter Kimiawi 🧪",
+      "description": "Ingin air lebih jernih dan bebas bau? Filter kimiawi seperti karbon aktif atau zeolite menyerap zat kimia terlarut, bau tak sedap, warna kuning, bahkan logam berat. Gunakan sesuai kebutuhan dan ganti secara berkala ya!",
+      "tags": [
+        "KarbonAktif",
+        "Zeolite",
+        "PenyerapBau"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Filter Gantung (HOB) 🏞️",
+      "description": "Populer untuk pemula! Filter Hang-On-Back (HOB) digantung di belakang aquarium, praktis dan efisien untuk ukuran kecil hingga sedang. Mereka biasanya memiliki kompartemen untuk media mekanis, biologis, dan kimiawi sekaligus.",
+      "tags": [
+        "HOBFilter",
+        "Praktis",
+        "AquariumKecil"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Filter Internal 🧼",
+      "description": "Ditempatkan langsung di dalam aquarium, filter internal ringkas dan mudah dipasang. Umumnya menggunakan spons sebagai media mekanis dan biologis, cocok untuk aquarium berukuran kecil dan pemeliharaan ikan yang tidak terlalu banyak.",
+      "tags": [
+        "PowerFilter",
+        "Submersible",
+        "Kompak"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Canister Filter 🌀",
+      "description": "Si 'otot' untuk aquarium besar! Canister filter diletakkan di luar aquarium dan menggunakan selang untuk sirkulasi air. Kapasitas media filternya besar, memungkinkan kombinasi filter mekanis, biologis, dan kimiawi yang maksimal.",
+      "tags": [
+        "HighCapacity",
+        "ExternalFilter",
+        "AquariumBesar"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Sump & DIY Filter 🛠️",
+      "description": "Untuk aquarist tingkat lanjut, Sump adalah sistem filter eksternal di bawah aquarium, menawarkan ruang filter sangat luas. Ada juga DIY filter dari talang atau kotak plastik, solusi hemat dan kreatif!",
+      "tags": [
+        "Sump",
+        "CustomFilter",
+        "Kreatif"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

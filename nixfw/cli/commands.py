@@ -266,28 +266,19 @@ def cmd_post_carousel(client, args):
     from PIL import Image
     import io
     for p in latest:
-        upload_path = p
-        # Auto-compress PNG >500KB ke JPEG biar IG gak timeout
-        if p.suffix.lower() == ".png":
-            if p.stat().st_size > 500 * 1024:
-                jpg_path = p.with_suffix(".jpg")
-                if not jpg_path.exists() or jpg_path.stat().st_size == 0:
-                    if jpg_path.exists() and jpg_path.stat().st_size == 0:
-                        jpg_path.unlink()
-                        print(f"   🗑️  Hapus JPG corrupt: {jpg_path.name}")
-                    Image.open(p).convert("RGB").save(jpg_path, "JPEG", quality=82, optimize=True)
-                upload_path = jpg_path
-                print(f"   🗜️  {p.name} → {upload_path.name} ({upload_path.stat().st_size // 1024} KB)")
-            else:
-                # PNG kecil — upload langsung
-                pass
-        elif p.suffix.lower() in (".jpg", ".jpeg") and p.stat().st_size == 0:
+        # Selalu upload PNG asli ke Catbox — JPG cuma dipake kalo publish langsung ke IG
+        if p.suffix.lower() in (".jpg", ".jpeg"):
             png_path = p.with_suffix(".png")
             if png_path.exists() and png_path.stat().st_size > 0:
                 upload_path = png_path
-                print(f"   ⚠️  {p.name} corrupt — fallback ke {png_path.name}")
+                print(f"   ⚠️  {p.name} skip — pake {png_path.name} asli")
             else:
-                print(f"   ❌ {p.name} corrupt dan gak ada fallback PNG. Coba `/generate {latest_prefix}` ulang.")
+                print(f"   ❌ {p.name} gak punya PNG fallback. Coba `/generate {latest_prefix}` ulang.")
+                continue
+        else:
+            upload_path = p
+            if upload_path.stat().st_size == 0:
+                print(f"   ❌ {upload_path.name} kosong (0 bytes). Coba `/generate {latest_prefix}` ulang.")
                 continue
 
         cached = _cached_upload_url(latest_prefix, upload_path)

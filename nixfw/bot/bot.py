@@ -438,7 +438,7 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     args = context.args
     if not args:
-        await update.message.reply_text("Contoh: `/generate #07` atau `/generate #07 7`\nCek `/topics` buat liat daftar #XX.")
+        await update.message.reply_text("Contoh: `/generate #07` atau `/generate #07 7`\nCek `/topic` buat liat daftar #XX.")
         return
     num_facts = "8"
     topic_parts = []
@@ -922,7 +922,7 @@ async def peekcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Lihat caption topik tanpa trigger post flow."""
     args = context.args
     if not args:
-        await update.message.reply_text("Contoh: `/peekcaption C1#07` atau `/peekcaption filter-aquarium`")
+        await update.message.reply_text("Contoh: `/post caption show C1#07`")
         return
     topic_input = " ".join(args)
     display_name, slug, topic_ref = _resolve_topic(topic_input)
@@ -941,7 +941,7 @@ async def showtopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Tampilkan semua field topic dari curriculum."""
     args = context.args
     if not args:
-        await update.message.reply_text("Contoh: `/showtopic C1#07` atau `/showtopic filter-aquarium`")
+        await update.message.reply_text("Contoh: `/topic show C1#07`")
         return
     topic_input = " ".join(args)
     display_name, slug, topic_ref = _resolve_topic(topic_input)
@@ -969,8 +969,8 @@ async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not args:
         await update.message.reply_text(
             "Gunakan:\n"
-            "`/editcaption <instruksi>` — edit caption pending post\n"
-            "`/editcaption C1#XX <instruksi>` — edit caption topik tertentu"
+            "`/post caption <instruksi>` — edit caption pending post\n"
+            "`/post caption C1#XX <instruksi>` — edit caption topik tertentu"
         )
         return
 
@@ -986,7 +986,7 @@ async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(
                 "Ngga ada pending post. Coba:\n"
                 "`/post` dulu buat pending, atau\n"
-                "`/editcaption C1#XX <instruksi>` langsung ke topik"
+                "`/post caption C1#XX <instruksi>` langsung ke topik"
             )
             return
         is_pending_mode = True
@@ -997,7 +997,7 @@ async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         instruction = " ".join(args)
     else:
         if len(args) < 2:
-            await update.message.reply_text(f"Instruksinya mana sayang? Contoh: `/editcaption {topic_ref} bikin lebih santai`")
+            await update.message.reply_text(f"Instruksinya mana sayang? Contoh: `/post caption {topic_ref} bikin lebih santai`")
             return
         instruction = " ".join(args[1:])
 
@@ -1149,8 +1149,8 @@ async def clean_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     if not args:
         await update.message.reply_text(
-            "Gunakan: `/clean <slug>` atau `/clean C1#XX`\n"
-            "Cek `/slides` buat liat slug yang tersedia."
+            "Gunakan: `/post clean <slug>` atau `/post clean C1#XX`\n"
+            "Cek `/topic slides` buat liat slug yang tersedia."
         )
         return
 
@@ -1269,7 +1269,7 @@ async def addcategory_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Tambah category baru via Telegram."""
     args = context.args or []
     if not args:
-        await update.message.reply_text("Contoh: `/addcategory Nama Category`")
+        await update.message.reply_text("Contoh: `/topic cat add Nama Category`")
         return
     title = " ".join(args)
     result = telegram_add_category(title)
@@ -1280,7 +1280,7 @@ async def addsubcategory_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE)
     """Tambah subcategory ke category tertentu."""
     args = context.args or []
     if len(args) < 2:
-        await update.message.reply_text("Contoh: `/addsubcategory C2 1 Nama Subkategori`")
+        await update.message.reply_text("Contoh: `/topic cat sub add C2 1 Nama Subkategori`")
         return
     cat_id = args[0].lstrip("C")
     number = args[1]
@@ -1293,7 +1293,7 @@ async def addtopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Tambah topic ke category/subcategory."""
     args = context.args or []
     if len(args) < 2:
-        await update.message.reply_text("Contoh: `/addtopic C2 1 Judul Topik Disini`")
+        await update.message.reply_text("Contoh: `/topic add C2 1 Judul Topik Disini`")
         return
     cat_id = args[0].lstrip("C")
     subcat = args[1]
@@ -1303,14 +1303,14 @@ async def addtopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def edittopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Edit topic fields via Telegram. Format: /edittopic C1#07 --title Nama --status live"""
+    """Edit topic fields via Telegram. Format: /topic edit C1#07 --title Nama --status live"""
     args = context.args or []
     if len(args) < 1:
-        await update.message.reply_text("Contoh: `/edittopic C1#07 --status live`\nField: title, slug, status, subcategory, display_name, subtitle, keywords")
+        await update.message.reply_text("Contoh: `/topic edit C1#07 --status live`\nField: title, slug, status, subcategory, display_name, subtitle, keywords")
         return
     topic_ref = args[0]
     if not re.match(r'[CS]\d+#\d+', topic_ref):
-        await update.message.reply_text(f"❌ Format salah. Contoh: `/edittopic C1#07 --status live`")
+        await update.message.reply_text(f"❌ Format salah. Contoh: `/topic edit C1#07 --status live`")
         return
     fields = {}
     i = 1
@@ -1333,7 +1333,7 @@ async def deletetopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Hapus topic via Telegram."""
     args = context.args or []
     if not args:
-        await update.message.reply_text("Contoh: `/deletetopic C1#07`")
+        await update.message.reply_text("Contoh: `/topic delete C1#07`")
         return
     topic_ref = args[0]
     result = telegram_delete_topic(topic_ref)
@@ -1344,7 +1344,7 @@ async def movetopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Pindah topic ke category/subcategory lain."""
     args = context.args or []
     if len(args) < 3:
-        await update.message.reply_text("Contoh: `/movetopic C1#07 C2 2`")
+        await update.message.reply_text("Contoh: `/topic move C1#07 C2 2`")
         return
     topic_ref = args[0]
     target_cat = args[1].lstrip("C")
@@ -1366,7 +1366,7 @@ async def delete_schedule_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE
     """Hapus entry dari schedule.json."""
     args = context.args
     if not args:
-        await update.message.reply_text("Contoh: `/delete-schedule C1#07`")
+        await update.message.reply_text("Contoh: `/schedule delete C1#07`")
         return
 
     topic_input = args[0]
@@ -1408,7 +1408,7 @@ async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     if not args:
         slots_str = SLOT_MANAGER.format_list()
-        await update.message.reply_text(f"📅 **Slot Jadwal Saat Ini:**\n{slots_str}\n\nGunakan:\n`/setslot add` — tambah slot interaktif\n`/setslot remove <id>`\n`/setslot sync`", parse_mode="Markdown")
+        await update.message.reply_text(f"📅 **Slot Jadwal Saat Ini:**\n{slots_str}\n\nGunakan:\n`/schedule slot add` — tambah slot interaktif\n`/schedule slot remove <id>`\n`/schedule slot sync`", parse_mode="Markdown")
         return
 
     cmd = args[0].lower()
@@ -1418,7 +1418,7 @@ async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("📝 **Id slotnya?** (huruf, angka, strip `-`, underscore `_` aja, gak boleh spasi)\nContoh: `weekend-09`, `weekday-19`, `lunch-12`", parse_mode="Markdown")
     elif cmd == "remove":
         if len(args) < 2:
-            await update.message.reply_text("Pake: `/setslot remove <id>`")
+            await update.message.reply_text("Pake: `/schedule slot remove <id>`")
             return
         ok = SLOT_MANAGER.remove_slot(args[1])
         if ok:

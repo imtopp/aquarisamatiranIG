@@ -246,7 +246,14 @@ def _read_schedule() -> str:
             continue
         ref = entry.get("source_ref") or entry.get("curriculum") or ""
         title = cc.get(ref, "") if ref else ""
-        topic = f"{ref} — {title}" if title else ref or entry.get("type", "post")
+        if title:
+            topic = f"{ref} — {title}"
+        elif ref:
+            topic = ref
+        else:
+            cap = entry.get("caption", "")
+            snippet = cap[:60].replace("\n", " ") + "…" if len(cap) > 60 else cap.replace("\n", " ")
+            topic = f"{entry.get('type', 'post')}: \"{snippet}\"" if snippet else entry.get('type', 'post')
         if entry.get("done"):
             done.append(f"{topic}: {d.strftime('%d %b')} ✅")
         elif d < now:

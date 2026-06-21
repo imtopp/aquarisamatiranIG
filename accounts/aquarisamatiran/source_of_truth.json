@@ -541,7 +541,7 @@
       "07": {
         "slug": "filter-aquarium",
         "title": "Macam-macam Filter",
-        "status": "generated",
+        "status": "live",
         "keywords": [
           "filtrasi mekanis/biologis/kimiawi",
           "flow rate",
@@ -646,7 +646,8 @@
               "Kreatif"
             ]
           }
-        ]
+        ],
+        "result_id": "18077285801302840"
       },
       "08": {
         "slug": "tanaman-dasar",

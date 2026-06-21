@@ -678,7 +678,7 @@ async def _generate_caption(facts_json: dict | None, topic: str) -> str:
         for f in facts_json["facts"]:
             prompt_parts.append(f"- {f.get('number','')}. {f.get('title','')}: {f.get('description','')[:100]}")
     prompt_parts.append(
-        f"\nInclude ajakan diskusi dan hashtag #aquarisamatiran di akhir. "
+        f"\nInclude ajakan diskusi dan hashtag #{name} di akhir. "
         f"Maksimal 2200 karakter total. "
         f"Hashtag termasuk dalam hitungan karakter."
     )
@@ -906,7 +906,14 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             caption = await asyncio.wait_for(_generate_caption(facts_json, topic_display), timeout=60)
         except asyncio.TimeoutError:
-            caption = f"{topic_display} — Yuk belajar bareng @aquarisamatiran! 🌱 #Aquarisamatiran #AquascapeIndonesia"
+            _cfg = {}
+            try:
+                _cfg = json.loads((PROJECT_ROOT / "accounts" / "aquarisamatiran" / "config.json").read_text(encoding="utf-8"))
+            except Exception:
+                pass
+            _name = _cfg.get("name", "Aquarisamatiran")
+            _handle = _cfg.get("handle", "@aquarisamatiran")
+            caption = f"{topic_display} — Yuk belajar bareng {_handle}! 🌱 #{_name} #AquascapeIndonesia"
             await update.message.reply_text("⚠️ Caption generation timeout, pakai fallback~")
         _save_caption_to_curriculum(slug, caption)
 
@@ -1030,8 +1037,18 @@ async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             pass
 
+    config = {}
+    try:
+        config_path = PROJECT_ROOT / "accounts" / "aquarisamatiran" / "config.json"
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+    except Exception:
+        pass
+    niche = config.get("niche", "aquascape")
+    handle = config.get("handle", "@aquarisamatiran")
+    name = config.get("name", "Aquarisamatiran")
+
     caption_system = (
-        "Kamu adalah alat pembuat caption Instagram untuk akun aquascape @aquarisamatiran. "
+        f"Kamu adalah alat pembuat caption Instagram untuk akun {niche} {handle}. "
         "Tugasmu: OUTPUT HANYA CAPTION — tanpa penjelasan, tanpa intro, tanpa 'tentu', tanpa markdown berlebih. "
         "Gaya: santai, edukatif, engaging, akrab, bahasa Indonesia sehari-hari. "
         "Maksimal 1800 karakter."

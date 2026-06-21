@@ -1,0 +1,89 @@
+{
+  "topic": "Penyakit Ikan",
+  "display_name": "Penyakit Ikan",
+  "subtitle": "Ikan Sehat, Akuarium Ceria!",
+  "scientific_name": "",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Penyakit Ikan? Kenapa Sih? 🤔",
+      "description": "Penyakit pada ikan seringkali bukan karena 'sial', tapi akibat faktor lingkungan yang kurang optimal. Stres, kualitas air yang buruk, atau nutrisi yang tidak memadai adalah pemicu utama yang melemahkan sistem imun ikanmu.",
+      "tags": [
+        "StresIkan",
+        "KualitasAirBuruk",
+        "SistemImun"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Deteksi Dini itu Kunci! 🕵️‍♀️",
+      "description": "Perhatikan baik-baik perubahan perilaku atau fisik ikanmu. Jika ikan berenang lesu, menggosokkan tubuh ke dekorasi, sirip menguncup, atau ada bercak aneh, itu bisa jadi tanda awal bahwa ada masalah kesehatan.",
+      "tags": [
+        "PerilakuIkan",
+        "TandaPenyakit",
+        "Observasi"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "White Spot (Ich) ⚪",
+      "description": "Ini salah satu penyakit parasit paling umum di akuarium! Ikan akan terlihat seperti ditaburi garam atau gula putih di tubuh dan siripnya. Disebabkan oleh parasit *Ichthyophthirius multifiliis* yang sangat menular.",
+      "tags": [
+        "Ich",
+        "Parasit",
+        "Ichthyophthirius"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Fin Rot & Body Rot 🩹",
+      "description": "Sirip ikanmu terlihat sobek, berlubang, atau bahkan membusuk? Ini adalah gejala fin rot, seringkali disebabkan oleh infeksi bakteri sekunder saat kualitas air buruk atau ikan stres. Jika parah, infeksi bisa menyebar ke tubuh.",
+      "tags": [
+        "FinRot",
+        "Bakteri",
+        "SiripBusuk"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Penyakit Jamur 🍄",
+      "description": "Bercak putih menyerupai kapas atau bulu halus pada tubuh atau sirip ikanmu? Itu adalah tanda infeksi jamur, biasanya dari genus *Saprolegnia*. Jamur sering menyerang ikan yang sudah terluka atau memiliki sistem imun yang lemah.",
+      "tags": [
+        "InfeksiJamur",
+        "Saprolegnia",
+        "IkanLuka"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Pentingnya Karantina! 🏥",
+      "description": "Selalu karantina ikan baru di akuarium terpisah selama 2-4 minggu sebelum menggabungkannya dengan penghuni lama. Langkah ini krusial untuk memastikan ikan baru bebas penyakit dan tidak menularkan ke seluruh akuarium.",
+      "tags": [
+        "KarantinaIkan",
+        "PencegahanPenyakit",
+        "AkuariumBaru"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Jaga Kualitas Airmu! 💧",
+      "description": "Kualitas air adalah fondasi utama untuk kesehatan ikanmu. Lakukan pergantian air rutin, pantau parameter air (pH, amonia, nitrit, nitrat), dan hindari overfeeding. Air yang bersih dan stabil adalah kunci ikan sehat!",
+      "tags": [
+        "PergantianAir",
+        "ParameterAir",
+        "Pencegahan"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Kapan Waktunya Bertindak? ⏰",
+      "description": "Jangan tunda! Segera setelah kamu melihat tanda-tanda penyakit, identifikasi masalahnya dan mulai penanganan secepat mungkin. Semakin cepat diatasi, peluang ikan untuk pulih semakin besar. Jangan ragu konsultasi jika bingung!",
+      "tags": [
+        "PenangananCepat",
+        "DiagnosisDini",
+        "ObatIkan"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

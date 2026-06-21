@@ -177,6 +177,10 @@ class InstagramClient:
             print(f"   🖼️  Item container: {cid}")
             time.sleep(1)
 
+        # IG API caption limit: 2200 chars
+        if len(caption) > 2200:
+            caption = caption[:2197] + "..."
+
         carousel_data = {
             "media_type": "CAROUSEL",
             "children": ",".join(child_ids),

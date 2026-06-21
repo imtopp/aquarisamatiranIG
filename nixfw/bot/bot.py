@@ -1745,67 +1745,86 @@ async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def sync_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Sync VPS with remote repo — commit lokal, pull, push, restart."""
+    """Sync VPS with remote repo — commit lokal, curriculum sync, push, pages push, restart."""
     msg = await update.message.reply_text("⏳ Sync on progress...")
     chat_id = update.effective_chat.id
+    BIO_PATH = "accounts/aquarisamatiran/bio/index.html"
 
-    steps = [
-        ("git add -A", ["git", "add", "-A"]),
-        ("git diff --cached --quiet || git commit -m 'auto: pre-sync save'",
-         ["git", "diff", "--cached", "--quiet"]),
-    ]
+    def _sh(cmd, timeout=30, check=False):
+        r = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=timeout)
+        if check and r.returncode != 0:
+            raise RuntimeError(f"cmd failed: {cmd}\n{r.stderr[:200]}")
+        return r
 
     try:
-        subprocess.run(
-            ["git", "add", "-A"],
-            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=15,
-        )
-        diff = subprocess.run(
-            ["git", "diff", "--cached", "--quiet"],
-            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=15,
-        )
+        # 1. Commit pending local changes
+        _sh(["git", "add", "-A"])
+        diff = _sh(["git", "diff", "--cached", "--quiet"])
         if diff.returncode != 0:
-            subprocess.run(
-                ["git", "commit", "-m", "auto: pre-sync save"],
-                cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=15,
-            )
+            _sh(["git", "commit", "-m", "auto: pre-sync save"])
 
-        subprocess.run(
-            ["git", "fetch", "origin", "main"],
-            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=30,
-        )
-        subprocess.run(
-            ["git", "rebase", "origin/main"],
-            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=30,
-        )
-        push = subprocess.run(
-            ["git", "push", "origin", "main"],
-            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=30,
-        )
+        # 2. Sync with remote
+        _sh(["git", "fetch", "origin", "main"])
+        _sh(["git", "rebase", "origin/main"], timeout=60)
+
+        # 3. Install deps
+        pip_res = _sh([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], timeout=120)
+        if pip_res.returncode != 0:
+            await msg.edit_text(f"⚠️ pip install error:\n{pip_res.stderr[:300]}")
+
+        # 4. Curriculum sync — regenerates bio/index.html
+        _sh([sys.executable, "main.py", "curriculum", "sync"], timeout=60)
+
+        # 5. Commit bio changes
+        _sh(["git", "add", BIO_PATH])
+        bio_diff = _sh(["git", "diff", "--cached", "--quiet"])
+        if bio_diff.returncode != 0:
+            _sh(["git", "commit", "-m", "auto: sync bio [skip ci]"])
+
+        # 6. Push ke repo ini (includes bio commit)
+        push = _sh(["git", "push", "origin", "main"])
         if push.returncode != 0:
             await msg.edit_text(f"❌ Sync failed — push error:\n{push.stderr[:300]}")
             return
 
-        pip_res = subprocess.run(
-            [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
-            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=120,
-        )
-        if pip_res.returncode != 0:
-            await msg.edit_text(f"⚠️ pip install error:\n{pip_res.stderr[:300]}")
+        # 7. Push bio ke pages repo (opsional)
+        try:
+            pages_script = (
+                'set -e\n'
+                'cd "$1"\n'
+                'test -f .env && set -a && source .env && set +a || true\n'
+                'if [ -z "$GH_PAT" ]; then\n'
+                '  echo "GH_PAT not set -- skip pages push"\n'
+                '  exit 0\n'
+                'fi\n'
+                'if [ ! -d /tmp/pages-repo ]; then\n'
+                '  git clone "https://${GH_PAT}@github.com/imtopp/aquarisamatiran-pages.git" /tmp/pages-repo\n'
+                'else\n'
+                '  cd /tmp/pages-repo && git pull origin main && cd "$1"\n'
+                'fi\n'
+                'cp accounts/aquarisamatiran/bio/index.html /tmp/pages-repo/index.html\n'
+                'cd /tmp/pages-repo\n'
+                'git config user.name "Nix Bot"\n'
+                'git config user.email "nix@aquarisamatiran.dev"\n'
+                'git add index.html\n'
+                'git diff --cached --quiet || git commit -m "auto: update bio from sync"\n'
+                'git push origin main\n'
+            )
+            subprocess.run(
+                ["bash", "-c", pages_script, "_", str(PROJECT_ROOT)],
+                timeout=60,
+            )
+        except Exception as pages_err:
+            print(f"  ⚠️  Pages push skipped: {pages_err}")
 
-        subprocess.run(
-            [sys.executable, "main.py", "curriculum", "sync"],
-            cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=60,
-        )
-
-        # Save flag for restart notification
+        # 8. Save flag for restart notification
         (PROJECT_ROOT / ".restart_flag").write_text(
             json.dumps({"chat_id": chat_id}), encoding="utf-8"
         )
 
         await msg.edit_text("✅ Sync done!\n🔄 Restart bot system...")
 
-        # Restart via systemctl with small delay
+        # 9. Restart via systemctl with small delay
         subprocess.Popen(
             ["nohup", "sh", "-c", "sleep 2 && sudo systemctl restart nix-bot"],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,

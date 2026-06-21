@@ -19,14 +19,47 @@ jobs:
       - name: Deploy
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
-            cd /home/topp/projects/aquarisamatiran &&
-            git add -A &&
-            git diff --cached --quiet || git commit -m 'auto: pre-deploy save' &&
-            git fetch origin main &&
-            git rebase origin/main &&
-            git push origin main &&
-            .venv/bin/pip install -r requirements.txt &&
-            .venv/bin/python main.py curriculum sync &&
-            sudo systemctl restart nix-bot &&
+            set -e
+            cd /home/topp/projects/aquarisamatiran
+
+            # Commit pending local changes (if any)
+            git add -A
+            git diff --cached --quiet || git commit -m 'auto: pre-deploy save'
+
+            # Sync with remote
+            git fetch origin main
+            git rebase origin/main
+
+            # Install deps + sync curriculum (regenerates bio/index.html)
+            .venv/bin/pip install -q -r requirements.txt
+            .venv/bin/python main.py curriculum sync
+
+            # Commit bio changes + push ke repo ini
+            git add accounts/aquarisamatiran/bio/index.html
+            git diff --cached --quiet || git commit -m 'auto: sync bio [skip ci]'
+            git push origin main
+
+            # Push ke pages repo
+            . .env 2>/dev/null || true
+            if [ -n \"\$GH_PAT\" ]; then
+              if [ ! -d /tmp/pages-repo ]; then
+                git clone https://\$GH_PAT@github.com/imtopp/aquarisamatiran-pages.git /tmp/pages-repo
+              else
+                cd /tmp/pages-repo && git pull origin main && cd /home/topp/projects/aquarisamatiran
+              fi
+              cp accounts/aquarisamatiran/bio/index.html /tmp/pages-repo/index.html
+              cd /tmp/pages-repo
+              git config user.name 'Nix Bot'
+              git config user.email 'nix@aquarisamatiran.dev'
+              git add index.html
+              git diff --cached --quiet || git commit -m 'auto: update bio from deploy'
+              git push origin main
+              cd /home/topp/projects/aquarisamatiran
+            else
+              echo '⚠️  GH_PAT not set — skip pages push'
+            fi
+
+            # Restart bot
+            sudo systemctl restart nix-bot
             echo '✅ Deploy selesai'
           "

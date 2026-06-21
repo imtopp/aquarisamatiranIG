@@ -23,7 +23,7 @@ from pathlib import Path
 
 from nixfw import config
 
-ACCOUNT_BASE = config.PROJECT_ROOT / "accounts" / "aquarisamatiran"
+ACCOUNT_BASE = config.PROJECT_ROOT / "accounts" / config.ACCOUNT_NAME
 SRC = ACCOUNT_BASE / "source_of_truth.json"
 CUR_MD = ACCOUNT_BASE / "curriculum.md"
 BIO_HTML = ACCOUNT_BASE / "bio" / "index.html"

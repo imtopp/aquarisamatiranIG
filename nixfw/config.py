@@ -21,6 +21,8 @@ AGENTS_MD = PROJECT_ROOT / "AGENTS.md"
 DB_PATH = PROJECT_ROOT / "bot" / "chat_history.db"
 
 IG_HANDLE = "@aquarisamatiran"
+ACCOUNT_NAME = "aquarisamatiran"
+GH_REPO = "imtopp/aquarisamatiranIG"
 SLIDE_SIZE = (1080, 1080)
 
 PALETTE = {

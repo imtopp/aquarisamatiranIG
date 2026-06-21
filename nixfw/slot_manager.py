@@ -6,6 +6,8 @@ from pathlib import Path
 
 import httpx
 
+from nixfw import config
+
 WIB = datetime.timezone(datetime.timedelta(hours=7))
 
 SLOTS_PATH = Path(__file__).resolve().parent / "slots.json"
@@ -104,7 +106,7 @@ class SlotManager:
                 "enabled": True,
                 "title": slot.get("title", slot["id"]),
                 "saveResponses": True,
-                "url": "https://api.github.com/repos/imtopp/aquarisamatiranIG/actions/workflows/scheduler.yml/dispatches",
+                "url": f"https://api.github.com/repos/{config.GH_REPO}/actions/workflows/scheduler.yml/dispatches",
                 "requestMethod": 1,
                 "schedule": {
                     "timezone": "Asia/Jakarta",

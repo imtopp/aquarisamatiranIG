@@ -458,7 +458,7 @@ def _github_raw_url(upload_path: Path) -> str | None:
         except Exception:
             pass
         if not _GITHUB_RAW_BASE:
-            _GITHUB_RAW_BASE = "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/"
+            _GITHUB_RAW_BASE = f"https://raw.githubusercontent.com/{config.GH_REPO}/main/"
     try:
         rel = str(upload_path.relative_to(config.PROJECT_ROOT)).replace("\\", "/")
     except ValueError:

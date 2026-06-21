@@ -837,6 +837,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # Determine schedule time — skip slot yang udah diambil
+    nearest = ""
     if not schedule_time:
         occupied = set()
         try:
@@ -920,6 +921,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "slug": slug,
         "caption": caption,
         "schedule_time": schedule_time,
+        "schedule_time_iso": nearest,  # ISO "YYYY-MM-DD HH:MM" biar gak di-recalc
         "topic_display": topic_display,
         "facts_json": facts_json,
         "topic_ref": topic_ref,
@@ -1124,7 +1126,7 @@ async def confirm_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     slug = pending["slug"]
     caption = pending["caption"]
-    schedule_time = pending["schedule_time"]
+    schedule_time = pending.get("schedule_time_iso") or pending["schedule_time"]
 
     await update.message.reply_text(f"📤 Upload & jadwalin \"{slug}\"...")
     try:

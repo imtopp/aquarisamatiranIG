@@ -304,7 +304,7 @@ Slot jadwal dikelola via `nixfw/slots.json` + `nixfw/slot_manager.py`:
 - **`nixfw/slot_manager.py`** — class `SlotManager` (load, save, nearest_slot, add, remove, sync_cronjob)
 
 Sync cron-job.org otomatis terjadi di 3 jalur:
-1. **`/setslot add/remove`** via Telegram → auto-sync (butuh VPS hidup + `CRONJOB_TOKEN`)
+1. **`/schedule slot add/remove`** via Telegram → auto-sync (butuh VPS hidup + `CRONJOB_TOKEN`)
 2. **Push ke `nixfw/slots.json`** → GH Action `sync-slots.yml` jalan (butuh `CRONJOB_TOKEN` + `GH_PAT` di secrets)
 3. **Manual CLI** → `python main.py sync-slots` (dari lokal mana aja)
 

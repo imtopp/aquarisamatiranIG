@@ -509,7 +509,7 @@ Generate slide gambar pake Stable Diffusion **wajib jalan di GH Actions**, bukan
            ▼
 ┌─ User ─────────────────────────────┐
 │  /status → "completed"             │
-│  /post C1#07 → review → /confirm   │
+│  /post C1#07 → review → /post confirm │
 └─────────────────────────────────────┘
 ```
 
@@ -582,7 +582,7 @@ Ini akan menulis entry ke schedule.json dengan waktu spesifik. Runner akan nge-p
 
 Post langsung (tanpa jadwal) bisa dari:
 - CLI: `python main.py post-carousel ...` (tanpa `--schedule`)
-- Bot: `/postnow` atau `/confirm` tanpa jadwal
+- Bot: `/post confirm --now`
 
 ---
 
@@ -596,32 +596,51 @@ Post langsung (tanpa jadwal) bisa dari:
 
 ```
 /start, /help              — Panduan bot
-/topics [filter]           — List topic (by status, category, curriculum)
-/schedule                  — Antrian posting (pending + done)
 
-=== CONTENT ===
-/create <curriculum>       — Buat topic baru dalam curriculum
-/generate <topic>          — Trigger GH Actions generate (facts + slides)
-  └── async: trigger → cek /status → tunggu 10-30 menit
-  └── /status              — Cek status GH Actions run terakhir
-  └── /regenerate          — Ulang generate buat topic pending terakhir
+=== KURIKULUM ===
+/topic                     — CRUD kurikulum
+  /topic help              — Subcommand detail
+  /topic [C#]              — List topic (by filter)
+  /topic add C# sub judul  — Tambah topic baru
+  /topic show C1#XX        — Detail topic
+  /topic edit C1#XX --field val — Edit topic
+  /topic delete C1#XX      — Hapus topic
+  /topic move C1#XX C# sub — Pindah topic
+  /topic slides            — List slide siap post
+  /topic cat add|rename|remove — CRUD category
+  /topic cat sub add|rename|remove — CRUD subcategory
 
-=== REVIEW ===
-/review                    — Preview konten pending review
-/approve                   — Setujui konten → ready to publish
-/editcaption <instruction> — Edit caption via AI
-/regenerate                — Ulang generate gambar (skip AI facts)
+=== POSTING ===
+/post                      — Alur posting
+  /post help               — Subcommand detail
+  /post C1#XX [hari jam]   — Preview + caption → siap schedule / post now
+  /post confirm            — Upload & jadwal
+  /post confirm --now      — Publish langsung sekarang
+  /post cancel             — Batalin pending post
+  /post caption <instruksi> — Edit caption via AI
+  /post caption show C1#XX — Lihat caption topic
+  /post clean C1#XX        — Hapus slide batal post
 
-=== PUBLISH ===
-/post <topic> [jadwal]     — Preview + caption → siap schedule atau post now
-/confirm                   — Eksekusi schedule / post now
-/cancel                    — Batalin pending post
+=== GENERATE ===
+/generate                  — Generate slide
+  /generate help           — Subcommand detail
+  /generate C1#XX [count]  — Trigger GH Actions generate (facts + slides)
+  /generate --force C1#XX  — Regenerate facts + slides
+  /generate --cache C1#XX  — Regenerate slides aja (pake facts lama)
 
-=== MANAGEMENT ===
-/setslot                   — Kelola slot jadwal (add/remove/sync cron-job)
-/curriculum                — CRUD curriculum (add/edit/delete category/subcategory/topic)
+=== JADWAL ===
+/schedule                  — Manajemen jadwal
+  /schedule help           — Subcommand detail
+  /schedule [tanpa arg]    — Antrian posting (pending + done)
+  /schedule delete C1#XX   — Hapus dari antrian
+  /schedule slot add|remove|sync — Kelola slot cron-job
+
+=== LAINNYA ===
 /status                    — Cek status GH Actions runner
+/reset                     — Hapus riwayat chat
+/run <cmd>                 — Jalanin perintah VPS
 /myid                      — Info chat ID
+/sync                      — Sync curriculum → schedule + bio
 ```
 
 ### 7.2 CLI

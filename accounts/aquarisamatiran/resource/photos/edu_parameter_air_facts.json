@@ -1,0 +1,89 @@
+{
+  "topic": "Parameter Air",
+  "display_name": "Parameter Air: Kunci Kehidupan Aquariummu!",
+  "subtitle": "Jaga Air, Ikan Sehat!",
+  "scientific_name": "Akuakultur & Kimia Air",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Apa itu Parameter Air? 💧",
+      "description": "Parameter air adalah kondisi kimia dan fisika air di aquariummu, seperti suhu, pH, dan kadar racun. Ini ibarat 'udara' bagi ikanmu. Memahaminya sangat penting agar ikan dan tanaman air bisa hidup sehat dan bahagia.",
+      "tags": [
+        "DasarAquarium",
+        "KualitasAir",
+        "LingkunganIkan"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Suhu Air: Nyaman atau Stres? 🌡️",
+      "description": "Setiap jenis ikan memiliki rentang suhu idealnya sendiri. Suhu yang terlalu tinggi atau rendah bisa menyebabkan stres, penyakit, bahkan kematian. Gunakan heater dan termometer untuk menjaga suhu tetap stabil dan sesuai.",
+      "tags": [
+        "Termometer",
+        "HeaterAquarium",
+        "MetabolismeIkan"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "pH Air: Asam atau Basa? 🧪",
+      "description": "pH mengukur tingkat keasaman atau kebasaan air. Skalanya dari 0-14, dengan 7 sebagai netral. Ikanmu membutuhkan pH yang spesifik, dan fluktuasi pH bisa sangat berbahaya bagi insang dan sistem tubuh mereka.",
+      "tags": [
+        "SkalapH",
+        "AsamBasa",
+        "KesehatanInsang"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Amonia (NH3/NH4+): Racun Mematikan! ☠️",
+      "description": "Amonia adalah hasil buangan kotoran ikan dan sisa makanan yang sangat beracun. Kadar amonia harus 0 di aquarium yang sudah mature. Ini adalah penyebab utama kematian ikan baru di aquarium yang belum melalui siklus nitrogen.",
+      "tags": [
+        "SiklusNitrogen",
+        "RacunIkan",
+        "FilterBiologis"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Nitrit (NO2-): Ancaman Tersembunyi! 😱",
+      "description": "Setelah amonia, nitrit terbentuk dan juga sangat berbahaya bagi ikan, mengganggu kemampuan darah mereka mengangkut oksigen. Kadar nitrit juga harus 0. Penting untuk memastikan bakteri baik di filtermu bekerja optimal.",
+      "tags": [
+        "BahayaIkan",
+        "OksigenDarah",
+        "BakteriNitrifikasi"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Nitrat (NO3-): Akhir Siklus Nitrogen 🌱",
+      "description": "Nitrat adalah hasil akhir dari siklus nitrogen, dan relatif tidak beracun pada konsentrasi rendah. Namun, kadar nitrat yang tinggi bisa memicu pertumbuhan alga berlebih dan melemahkan ikan. Ganti air rutin adalah solusinya!",
+      "tags": [
+        "GantiAirRutin",
+        "AlgaControl",
+        "PupukTanaman"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Kesadahan Air (GH & KH): Stabilitas Lingkungan ⛰️",
+      "description": "GH (General Hardness) mengukur total mineral seperti kalsium dan magnesium, penting untuk osmoregulasi ikan. KH (Carbonate Hardness) adalah 'buffer' yang menjaga pH tetap stabil. Keduanya penting agar air tidak mudah berubah drastis.",
+      "tags": [
+        "MineralAir",
+        "StabilisasipH",
+        "Osmoregulasi"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Yuk Uji Air Aquariummu! 📊",
+      "description": "Untuk tahu parameter airmu, kamu perlu test kit! Ada strip test yang praktis dan liquid test kit yang lebih akurat. Lakukan pengujian secara rutin, terutama saat baru memulai aquarium atau jika ada masalah. Jangan cuma kira-kira!",
+      "tags": [
+        "TestKitAquarium",
+        "RutinCek",
+        "MencegahPenyakit"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

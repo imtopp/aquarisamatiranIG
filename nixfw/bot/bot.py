@@ -673,7 +673,10 @@ async def _generate_caption(facts_json: dict | None, topic: str) -> str:
         for f in facts_json["facts"]:
             prompt_parts.append(f"- {f.get('number','')}. {f.get('title','')}: {f.get('description','')[:100]}")
     prompt_parts.append(
-        f"\nInclude ajakan diskusi. Maks 2000 karakter. "
+        f"\nInclude ajakan diskusi. "
+        f"IG caption maksimal 2200 karakter (termasuk hashtag). "
+        f"Buat caption sekitar 1800 karakter biar ada ruang buat hashtag. "
+        f"PASTIKAN total caption + hashtag ≤ 2200 karakter. "
         f"Sertakan hashtag #{name} dan hashtag relevan lainnya di akhir."
     )
 
@@ -690,11 +693,23 @@ async def _generate_caption(facts_json: dict | None, topic: str) -> str:
                     print(f"   ⚠️  Gemini {model} timeout: {e}")
                     continue
                 if resp.status_code == 200:
-                    return resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+                    caption = resp.json()["candidates"][0]["content"]["parts"][0]["text"]
+                    if len(caption) > 2200:
+                        truncated = caption[:2199]
+                        last_period = truncated.rfind(".")
+                        last_newline = truncated.rfind("\n")
+                        cut = max(last_period, last_newline) + 1
+                        if cut < 1100:
+                            cut = 2199
+                        caption = caption[:cut]
+                    return caption
                 print(f"   ⚠️  Gemini {model} (key?): HTTP {resp.status_code}")
                 if resp.status_code in (429, 403):
                     break
-    return _build_caption_from_facts(topic, facts_json, handle)
+    caption = _build_caption_from_facts(topic, facts_json, handle)
+    if len(caption) > 2200:
+        caption = caption[:2199]
+    return caption
 
 
 def _format_run(run: dict) -> str:

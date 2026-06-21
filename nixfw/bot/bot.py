@@ -897,10 +897,11 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"📋 **{topic_display}** ({len(slides)} slide)\n"
         f"📅 Jadwal: {schedule_time}\n\n"
         f"📝 **Caption:**\n{caption[:1000]}\n\n"
-        f"`/confirm` → upload & jadwalin\n"
-        f"`/editcaption <instruksi>` → ganti caption\n"
-        f"`/regenerate` → generate ulang slide\n"
-        f"`/cancel` → batalin"
+        f"`/post confirm` → upload & jadwal\n"
+        f"`/post confirm --now` → publish langsung sekarang\n"
+        f"`/post caption <instruksi>` → ganti caption\n"
+        f"`/generate --force` → generate ulang slide\n"
+        f"`/post cancel` → batalin"
     )
     await update.message.reply_text(msg)
 

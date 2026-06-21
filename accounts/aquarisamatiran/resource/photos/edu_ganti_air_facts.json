@@ -1,87 +1,88 @@
 {
   "topic": "Ganti Air & Perawatan Aquarium",
   "display_name": "Ganti Air & Perawatan",
-  "subtitle": "Air Jernih, Ikan Sehat!",
+  "subtitle": "Bersih, Sehat, Cemerlang!",
   "scientific_name": "",
   "facts": [
     {
       "number": "01",
-      "title": "Mengapa Ganti Air Penting? 💧",
-      "description": "Ganti air rutin adalah kunci kualitas air optimal. Ini membantu menghilangkan nitrat, amonia, dan polutan lain yang menumpuk, menjaga lingkungan ikanmu tetap bersih dan sehat.",
+      "title": "Mengapa Ganti Air Penting? ♻️",
+      "description": "Ganti air rutin adalah kunci menjaga kualitas air optimal di aquariummu. Ini membantu menyingkirkan akumulasi nitrat beracun dan mengembalikan mineral esensial yang terkuras, menjaga ikanmu tetap sehat dan bahagia.",
       "tags": [
-        "KualitasAir",
-        "RacunAquarium",
-        "KesehatanIkan"
+        "Nitrat Rendah",
+        "Mineral Esensial",
+        "Kualitas Air"
       ]
     },
     {
       "number": "02",
-      "title": "Berapa Sering & Berapa Banyak? 🗓️",
-      "description": "Untuk pemula, ganti 20-30% air seminggu sekali adalah aturan emas. Sesuaikan frekuensi dan volume berdasarkan ukuran aquarium dan jumlah ikan (beban biologis) di dalamnya.",
+      "title": "Berapa Sering Ganti Air? ⏳",
+      "description": "Idealnya, ganti air seminggu sekali atau dua minggu sekali. Frekuensinya tergantung pada ukuran aquarium, jumlah ikan, dan efisiensi filtrasimu. Perhatikan selalu kondisi air dan perilaku ikan!",
       "tags": [
-        "FrekuensiGantiAir",
-        "VolumeAir",
-        "MaintenanceRutin"
+        "Jadwal Rutin",
+        "Beban Hayati",
+        "Observasi Ikan"
       ]
     },
     {
       "number": "03",
-      "title": "Air Seperti Apa yang Aman? 🌡️",
-      "description": "Gunakan air yang sudah diendapkan minimal 24 jam atau air keran yang diberi water conditioner untuk menghilangkan klorin berbahaya. Pastikan suhu air pengganti mirip dengan suhu aquarium agar ikan tidak kaget.",
+      "title": "Seberapa Banyak Ganti Air? 💧",
+      "description": "Umumnya, ganti air 25-50% dari volume total aquarium. Jangan pernah ganti seluruh air sekaligus karena bisa menyebabkan 'new tank syndrome' dan stres parah pada ikan.",
       "tags": [
-        "AirEndapan",
-        "WaterConditioner",
-        "SuhuStabil"
+        "Volume Air",
+        "Stres Ikan",
+        "Keseimbangan Mikroba"
       ]
     },
     {
       "number": "04",
-      "title": "Alat Wajib Ganti Air ✅",
-      "description": "Siapkan selang siphon khusus aquarium untuk menyedot air kotor dan sisa makanan dari dasar. Jangan lupa ember bersih dan water conditioner sebagai perlengkapan utamamu.",
+      "title": "Langkah Mudah Ganti Air ✅",
+      "description": "Matikan peralatan listrik, gunakan selang siphon untuk menyedot air kotor dan sisa makanan dari dasar. Bersihkan kaca jika perlu. Lalu isi kembali dengan air baru yang sudah dipersiapkan.",
       "tags": [
-        "SiphonAquarium",
-        "AlatAquarium",
-        "KebersihanDasar"
+        "Siphon",
+        "Kebersihan Kaca",
+        "Persiapan Air"
       ]
     },
     {
       "number": "05",
-      "title": "Vakum Substrat Jangan Lupa! 🧹",
-      "description": "Saat menyedot air, arahkan ujung siphon ke dasar substrat (pasir/kerikil). Ini sangat efektif untuk mengangkat kotoran tersembunyi, sisa makanan, dan detritus yang menumpuk di sela-sela.",
+      "title": "Pentingnya Kondisioner Air 🧪",
+      "description": "Air keran mengandung klorin dan kloramin yang berbahaya bagi ikan. Selalu gunakan kondisioner air (dechlorinator) untuk menetralkan zat-zat tersebut sebelum memasukkan air baru ke aquariummu.",
       "tags": [
-        "VakumDasar",
-        "SisaMakanan",
-        "SubstratBersih"
+        "Deklorinasi",
+        "Air Keran",
+        "Aman Ikan"
       ]
     },
     {
       "number": "06",
-      "title": "Rawat Filter Biologis dengan Tepat 🦠",
-      "description": "Penting: Jangan pernah mencuci media filter (spons, bioball) dengan air keran! Cukup bilas perlahan menggunakan air bekas aquarium saat kamu ganti air, agar koloni bakteri baik tidak mati.",
+      "title": "Vakum Dasar Aquariummu 🧹",
+      "description": "Saat ganti air, manfaatkan siphon untuk membersihkan kotoran dan sisa makanan yang terperangkap di substrat. Ini mencegah pembusukan dan penumpukan amonia yang tidak diinginkan.",
       "tags": [
-        "FilterAquarium",
-        "BakteriBaik",
-        "MediaFilter"
+        "Substrat Bersih",
+        "Sedimen",
+        "Pencegahan Amonia"
       ]
     },
     {
       "number": "07",
-      "title": "Kaca Bersih, Pemandangan Apik ✨",
-      "description": "Sikat atau bersihkan lumut/alga yang menempel pada kaca aquarium saat ganti air. Gunakan pembersih magnetik atau algae scraper khusus untuk menjaga kejernihan pandanganmu.",
+      "title": "Perawatan Filter yang Benar ⚙️",
+      "description": "Jangan bersihkan filter secara berlebihan dengan air keran! Cukup bilas media filter biologis (busa, keramik) di air bekas aquariummu agar bakteri baik tetap terjaga. Ganti media mekanis (kapas) secara berkala.",
       "tags": [
-        "AlgaeScraper",
-        "KacaAquarium",
-        "BersihLumut"
+        "Bakteri Baik",
+        "Media Filter",
+        "Air Bekas"
       ]
     },
     {
       "number": "08",
-      "title": "Jangan Bersihkan Semua Sekaligus! ⚠️",
-      "description": "Hindari membersihkan semua komponen aquarium (kaca, filter, dan ganti air besar-besaran) secara bersamaan. Tindakan ekstrem ini bisa menghilangkan terlalu banyak bakteri baik dan merusak siklus nitrogen, membahayakan ikanmu.",
+      "title": "Kapan Harus Ganti Air Ekstra? 🚨",
+      "description": "Perhatikan tanda-tanda seperti air keruh, bau tidak sedap, pertumbuhan alga berlebihan, atau ikan terlihat lesu dan megap-megap. Ini adalah sinyal bahwa kualitas air memburuk dan perlu tindakan cepat.",
       "tags": [
-        "JanganOverclean",
-        "BakteriBaik",
-        "NitrogenCycle"
+        "Air Keruh",
+        "Bau Busuk",
+        "Alga",
+        "Ikan Lesu"
       ]
     }
   ],

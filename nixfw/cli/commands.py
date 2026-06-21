@@ -35,6 +35,7 @@ def _notify_telegram(msg: str):
 from nixfw.ig_client import InstagramClient, parse_schedule
 from nixfw.editor import replace_audio, compress_video, upload_file, copy_to_published, VIDEO_DIR, MUSIC_DIR, PHOTO_DIR, OUTPUT_DIR, PUBLISHED_DIR, MAX_UPLOAD_MB
 from nixfw.curriculum.manager import cmd_curriculum
+from nixfw.bio.generator import update_bio
 from nixfw.cli.refresh_token import main as _refresh_token_main
 
 import PIL.Image
@@ -412,6 +413,8 @@ def cmd_post_carousel(client, args):
 
     # Update curriculum_content.json
     _update_curriculum_content(latest_prefix, result_id=media_id, status="live", caption=caption)
+    # Update bio page
+    update_bio(account=config.ACCOUNT_NAME)
 
 
 _UPLOAD_MAP = Path("resource") / ".uploaded.json"

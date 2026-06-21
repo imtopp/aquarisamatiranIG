@@ -884,8 +884,9 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
         m = re.match(r"[CS](\d+)(?:\.(\d+))?#(\d+)", topic_ref)
         if m:
-            s_num, t_num = m.group(1), m.group(3).zfill(2)
-            t = cc.get("topics", {}).get(s_num, {}).get(t_num, {})
+            s_num, sc, t_num_seq = m.group(1), m.group(2) or "1", m.group(3).zfill(2)
+            num_key = _seq_to_key(cc, s_num, sc, t_num_seq) if m.group(2) else t_num_seq
+            t = cc.get("topics", {}).get(s_num, {}).get(num_key, {}) if num_key else {}
             st = t.get("status")
             if st == "live":
                 await update.message.reply_text(f"❌ `{topic_ref}` udah live, gak bisa dipost lagi~")

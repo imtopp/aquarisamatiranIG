@@ -627,11 +627,13 @@ def telegram_add_topic(cat_id: str, subcat: str, title: str, slug: str | None = 
 
 def telegram_edit_topic(topic_ref: str, **fields) -> str:
     """Edit topic fields. Supported: title, slug, status, subcategory, display_name, subtitle, keywords, scheduled_time."""
-    m = re.match(r'[CS](\d+)#(\d+)', topic_ref)
-    if not m:
+    if not re.match(r'[CS]\d+(?:\.\d+)?#\d+', topic_ref):
         return f"❌ Format topic_ref salah: {topic_ref}"
-    cat_id, num = m.group(1), m.group(2).zfill(2)
     data = load()
+    resolved = resolve_ref(topic_ref, data)
+    if not resolved:
+        return f"❌ {topic_ref} tidak ditemukan"
+    cat_id, num = resolved
     st = _get_category_topics(data, cat_id)
     if num not in st:
         return f"❌ {topic_ref} tidak ditemukan"
@@ -649,11 +651,13 @@ def telegram_edit_topic(topic_ref: str, **fields) -> str:
 
 def telegram_delete_topic(topic_ref: str) -> str:
     """Delete a topic and renumber. Returns result message."""
-    m = re.match(r'[CS](\d+)#(\d+)', topic_ref)
-    if not m:
+    if not re.match(r'[CS]\d+(?:\.\d+)?#\d+', topic_ref):
         return f"❌ Format topic_ref salah: {topic_ref}"
-    cat_id, num = m.group(1), m.group(2).zfill(2)
     data = load()
+    resolved = resolve_ref(topic_ref, data)
+    if not resolved:
+        return f"❌ {topic_ref} tidak ditemukan"
+    cat_id, num = resolved
     st = _get_category_topics(data, cat_id)
     if num not in st:
         return f"❌ {topic_ref} tidak ditemukan"
@@ -665,11 +669,13 @@ def telegram_delete_topic(topic_ref: str) -> str:
 
 def telegram_move_topic(topic_ref: str, target_cat: str, target_sc: str) -> str:
     """Move a topic to another category/subcategory. Returns result message."""
-    m = re.match(r'[CS](\d+)#(\d+)', topic_ref)
-    if not m:
+    if not re.match(r'[CS]\d+(?:\.\d+)?#\d+', topic_ref):
         return f"❌ Format topic_ref salah: {topic_ref}"
-    src_cat, num = m.group(1), m.group(2).zfill(2)
     data = load()
+    resolved = resolve_ref(topic_ref, data)
+    if not resolved:
+        return f"❌ {topic_ref} tidak ditemukan"
+    src_cat, num = resolved
     if target_cat not in data.get("categories", {}):
         return f"❌ Category {target_cat} tidak ditemukan"
     src_topics = _get_category_topics(data, src_cat)

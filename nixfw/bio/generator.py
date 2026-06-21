@@ -9,6 +9,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from jinja2 import Environment, FileSystemLoader
 
+
+
 WIB = timezone(timedelta(hours=7))
 MONTHS_ID = {1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "Mei", 6: "Jun",
              7: "Jul", 8: "Agu", 9: "Sep", 10: "Okt", 11: "Nov", 12: "Des"}
@@ -25,28 +27,40 @@ def fmt_date(dt):
     return f"{dt.day} {MONTHS_ID[dt.month]} {dt.strftime('%H:%M')}"
 
 
-def build_card_statuses(schedule):
+def _ref_to_card_key(source_ref, truth):
+    """Resolve source_ref (C1.2#01 or C1#07) to integer dict_key for status lookup."""
+    if truth:
+        from nixfw.curriculum.manager import resolve_ref
+        resolved = resolve_ref(source_ref, truth)
+        if resolved:
+            return int(resolved[1])  # (cid, num_key) → int(num_key)
+    m = re.search(r'#(\d+)', source_ref)
+    if m:
+        return int(m.group(1))
+    return None
+
+
+def build_card_statuses(schedule, truth=None):
     statuses = {}
     for entry in schedule:
         source_ref = entry.get("source_ref") or entry.get("curriculum")
         if not source_ref:
             continue
-        m = re.search(r'#(\d+)', source_ref)
-        if not m:
+        card_key = _ref_to_card_key(source_ref, truth)
+        if card_key is None:
             continue
-        card_num = int(m.group(1))
         permalink = entry.get("permalink", "")
         if entry.get("done"):
-            statuses[card_num] = {"tag_class": "tag-live", "tag_text": "✅ Live", "permalink": permalink}
+            statuses[card_key] = {"tag_class": "tag-live", "tag_text": "✅ Live", "permalink": permalink}
         else:
             dt = parse_time(entry.get("time"))
             if dt and dt > datetime.now(WIB):
-                statuses[card_num] = {"tag_class": "tag-soon", "tag_text": f"📅 {fmt_date(dt)}", "permalink": permalink}
+                statuses[card_key] = {"tag_class": "tag-soon", "tag_text": f"📅 {fmt_date(dt)}", "permalink": permalink}
             else:
                 if dt:
-                    statuses[card_num] = {"tag_class": "tag-live", "tag_text": "✅ Live", "permalink": permalink}
+                    statuses[card_key] = {"tag_class": "tag-live", "tag_text": "✅ Live", "permalink": permalink}
                 else:
-                    statuses[card_num] = {"tag_class": "tag-empty", "tag_text": "🔜", "permalink": permalink}
+                    statuses[card_key] = {"tag_class": "tag-empty", "tag_text": "🔜", "permalink": permalink}
     return statuses
 
 
@@ -87,7 +101,7 @@ def update_bio(schedule=None, account: str = "aquarisamatiran"):
         else:
             schedule = json.loads(sched_path.read_text(encoding="utf-8"))
 
-    statuses = build_card_statuses(schedule)
+    statuses = build_card_statuses(schedule, truth)
     _merge_permalinks(statuses, topics)
 
     config = {}

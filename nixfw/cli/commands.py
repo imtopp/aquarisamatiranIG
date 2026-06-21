@@ -178,15 +178,27 @@ def _add_schedule_entry(slug: str, ptype: str, urls_or_url: str | list[str],
     topic_uuid = ""
     if curriculum_key:
         m = re.match(r"[CS](\d+)\.(\d+)#(\d+)", curriculum_key)
-        if not m:
-            m = re.match(r"[CS](\d+)#(\d+)", curriculum_key)
         if m:
+            s_num, sc, seq = m.group(1), m.group(2), m.group(3).zfill(2)
             try:
                 cc = json.loads(config.CONTENT_PATH.read_text(encoding="utf-8"))
-                t = cc.get("topics", {}).get(m.group(1), {}).get(m.group(2), {})
+                st = cc.get("topics", {}).get(s_num, {})
+                items = sorted([(int(k), k) for k, v in st.items() if v.get("subcategory", "1") == sc])
+                idx = int(seq) - 1
+                num_key = items[idx][1] if 0 <= idx < len(items) else seq
+                t = st.get(num_key, {})
                 topic_uuid = t.get("id", "")
             except Exception:
                 pass
+        else:
+            m = re.match(r"[CS](\d+)#(\d+)", curriculum_key)
+            if m:
+                try:
+                    cc = json.loads(config.CONTENT_PATH.read_text(encoding="utf-8"))
+                    t = cc.get("topics", {}).get(m.group(1), {}).get(m.group(2).zfill(2), {})
+                    topic_uuid = t.get("id", "")
+                except Exception:
+                    pass
     entry = {
         "source_ref": curriculum_key,
         "time": time_str,
@@ -1171,8 +1183,15 @@ def cmd_generate_carousel_sd(_client, args):
             cc = json.loads(cc_path.read_text(encoding="utf-8"))
             m = re.match(r"[CS](\d+)(?:\.(\d+))?#(\d+)", topic)
             if m:
-                s_num, t_num = m.group(1), m.group(3).zfill(2)
-                t = cc.get("topics", {}).get(s_num, {}).get(t_num)
+                s_num, sc, t_num_seq = m.group(1), m.group(2) or "1", m.group(3).zfill(2)
+                if m.group(2):
+                    st = cc.get("topics", {}).get(s_num, {})
+                    items = sorted([(int(k), k) for k, v in st.items() if v.get("subcategory", "1") == sc])
+                    idx = int(t_num_seq) - 1
+                    num_key = items[idx][1] if 0 <= idx < len(items) else t_num_seq
+                else:
+                    num_key = t_num_seq
+                t = cc.get("topics", {}).get(s_num, {}).get(num_key, {})
                 if t:
                     topic_name = t.get("display_name", t.get("title", topic))
                     season_tag = f"{format_ref(cc, s_num, t_num)} "
@@ -1792,9 +1811,17 @@ def cmd_clean(_client, args):
         if not cpath.exists():
             return
         d = json.loads(cpath.read_text(encoding='utf-8'))
-        m = re.match(r'C(\d+)#(\d+)', tag)
+        m = re.match(r'[CS](\d+)(?:\.(\d+))?#(\d+)', tag)
         if m:
-            topic = d.get('topics', {}).get(m.group(1), {}).get(m.group(2))
+            s_num, sc, t_seq = m.group(1), m.group(2) or "1", m.group(3).zfill(2)
+            if m.group(2):
+                st = d.get("topics", {}).get(s_num, {})
+                items = sorted([(int(k), k) for k, v in st.items() if v.get("subcategory", "1") == sc])
+                idx = int(t_seq) - 1
+                num_key = items[idx][1] if 0 <= idx < len(items) else t_seq
+            else:
+                num_key = t_seq
+            topic = d.get('topics', {}).get(s_num, {}).get(num_key)
             if topic:
                 topic['status'] = 'planned'
                 for field in ['scheduled_time', 'display_name', 'subtitle',

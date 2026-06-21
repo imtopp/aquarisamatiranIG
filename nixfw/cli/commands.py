@@ -167,7 +167,7 @@ def _find_topic_title_by_slug(slug: str) -> str | None:
 
 
 def _add_schedule_entry(slug: str, ptype: str, urls_or_url: str | list[str],
-                         caption: str, time_str: str):
+                         caption: str, time_str: str, done: bool = False):
     """Tambah entry ke schedule.json."""
     import json
     spath = config.SCHEDULE_PATH
@@ -178,7 +178,7 @@ def _add_schedule_entry(slug: str, ptype: str, urls_or_url: str | list[str],
         "time": time_str,
         "type": ptype,
         "caption": caption,
-        "done": False,
+        "done": done,
         "category": 1,
     }
     if ptype == "carousel":
@@ -413,6 +413,10 @@ def cmd_post_carousel(client, args):
 
     # Update curriculum_content.json
     _update_curriculum_content(latest_prefix, result_id=media_id, status="live", caption=caption)
+    # Add done entry ke schedule.json biar bio page tau
+    from datetime import datetime
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    _add_schedule_entry(latest_prefix, "carousel", urls, caption, now_str, done=True)
     # Update bio page
     update_bio(account=config.ACCOUNT_NAME)
 

@@ -391,10 +391,17 @@ def cmd_post_carousel(client, args):
         print(f"\n📅 Carousel masuk antrian schedule.json: {dt.strftime('%Y-%m-%d %H:%M')}")
         return
 
-    # IG caption limit: 2200 chars
-    if len(caption) > 2200:
-        print(f"⚠️ Caption kepanjangan ({len(caption)} chars), dipotong ke 2200")
-        caption = caption[:2197] + "..."
+    # IG caption limit: 2200 chars — potong di batas kalimat
+    MAX_CAPTION = 2200
+    if len(caption) > MAX_CAPTION:
+        truncated = caption[:MAX_CAPTION - 1]
+        last_period = truncated.rfind(".")
+        last_newline = truncated.rfind("\n")
+        cut = max(last_period, last_newline) + 1
+        if cut < MAX_CAPTION // 2:
+            cut = MAX_CAPTION - 1
+        caption = caption[:cut]
+        print(f"⚠️ Caption kepanjangan ({len(caption)} chars), dipotong ke {cut} chars")
     result = client.post_carousel(urls, caption, scheduled_publish_time=None)
     media_id = result.get("id")
     print(f"✅ Carousel berhasil di-publish! ID: {media_id}")

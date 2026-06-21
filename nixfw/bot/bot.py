@@ -662,14 +662,15 @@ async def _generate_caption(facts_json: dict | None, topic: str) -> str:
         return _build_caption_from_facts(topic, facts_json, handle)
 
     system_text = (
-        f"Kamu adalah asisten pembuat konten Instagram untuk akun {handle}.\n"
+        f"Kamu adalah alat pembuat caption Instagram untuk akun {handle}.\n"
+        "Output HANYA caption — tanpa intro, tanpa penjelasan, tanpa markdown.\n"
         f"Gaya bicara: {tone}.\n"
-        "Beri informasi bermanfaat, ajak diskusi, jangan terlalu formal, jangan pake gaya genit/flirty.\n"
+        "Beri informasi bermanfaat, ajak diskusi.\n"
         f"Tujuan: {mission}."
     )
 
     prompt_parts = [
-        f"Buat caption Instagram dalam bahasa Indonesia untuk konten {niche} dengan topik: {topic}."
+        f"Buat caption Instagram dalam bahasa Indonesia untuk konten {niche} dengan topik: {topic}. OUTPUT HANYA CAPTION, TANPA TEKS TAMBAHAN."
     ]
     if facts_json and "facts" in facts_json:
         prompt_parts.append("\nFakta-fakta dalam konten ini:")
@@ -679,7 +680,6 @@ async def _generate_caption(facts_json: dict | None, topic: str) -> str:
         f"\nInclude ajakan diskusi. "
         f"IG caption maksimal 2200 karakter (termasuk hashtag). "
         f"Buat caption sekitar 1800 karakter biar ada ruang buat hashtag. "
-        f"PASTIKAN total caption + hashtag ≤ 2200 karakter. "
         f"Sertakan hashtag #{name} dan hashtag relevan lainnya di akhir."
     )
 
@@ -1031,14 +1031,18 @@ async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pass
 
     caption_system = (
-        "Kamu adalah asisten pembuat konten Instagram untuk akun aquascape @aquarisamatiran. "
-        "Gaya bicara: santai, edukatif, engaging, akrab. Pake bahasa Indonesia sehari-hari, "
-        "jangan genit/flirty. Tujuan: ngajarin follower aquarium dari nol dengan cara yang asyik."
+        "Kamu adalah alat pembuat caption Instagram untuk akun aquascape @aquarisamatiran. "
+        "Tugasmu: OUTPUT HANYA CAPTION — tanpa penjelasan, tanpa intro, tanpa 'tentu', tanpa markdown berlebih. "
+        "Gaya: santai, edukatif, engaging, akrab, bahasa Indonesia sehari-hari. "
+        "Maksimal 1800 karakter."
     )
 
-    context_lines = [f"Instruksi: {instruction}"]
+    context_lines = [
+        f"Edit caption sesuai instruksi ini: {instruction}",
+        "Output: HANYA caption yang sudah diedit, TANPA teks tambahan apapun.",
+    ]
     if existing_caption:
-        context_lines.append(f"\nCaption sekarang:\n{existing_caption[:1500]}")
+        context_lines.append(f"\nCaption lama:\n{existing_caption[:1500]}")
     elif facts_json and "facts" in facts_json:
         context_lines.append("\nFakta dalam konten:")
         for f in facts_json["facts"]:

@@ -32,13 +32,13 @@
     "time": "",
     "type": "carousel",
     "done": true,
-    "permalink": "https://www.instagram.com/p/DZU5WSCDZxh/",
-    "result_id": "17882725962597921",
+    "permalink": "https://ig.example/p/01",
+    "result_id": "post_01",
     "urls": [],
     "caption": "",
     "category": 1,
     "source_ref": "C1.1#01",
-    "topic_uuid": "c3e463eb-34e6-4246-96ef-36aa0b96593e"
+    "topic_uuid": "e90a8b6e-771d-4ddd-a843-ed163478af63"
   },
   {
     "time": "",
@@ -53,45 +53,9 @@
     "topic_uuid": "5aa74c7d-99a6-4edc-9206-b88e2d68566d"
   },
   {
-    "time": "",
-    "type": "carousel",
-    "done": true,
-    "permalink": "https://www.instagram.com/p/DZSPFw2Hfk6/",
-    "result_id": "18329549080271215",
-    "urls": [],
-    "caption": "",
-    "category": 1,
-    "source_ref": "C1.1#03",
-    "topic_uuid": "ead7c7c0-f42d-4188-93f8-a8c848843258"
-  },
-  {
-    "time": "2026-06-12 19:00",
-    "type": "carousel",
-    "done": true,
-    "permalink": "https://www.instagram.com/p/DZena-bgWEm/",
-    "result_id": "18590795848054190",
-    "urls": [],
-    "caption": "Pengen beli ikan tapi bingung mulai dari mana? ≡ƒÿ⌐\n\nNah ini dia panduan milih ikan pertama biar gak nyesel — karena percaya deh, asal-asalan masukin ikan itu resep bencana ≡ƒÿ¡ (udah pernah, tau rasanya wkwk)\n\nYang dibahas:\n≡ƒÆ¬ Pilih spesies tangguh — jangan langsung yang mahal & rare\n≡ƒôÅ Cek ukuran dewasa — ikan kecil lucu? bisa gede 30cm lho!\n≡ƒÉƒ Karakter ikan — ada yg preman, ada yg kalem\n≡ƒæÑ Suka sendiri atau butuh teman?\n≡ƒì╜∩╕Å Pakan yang praktis\n≡ƒîè Zona renang — si atas, tengah, bawah\n\nUdah selesai siklus airnya? Cek dulu post siklus nitrogen aku ya biar aman! ≡ƒî▒",
-    "category": 1,
-    "source_ref": "C1.1#04",
-    "topic_uuid": "65b70748-7642-4037-a4af-dafb2b0c66af"
-  },
-  {
-    "time": "2026-06-14 09:00",
-    "type": "carousel",
-    "done": true,
-    "permalink": "https://www.instagram.com/p/DZjSgOzmNn0/",
-    "result_id": "17954976801160939",
-    "urls": [],
-    "caption": "Rutinitas mingguan yang wajib kamu lakuin biar aquarium tetap sehat! ≡ƒùô∩╕Å≡ƒî┐\n\nGak perlu ribet kok, cuma 6 langkah simpel:\n≡ƒ¬ú Ganti air 20-30%\n≡ƒº╣ Siphon kotoran dasar\n≡ƒº╜ Gosok alga di kaca\n≡ƒ½º Bilas busa filter\nΓ£é∩╕Å Pangkas tanaman layu\n≡ƒº¬ Tes parameter air\n\nUdah bahas filter di post Filter Aquarium? Ini penting banget biar kamu tau gimana cara rawat filternya! ≡ƒÿë",
-    "category": 1,
-    "source_ref": "C1.1#05",
-    "topic_uuid": "dfdbbe95-c60a-4238-a56d-ba0df7a9ce61"
-  },
-  {
     "time": "2026-06-17 19:00",
     "type": "carousel",
-    "done": true,
+    "done": false,
     "urls": [
       "https://files.catbox.moe/q08uy6.png",
       "https://files.catbox.moe/cwcgea.png",
@@ -104,10 +68,10 @@
     ],
     "caption": "Pernah frustrasi liat aquarium penuh alga hijau? 🫥\n\nDi episode kali ini, kita bedah tuntas: si hijau ini musuh atau guru?\n\nSpoiler: Ternyata dua-duanya! Alga punya peran baik sebagai sumber pakan alami & oksigen buat ekosistem. Tapi kalo udah bloom, bisa bikin aquarium kacau dan nutrisi ketarik abis.\n\nTerus gimana dong? Kuncinya bukan basmi total, tapi jaga keseimbangan:\n🌿 Atur cahaya max 6-8 jam/hari\n🌿 Kurangi pakan berlebih\n🌿 Rajin ganti air\n🌿 Banyakin tanaman kompetitor\n\nYang paling penting: alga itu guru yang ngasih sinyal kondisi aquarium kamu. Daripada sebel, yuk belajar baca tanda-tandanya!\n\nKalau kalian sendiri, alga jenis apa yang paling sering muncul di tank? Share di kolom komentar ya 👇\n\n#Aquarisamatiran #AquascapeIndonesia #AlgaAquarium #TutorialAquascape #AquariumHobby #BelajarAquascape #EdukasiAquarium #SiHijau #TankMaintenance",
     "category": 1,
-    "source_ref": "C1.1#06",
+    "source_ref": "C1.1#02",
     "result_id": "18119904010783440",
     "permalink": "https://www.instagram.com/p/DZmxTAFkxdl/",
-    "topic_uuid": "ab0e176f-c8c5-4e61-92d6-d625f54b2cd1"
+    "topic_uuid": "d3268bc0-e9f9-4a0a-ba07-af7ce400e3b4"
   },
   {
     "source_ref": "C1.2#01",
@@ -140,47 +104,5 @@
       "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/tanaman_dasar_sd_10_cta.jpg"
     ],
     "topic_uuid": "b56ee86d-0eff-4db5-9916-661ecd9f2bbf"
-  },
-  {
-    "source_ref": "C1.2#03",
-    "time": "2026-06-22 19:00",
-    "type": "carousel",
-    "caption": "Aquascape kinclong dan sehat selalu? Pasti idaman banget kan! 😉 Rahasianya cuma satu: RUTIN GANTI AIR!\n\nIni bukan cuma bikin bening kayak kaca, tapi juga cara paling ampuh buang racun tak kasat mata (nitrat, dll) yang numpuk. Kualitas air terjaga, ikan sehat, tanaman makin subur! Ibarat rumah, perlu dibersihin biar nyaman kan?\n\nTips simpelnya:\n*   Idealnya seminggu sekali, sekitar 25-50% volume akuarium. (INGAT: jangan semua ya, ikan bisa stress!)\n*   Wajib pakai kondisioner air/dechlorinator tiap kali nambah air baru. Penting banget biar klorin di air keran aman buat si ikan.\n\nGampang kan? Udah praktek rutin belum nih? Atau masih bingung cara ganti air yang bener? Yuk, share pengalaman dan pertanyaanmu di kolom komentar! 👇",
-    "done": false,
-    "category": 1,
-    "urls": [
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/ganti_air_sd_01_cover.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/ganti_air_sd_02_fact_01.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/ganti_air_sd_03_fact_02.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/ganti_air_sd_04_fact_03.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/ganti_air_sd_05_fact_04.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/ganti_air_sd_06_fact_05.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/ganti_air_sd_07_fact_06.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/ganti_air_sd_08_fact_07.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/ganti_air_sd_09_fact_08.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/ganti_air_sd_10_cta.jpg"
-    ],
-    "topic_uuid": "bd6b1f2b-c31e-4f79-9813-701e6c2c3990"
-  },
-  {
-    "source_ref": "C1.2#04",
-    "time": "2026-06-23 12:00",
-    "type": "carousel",
-    "caption": "Pernah ngalamin ikan di akuarium sakit? 😥 Jangan langsung mikir 'sial' atau 'kok bisa ya', gengs! Faktanya, penyakit pada ikan itu seringkali muncul karena faktor lingkungan di akuarium kita yang kurang optimal. Jadi, bukan cuma nasib, tapi juga tanggung jawab kita buat jaga mereka!\n\nNah, kuncinya itu deteksi dini! 🕵️‍♀️ Coba deh perhatiin baik-baik tingkah laku atau perubahan fisik ikanmu. Kalau mendadak jadi lesu, suka ngumpet di pojokan, atau anehnya kok sering gesek-gesekin badannya ke pasir atau dekorasi, itu bisa jadi sinyal awal lho! Jangan disepelekan.\n\nBeberapa penyakit yang sering nyerang ikan peliharaan:\n⚪ **White Spot (Ich)**: Ini nih parasit paling populer di kalangan aquarist! Ikanmu bakal kelihatan kayak ditaburi garam atau titik-titik putih kecil di badan sama siripnya. Ini gampang banget nularnya ke ikan lain!\n🩹 **Fin Rot & Body Rot**: Sirip ikanmu jadi sobek, bolong, atau bahkan ada bagian yang membusuk? Nah, ini ciri khas fin rot. Seringnya sih karena kualitas air yang jelek, stres, atau luka.\n🍄 **Penyakit Jamur**: Kalo ada bercak putih mirip kapas atau bulu halus di badan atau sirip ikan, fix itu infeksi jamur. Biasanya muncul pas ikan lagi lemah daya tahannya atau ada luka terbuka.\n\nPencegahan itu penting banget biar ikanmu sehat terus!\n🏥 **Karantina itu Wajib!**: Setiap beli ikan baru, mending karantina dulu di akuarium terpisah selama 2-4 minggu. Ini penting banget buat mastiin ikan baru bebas penyakit atau parasit sebelum gabung sama penghuni lama di akuarium utama.\n💧 **Jaga Kualitas Air**: Ini fondasi utama dan kunci banget untuk kesehatan ikanmu! Lakukan pergantian air rutin (misal 20-30% seminggu sekali), pantau parameter air (pH, amonia, nitrit, nitrat). Air yang bersih dan stabil itu 'vaksin' terbaik buat ikanmu.\n\nKalo udah kelihatan tanda-tanda penyakit, jangan tunda lagi! ⏰ Jangan panik, tapi segera bertindak. Langsung identifikasi masalahnya dan mulai penanganan yang tepat. Semakin cepat kamu tanggap, semakin besar peluang ikanmu untuk pulih dan sehat kembali!\n\nKalo kalian, pengalaman penyakit ikan yang paling sering dialamin apa nih? Atau ada tips jitu lain buat ngatasin penyakit ikan? Share yuk di kolom komentar! 👇\n\n",
-    "done": false,
-    "category": 1,
-    "urls": [
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/penyakit_ikan_sd_01_cover.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/penyakit_ikan_sd_02_fact_01.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/penyakit_ikan_sd_03_fact_02.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/penyakit_ikan_sd_04_fact_03.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/penyakit_ikan_sd_05_fact_04.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/penyakit_ikan_sd_06_fact_05.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/penyakit_ikan_sd_07_fact_06.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/penyakit_ikan_sd_08_fact_07.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/penyakit_ikan_sd_09_fact_08.jpg",
-      "https://raw.githubusercontent.com/imtopp/aquarisamatiranIG/main/accounts/aquarisamatiran/resource/photos/penyakit_ikan_sd_10_cta.jpg"
-    ],
-    "topic_uuid": "09f00cdc-f862-4d27-b59d-7ebbd608b265"
   }
 ]

@@ -239,10 +239,10 @@ def _read_schedule() -> str:
     now = datetime.date.today()
     cc = {}
     try:
-    cc_raw = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
-    for cid, ts in cc_raw.get("topics", {}).items():
-        for t_num, t in ts.items():
-            cc[format_ref(cc_raw, cid, t_num)] = t.get("title", "")
+        cc_raw = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        for cid, ts in cc_raw.get("topics", {}).items():
+            for t_num, t in ts.items():
+                cc[format_ref(cc_raw, cid, t_num)] = t.get("title", "")
     except Exception:
         pass
     done, upcoming = [], []

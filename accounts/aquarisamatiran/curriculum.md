@@ -18,30 +18,30 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 ### Subcategory 2: Mulai Pede
 | # | Topik | Status |
 |---|-------|--------|
-| 07 | Macam-macam Filter | ✅ |
-| 08 | Tanaman Aquascape Pemula | 📅 |
-| 09 | Ganti Air & Perawatan | 📅 |
-| 10 | Penyakit Ikan | 📅 |
-| 11 | Parameter Air | ⬜ |
-| 12 | Substrate Deep Dive | ⬜ |
+| 01 | Macam-macam Filter | ✅ |
+| 02 | Tanaman Aquascape Pemula | 📅 |
+| 03 | Ganti Air & Perawatan | 📅 |
+| 04 | Penyakit Ikan | 📅 |
+| 05 | Parameter Air | ⬜ |
+| 06 | Substrate Deep Dive | ⬜ |
 
 ### Subcategory 3: Naik Kelas
 | # | Topik | Status |
 |---|-------|--------|
-| 13 | CO2 & Pupuk | ⬜ |
-| 14 | Hardscape & Layout | ⬜ |
-| 15 | Gaya Aquascape | ⬜ |
-| 16 | Udang & Keong | ⬜ |
-| 17 | Aklimatisasi & Karantina | ⬜ |
-| 18 | Pakan & Nutrisi | ⬜ |
+| 01 | CO2 & Pupuk | ⬜ |
+| 02 | Hardscape & Layout | ⬜ |
+| 03 | Gaya Aquascape | ⬜ |
+| 04 | Udang & Keong | ⬜ |
+| 05 | Aklimatisasi & Karantina | ⬜ |
+| 06 | Pakan & Nutrisi | ⬜ |
 
 ### Subcategory 4: Advanced
 | # | Topik | Status |
 |---|-------|--------|
-| 19 | Dry Start Method | ⬜ |
-| 20 | Tank Mates | ⬜ |
-| 21 | DIY Aksesoris | ⬜ |
-| 22 | Rescape & Evolusi | ⬜ |
+| 01 | Dry Start Method | ⬜ |
+| 02 | Tank Mates | ⬜ |
+| 03 | DIY Aksesoris | ⬜ |
+| 04 | Rescape & Evolusi | ⬜ |
 
 ## 🌱 Category 2: Hidupkan Aquascape-mu: Jelajah Ragam Fauna & Flora
 

@@ -664,23 +664,23 @@ async def _generate_caption(facts_json: dict | None, topic: str) -> str:
     system_text = (
         f"Kamu adalah alat pembuat caption Instagram untuk akun {handle}.\n"
         "Output HANYA caption — tanpa intro, tanpa penjelasan, tanpa markdown.\n"
+        "Hashtag adalah BAGIAN dari caption, jangan dipisah.\n"
         f"Gaya bicara: {tone}.\n"
         "Beri informasi bermanfaat, ajak diskusi.\n"
         f"Tujuan: {mission}."
     )
 
     prompt_parts = [
-        f"Buat caption Instagram dalam bahasa Indonesia untuk konten {niche} dengan topik: {topic}. OUTPUT HANYA CAPTION, TANPA TEKS TAMBAHAN."
+        f"Buat caption Instagram dalam bahasa Indonesia untuk konten {niche} dengan topik: {topic}. Langsung mulai dengan teks caption — jangan pake kata pembuka."
     ]
     if facts_json and "facts" in facts_json:
         prompt_parts.append("\nFakta-fakta dalam konten ini:")
         for f in facts_json["facts"]:
             prompt_parts.append(f"- {f.get('number','')}. {f.get('title','')}: {f.get('description','')[:100]}")
     prompt_parts.append(
-        f"\nInclude ajakan diskusi. "
-        f"IG caption maksimal 2200 karakter (termasuk hashtag). "
-        f"Buat caption sekitar 1800 karakter biar ada ruang buat hashtag. "
-        f"Sertakan hashtag #{name} dan hashtag relevan lainnya di akhir."
+        f"\nInclude ajakan diskusi dan hashtag #aquarisamatiran di akhir. "
+        f"Maksimal 2200 karakter total. "
+        f"Hashtag termasuk dalam hitungan karakter."
     )
 
     text = _today_context() + "\n\n" + system_text + "\n\n" + "\n".join(prompt_parts)
@@ -914,7 +914,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = (
         f"📋 **{topic_display}** ({len(slides)} slide)\n"
         f"📅 Jadwal: {schedule_time}\n\n"
-        f"📝 **Caption:**\n{caption[:1000]}\n\n"
+        f"📝 **Caption (full):**\n{caption[:4000]}\n\n"
         f"`/post confirm` → upload & jadwal\n"
         f"`/post confirm --now` → publish langsung sekarang\n"
         f"`/post caption <instruksi>` → ganti caption\n"

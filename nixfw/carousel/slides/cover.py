@@ -42,16 +42,16 @@ def build_cover(facts: dict, subject_img: Image.Image | None, bg_image: Image.Im
     else:
         img_y += 140
 
-    # Subtitle / tagline
-    subtitle = facts.get("subtitle", "")
+    # Display name — tagline/hook
+    display_name = facts.get("display_name", "")
     ct_y = img_y + 10
-    if subtitle:
-        draw_text_fallback(draw, ((W - draw.textbbox((0, 0), subtitle, font=font_subtitle)[2]) // 2, ct_y), subtitle, font_subtitle, font_emoji_sub, fill=text_sub + (255,))
+    if display_name:
+        draw_text_fallback(draw, ((W - draw.textbbox((0, 0), display_name, font=font_subtitle)[2]) // 2, ct_y), display_name, font_subtitle, font_emoji_sub, fill=text_sub + (255,))
         ct_y += 50
 
-    # Display name (large title)
-    display = facts.get("display_name") or facts.get("topic", "")
-    lines = wrap_text(display, font_title, W - 80, draw)
+    # Topic — main title
+    topic = facts.get("topic", "")
+    lines = wrap_text(topic, font_title, W - 80, draw)
     ly = ct_y + 10
     for line in lines:
         bb = draw.textbbox((0, 0), line, font=font_title)
@@ -59,12 +59,12 @@ def build_cover(facts: dict, subject_img: Image.Image | None, bg_image: Image.Im
         draw_text_fallback(draw, ((W - lw) // 2, ly), line, font_title, font_emoji, fill=accent2 + (255,))
         ly += 70
 
-    # Scientific name
-    scientific = facts.get("scientific_name", "")
-    if scientific and scientific not in ("N/A", "None", ""):
-        bbox = draw.textbbox((0, 0), scientific, font=font_subtitle)
+    # Subtitle — description
+    subtitle = facts.get("subtitle", "")
+    if subtitle and subtitle not in ("N/A", "None", ""):
+        bbox = draw.textbbox((0, 0), subtitle, font=font_subtitle)
         sw = bbox[2] - bbox[0]
-        draw.text(((W - sw) // 2, ly + 10), scientific, fill=text_sub + (255,), font=font_subtitle)
+        draw.text(((W - sw) // 2, ly + 10), subtitle, fill=text_sub + (255,), font=font_subtitle)
         ly += 50
 
     # Teaser

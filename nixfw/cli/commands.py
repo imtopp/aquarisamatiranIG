@@ -1046,6 +1046,12 @@ def _search_pexels_image(query: str):
         return None
 
 
+def _pexels_subject_url(topic: str) -> str | None:
+    """Search Pexels, return first image URL without downloading."""
+    results = _pexels_search_results(topic, per_page=5)
+    return results[0][0] if results else None
+
+
 # ---------------------------------------------------------------------------
 # Stable Diffusion local
 # ---------------------------------------------------------------------------
@@ -1378,8 +1384,6 @@ def cmd_generate_carousel(_client, args):
         return
 
     from nixfw.content.providers.facts_generator import facts_cache_path, generate_facts
-    from nixfw.content.providers.wikimedia import get_wikimedia_image
-    from nixfw.content.providers.inaturalist import get_inaturalist_image
     from nixfw.content.providers.image_utils import prepare_subject_image
     from nixfw.carousel.slides.cover import build_cover
     from nixfw.carousel.slides.fact import build_fact_slide
@@ -1435,32 +1439,33 @@ def cmd_generate_carousel(_client, args):
         scientific = facts.get("scientific_name", topic)
         username = facts.get("topic", topic)
         print("🔍 Cari gambar...")
-        # 1. Wikimedia
-        url = get_wikimedia_image(scientific)
-        if url:
-            subject_img = prepare_subject_image(url)
-        # 2. iNaturalist
-        if url is None:
-            print("   ⏩ Wikimedia kosong, coba iNaturalist...")
-            url = get_inaturalist_image(scientific)
+
+        def _try_provider(name: str) -> str | None:
+            if name == "wikimedia":
+                from nixfw.content.providers.wikimedia import get_wikimedia_image
+                return get_wikimedia_image(scientific)
+            elif name == "inaturalist":
+                from nixfw.content.providers.inaturalist import get_inaturalist_image
+                return get_inaturalist_image(scientific)
+            elif name == "pexels":
+                return _pexels_subject_url(facts.get("topic", ""))
+            return None
+
+        for name in config.current_niche.image_providers:
+            url = _try_provider(name)
             if url:
                 subject_img = prepare_subject_image(url)
-        # 3. Pexels (buat topik konseptual)
+                if subject_img:
+                    print(f"   ✅ {name}: {url[:60]}...")
+                    break
+                else:
+                    print(f"   ⏩ {name}: download gagal")
+            else:
+                print(f"   ⏩ {name}: kosong")
+
         if subject_img is None:
-            print("   ⏩ iNaturalist kosong, coba Pexels...")
-            pexels_img = _search_pexels_image(f"{topic}")
-            if pexels_img:
-                from nixfw.content.providers.image_utils import apply_cartoon_effect
-                pexels_img = apply_cartoon_effect(pexels_img).convert("RGBA")
-                side = min(pexels_img.size)
-                l = (pexels_img.width - side) // 2
-                t = (pexels_img.height - side) // 2
-                canvas = PIL.Image.new("RGBA", (400, 400), (0, 0, 0, 0))
-                cropped = pexels_img.crop((l, t, l + side, t + side)).resize((400, 400), PIL.Image.LANCZOS)
-                canvas.paste(cropped, (0, 0), cropped)
-                subject_img = canvas
-        if subject_img is None:
-            print("   ⚠️  Ngga dapet gambar dari Wikimedia / iNaturalist / Pexels")
+            providers = ", ".join(config.current_niche.image_providers)
+            print(f"   ⚠️  Ngga dapet gambar dari {providers}")
 
     if subject_img:
         print(f"   ✅ Ukuran: {subject_img.width}x{subject_img.height}px\n")
@@ -1582,8 +1587,6 @@ def _update_curriculum_content(slug: str, facts: dict | None = None,
         dn = facts.get("display_name", "")
         topic["display_name"] = dn if dn else topic.get("display_name", "")
         topic["subtitle"] = facts.get("subtitle", "")
-        sn = facts.get("scientific_name", "")
-        topic["scientific_name"] = sn if sn and sn not in ("N/A", "None") else topic.get("scientific_name", "")
         slides = [{"type": "cover", "title": topic["display_name"],
                    "subtitle": facts.get("subtitle", "")}]
         for f in facts.get("facts", []):
@@ -1773,7 +1776,7 @@ def cmd_clean(_client, args):
             if topic:
                 topic['status'] = 'planned'
                 for field in ['scheduled_time', 'display_name', 'subtitle',
-                               'scientific_name', 'slides', 'result_id',
+                               'slides', 'result_id',
                                'permalink', 'caption']:
                     topic.pop(field, None)
                 cpath.write_text(json.dumps(d, indent=2, ensure_ascii=False), encoding='utf-8')

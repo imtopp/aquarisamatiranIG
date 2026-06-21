@@ -140,13 +140,14 @@ class NicheProfile:
     photo_description: str = "foto aquascape/aquarium"
     tags_hint: str = "pH, suhu, ukuran, dll"
     has_scientific_name: bool = True
+    image_providers: list = field(default_factory=lambda: ["pexels"])
     cta_template: str = "Follow {handle}\nuntuk edukasi aquarium\nsetiap minggu!"
     bg_theme: str = "aquascape"
     content_types: dict = field(default_factory=lambda: dict(DEFAULT_CONTENT_TYPES))
 
 
 _NICHE_REGISTRY: dict[str, NicheProfile] = {
-    "aquascape": NicheProfile(),
+    "aquascape": NicheProfile(image_providers=["wikimedia", "inaturalist", "pexels"]),
     "food": NicheProfile(
         niche_name="masakan & resep",
         expert_role="chef & food blogger",

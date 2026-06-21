@@ -104,8 +104,9 @@
       <div class="card l{{ subcat_id }}">
         <div class="num">{{ num }}</div>
         <div class="body">
-          <div class="title">{{ topic.display_name or topic.title }}</div>
-          {% if topic.subtitle %}<div class="desc">{{ topic.subtitle }}</div>{% endif %}
+          <div class="title">{{ topic.title or topic.display_name }}</div>
+          {% set desc = topic.subtitle or topic.display_name or topic.scientific_name %}
+          {% if desc %}<div class="desc">{{ desc }}</div>{% endif %}
           <div class="status"><span class="tag {{ st.tag_class }}">{{ st.tag_text }}</span></div>
         </div>
       </div>

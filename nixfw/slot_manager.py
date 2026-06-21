@@ -6,6 +6,8 @@ from pathlib import Path
 
 import httpx
 
+WIB = datetime.timezone(datetime.timedelta(hours=7))
+
 SLOTS_PATH = Path(__file__).resolve().parent / "slots.json"
 
 
@@ -39,7 +41,7 @@ class SlotManager:
 
     def nearest_slot(self, now: datetime.datetime | None = None, occupied: set | None = None) -> str:
         """Return nearest upcoming slot as 'YYYY-MM-DD HH:MM', skipping occupied times."""
-        now = now or datetime.datetime.now()
+        now = now or datetime.datetime.now(WIB)
         occupied = occupied or set()
         wday = now.weekday()
         hour = now.hour

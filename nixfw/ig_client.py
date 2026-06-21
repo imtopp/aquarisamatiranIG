@@ -2,9 +2,11 @@ import os
 import time
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
+
+WIB = timezone(timedelta(hours=7))
 
 import requests
 from dotenv import load_dotenv
@@ -23,12 +25,12 @@ _WEEKDAYS = {"senin": 0, "selasa": 1, "rabu": 2, "kamis": 3, "jumat": 4, "sabtu"
 
 
 def parse_schedule(text: str) -> int:
-    """Parse jadwal kayak 'Mon 19:00' atau '2026-06-08 19:00' ke unix timestamp."""
+    """Parse jadwal kayak 'Mon 19:00' atau '2026-06-08 19:00' ke unix timestamp (WIB)."""
     text = text.strip()
 
     # Coba format: YYYY-MM-DD HH:MM
     try:
-        dt = datetime.strptime(text, "%Y-%m-%d %H:%M")
+        dt = datetime.strptime(text, "%Y-%m-%d %H:%M").replace(tzinfo=WIB)
         return int(dt.timestamp())
     except ValueError:
         pass
@@ -41,11 +43,11 @@ def parse_schedule(text: str) -> int:
         target_wday = _WEEKDAYS.get(day_str)
         if target_wday is None:
             raise ValueError(f"Hari '{day_str}' ngga dikenal. Pake: Senin/Rabu/Jumat atau Mon/Wed/Fri")
-        now = datetime.now()
+        now = datetime.now(WIB)
         days_ahead = target_wday - now.weekday()
         if days_ahead <= 0 or (days_ahead == 0 and now.hour >= h):
             days_ahead += 7
-        dt = (now + timedelta(days=days_ahead)).replace(hour=h, minute=mi, second=0, microsecond=0)
+        dt = (now + timedelta(days=days_ahead)).replace(hour=h, minute=mi, second=0, microsecond=0, tzinfo=WIB)
         return int(dt.timestamp())
 
     raise ValueError("Format jadwal: 'Mon 19:00' / 'Senin 19:00' / '2026-06-08 19:00'")

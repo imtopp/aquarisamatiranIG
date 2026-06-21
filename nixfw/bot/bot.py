@@ -110,7 +110,7 @@ async def _call_gemini(messages: list[dict], system: str | None = None) -> str:
     last_err = ""
     for key in keys:
         for model in GEMINI_MODELS:
-            for attempt in range(2):
+            for attempt in range(3):
                 url = f"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent?key={key}"
                 try:
                     resp = await HTTPX_CLIENT.post(url, json=body)
@@ -124,10 +124,13 @@ async def _call_gemini(messages: list[dict], system: str | None = None) -> str:
                 err_msg = err_data.get("message", str(resp.status_code))
                 last_err = err_msg
                 if resp.status_code == 503:
-                    break  # server sibuk, guna model lain aja, gak perlu retry
+                    await asyncio.sleep(3 * (attempt + 1))
+                    continue
                 if resp.status_code in (429, 403):
-                    break  # quota abis / forbidden, guna key berikutnya
-    raise RuntimeError(f"Semua model & key Gemini kehabisan: {last_err[:100]}")
+                    break
+    if "high demand" in last_err.lower() or "currently experiencing" in last_err.lower():
+        raise RuntimeError(f"Gemini lagi sibuk (high demand). Coba lagi dalam beberapa menit~")
+    raise RuntimeError(f"Semua model & key Gemini error: {last_err[:100]}")
 
 
 def init_db():

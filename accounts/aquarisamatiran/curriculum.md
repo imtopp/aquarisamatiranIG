@@ -42,3 +42,9 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 | 20 | Tank Mates | ⬜ |
 | 21 | DIY Aksesoris | ⬜ |
 | 22 | Rescape & Evolusi | ⬜ |
+
+## 🌱 Category 2: Hidupkan Aquascape-mu: Jelajah Ragam Fauna & Flora
+
+### Subcategory 1: New Subcategory 1
+| # | Topik | Status |
+|---|-------|--------|

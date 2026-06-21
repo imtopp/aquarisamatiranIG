@@ -777,7 +777,7 @@
       "10": {
         "slug": "penyakit-ikan",
         "title": "Penyakit Ikan",
-        "status": "planned",
+        "status": "scheduled",
         "keywords": [
           "ich",
           "white spot",
@@ -785,8 +785,105 @@
           "quarantine",
           "salt bath"
         ],
-        "display_name": "Penyakit & Pengobatan Ikan",
-        "subcategory": "2"
+        "display_name": "Penyakit Ikan",
+        "subcategory": "2",
+        "caption": "Pernah ngalamin ikan di akuarium sakit? 😥 Jangan langsung mikir 'sial' atau 'kok bisa ya', gengs! Faktanya, penyakit pada ikan itu seringkali muncul karena faktor lingkungan di akuarium kita yang kurang optimal. Jadi, bukan cuma nasib, tapi juga tanggung jawab kita buat jaga mereka!\n\nNah, kuncinya itu deteksi dini! 🕵️‍♀️ Coba deh perhatiin baik-baik tingkah laku atau perubahan fisik ikanmu. Kalau mendadak jadi lesu, suka ngumpet di pojokan, atau anehnya kok sering gesek-gesekin badannya ke pasir atau dekorasi, itu bisa jadi sinyal awal lho! Jangan disepelekan.\n\nBeberapa penyakit yang sering nyerang ikan peliharaan:\n⚪ **White Spot (Ich)**: Ini nih parasit paling populer di kalangan aquarist! Ikanmu bakal kelihatan kayak ditaburi garam atau titik-titik putih kecil di badan sama siripnya. Ini gampang banget nularnya ke ikan lain!\n🩹 **Fin Rot & Body Rot**: Sirip ikanmu jadi sobek, bolong, atau bahkan ada bagian yang membusuk? Nah, ini ciri khas fin rot. Seringnya sih karena kualitas air yang jelek, stres, atau luka.\n🍄 **Penyakit Jamur**: Kalo ada bercak putih mirip kapas atau bulu halus di badan atau sirip ikan, fix itu infeksi jamur. Biasanya muncul pas ikan lagi lemah daya tahannya atau ada luka terbuka.\n\nPencegahan itu penting banget biar ikanmu sehat terus!\n🏥 **Karantina itu Wajib!**: Setiap beli ikan baru, mending karantina dulu di akuarium terpisah selama 2-4 minggu. Ini penting banget buat mastiin ikan baru bebas penyakit atau parasit sebelum gabung sama penghuni lama di akuarium utama.\n💧 **Jaga Kualitas Air**: Ini fondasi utama dan kunci banget untuk kesehatan ikanmu! Lakukan pergantian air rutin (misal 20-30% seminggu sekali), pantau parameter air (pH, amonia, nitrit, nitrat). Air yang bersih dan stabil itu 'vaksin' terbaik buat ikanmu.\n\nKalo udah kelihatan tanda-tanda penyakit, jangan tunda lagi! ⏰ Jangan panik, tapi segera bertindak. Langsung identifikasi masalahnya dan mulai penanganan yang tepat. Semakin cepat kamu tanggap, semakin besar peluang ikanmu untuk pulih dan sehat kembali!\n\nKalo kalian, pengalaman penyakit ikan yang paling sering dialamin apa nih? Atau ada tips jitu lain buat ngatasin penyakit ikan? Share yuk di kolom komentar! 👇\n\n",
+        "subtitle": "Ikan Sehat, Akuarium Ceria!",
+        "slides": [
+          {
+            "type": "cover",
+            "title": "Penyakit Ikan",
+            "subtitle": "Ikan Sehat, Akuarium Ceria!"
+          },
+          {
+            "type": "fact",
+            "number": 1,
+            "title": "Penyakit Ikan? Kenapa Sih? 🤔",
+            "description": "Penyakit pada ikan seringkali bukan karena 'sial', tapi akibat faktor lingkungan yang kurang optimal. Stres, kualitas air yang buruk, atau nutrisi yang tidak memadai adalah pemicu utama yang melemahkan sistem imun ikanmu.",
+            "tags": [
+              "StresIkan",
+              "KualitasAirBuruk",
+              "SistemImun"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 2,
+            "title": "Deteksi Dini itu Kunci! 🕵️‍♀️",
+            "description": "Perhatikan baik-baik perubahan perilaku atau fisik ikanmu. Jika ikan berenang lesu, menggosokkan tubuh ke dekorasi, sirip menguncup, atau ada bercak aneh, itu bisa jadi tanda awal bahwa ada masalah kesehatan.",
+            "tags": [
+              "PerilakuIkan",
+              "TandaPenyakit",
+              "Observasi"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 3,
+            "title": "White Spot (Ich) ⚪",
+            "description": "Ini salah satu penyakit parasit paling umum di akuarium! Ikan akan terlihat seperti ditaburi garam atau gula putih di tubuh dan siripnya. Disebabkan oleh parasit *Ichthyophthirius multifiliis* yang sangat menular.",
+            "tags": [
+              "Ich",
+              "Parasit",
+              "Ichthyophthirius"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 4,
+            "title": "Fin Rot & Body Rot 🩹",
+            "description": "Sirip ikanmu terlihat sobek, berlubang, atau bahkan membusuk? Ini adalah gejala fin rot, seringkali disebabkan oleh infeksi bakteri sekunder saat kualitas air buruk atau ikan stres. Jika parah, infeksi bisa menyebar ke tubuh.",
+            "tags": [
+              "FinRot",
+              "Bakteri",
+              "SiripBusuk"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 5,
+            "title": "Penyakit Jamur 🍄",
+            "description": "Bercak putih menyerupai kapas atau bulu halus pada tubuh atau sirip ikanmu? Itu adalah tanda infeksi jamur, biasanya dari genus *Saprolegnia*. Jamur sering menyerang ikan yang sudah terluka atau memiliki sistem imun yang lemah.",
+            "tags": [
+              "InfeksiJamur",
+              "Saprolegnia",
+              "IkanLuka"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 6,
+            "title": "Pentingnya Karantina! 🏥",
+            "description": "Selalu karantina ikan baru di akuarium terpisah selama 2-4 minggu sebelum menggabungkannya dengan penghuni lama. Langkah ini krusial untuk memastikan ikan baru bebas penyakit dan tidak menularkan ke seluruh akuarium.",
+            "tags": [
+              "KarantinaIkan",
+              "PencegahanPenyakit",
+              "AkuariumBaru"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 7,
+            "title": "Jaga Kualitas Airmu! 💧",
+            "description": "Kualitas air adalah fondasi utama untuk kesehatan ikanmu. Lakukan pergantian air rutin, pantau parameter air (pH, amonia, nitrit, nitrat), dan hindari overfeeding. Air yang bersih dan stabil adalah kunci ikan sehat!",
+            "tags": [
+              "PergantianAir",
+              "ParameterAir",
+              "Pencegahan"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 8,
+            "title": "Kapan Waktunya Bertindak? ⏰",
+            "description": "Jangan tunda! Segera setelah kamu melihat tanda-tanda penyakit, identifikasi masalahnya dan mulai penanganan secepat mungkin. Semakin cepat diatasi, peluang ikan untuk pulih semakin besar. Jangan ragu konsultasi jika bingung!",
+            "tags": [
+              "PenangananCepat",
+              "DiagnosisDini",
+              "ObatIkan"
+            ]
+          }
+        ]
       },
       "11": {
         "slug": "parameter-air",

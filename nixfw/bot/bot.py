@@ -229,6 +229,14 @@ def _read_schedule() -> str:
     except Exception:
         return ""
     now = datetime.date.today()
+    cc = {}
+    try:
+        cc_raw = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        for s_num, ts in cc_raw.get("topics", {}).items():
+            for t_num, t in ts.items():
+                cc[f"C{s_num}#{t_num}"] = t.get("title", "")
+    except Exception:
+        pass
     done, upcoming = [], []
     for entry in data:
         t = entry.get("time", "")
@@ -236,7 +244,9 @@ def _read_schedule() -> str:
             d = datetime.datetime.strptime(t[:10], "%Y-%m-%d").date()
         except (ValueError, IndexError):
             continue
-        topic = entry.get("curriculum") or entry.get("type", "post")
+        ref = entry.get("source_ref") or entry.get("curriculum") or ""
+        title = cc.get(ref, "") if ref else ""
+        topic = f"{ref} — {title}" if title else ref or entry.get("type", "post")
         if entry.get("done"):
             done.append(f"{topic}: {d.strftime('%d %b')} ✅")
         elif d < now:

@@ -222,6 +222,21 @@ async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(HELP_TEXT, parse_mode="Markdown")
 
 
+def _reset_topic_status(topic_ref: str, new_status: str = "generated"):
+    """Set status topik di source_of_truth.json."""
+    m = re.match(r"[CS](\d+)#(\d+)", topic_ref)
+    if not m:
+        return
+    try:
+        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        t = cc.get("topics", {}).get(m.group(1), {}).get(m.group(2))
+        if t:
+            t["status"] = new_status
+            CURRICULUM_PATH.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
+    except Exception:
+        pass
+
+
 def _read_schedule() -> str:
     """Read schedule.json and return a formatted summary."""
     try:
@@ -1403,7 +1418,9 @@ async def delete_schedule_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     del schedule[found]
     SCHEDULE_PATH.write_text(json.dumps(schedule, indent=2, ensure_ascii=False), encoding="utf-8")
-    await update.message.reply_text(f"✅ Jadwal {topic_ref} dihapus dari antrian")
+    # Reset status di curriculum biar bisa /post lagi
+    _reset_topic_status(topic_ref, "generated")
+    await update.message.reply_text(f"✅ Jadwal {topic_ref} dihapus dari antrian. Status di-reset ke 'generated'. Bisa `/post {topic_ref}` lagi~")
 
 
 async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):

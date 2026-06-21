@@ -681,6 +681,63 @@ def telegram_move_topic(topic_ref: str, target_cat: str, target_sc: str) -> str:
     return f"✅ {topic_ref} dipindah ke C{target_cat}#{new_key}"
 
 
+def telegram_rename_category(cat_id: str, new_title: str) -> str:
+    """Rename a category."""
+    data = load()
+    if cat_id not in data.get("categories", {}):
+        return f"❌ Category {cat_id} tidak ditemukan"
+    data["categories"][cat_id]["title"] = new_title
+    save(data)
+    return f"✅ Category {cat_id} diganti judulnya → {new_title}"
+
+
+def telegram_remove_category(cat_id: str) -> str:
+    """Remove a category. Blocked if it still has subcategories or topics."""
+    data = load()
+    if cat_id not in data.get("categories", {}):
+        return f"❌ Category {cat_id} tidak ditemukan"
+    subcats = data["categories"][cat_id].get("subcategories", {})
+    topics = data.get("topics", {}).get(str(cat_id), {})
+    if subcats:
+        return f"❌ Category {cat_id} masih punya {len(subcats)} subcategory. Hapus dulu subcategory-nya baru bisa remove."
+    if topics:
+        return f"❌ Category {cat_id} masih punya {len(topics)} topic. Pindahin atau hapus dulu topic-nya baru bisa remove."
+    del data["categories"][cat_id]
+    data.get("topics", {}).pop(str(cat_id), None)
+    save(data)
+    return f"✅ Category {cat_id} dihapus"
+
+
+def telegram_rename_subcategory(cat_id: str, sub_id: str, new_label: str) -> str:
+    """Rename a subcategory."""
+    data = load()
+    if cat_id not in data.get("categories", {}):
+        return f"❌ Category {cat_id} tidak ditemukan"
+    subcats = data["categories"][cat_id].get("subcategories", {})
+    if sub_id not in subcats:
+        return f"❌ Subcategory {sub_id} di Category {cat_id} tidak ditemukan"
+    subcats[sub_id]["title"] = new_label
+    save(data)
+    return f"✅ Subcategory {sub_id} di Category {cat_id} diganti → {new_label}"
+
+
+def telegram_remove_subcategory(cat_id: str, sub_id: str) -> str:
+    """Remove a subcategory. Blocked if it still has topics."""
+    data = load()
+    if cat_id not in data.get("categories", {}):
+        return f"❌ Category {cat_id} tidak ditemukan"
+    subcats = data["categories"][cat_id].get("subcategories", {})
+    if sub_id not in subcats:
+        return f"❌ Subcategory {sub_id} di Category {cat_id} tidak ditemukan"
+    topics = data.get("topics", {}).get(str(cat_id), {})
+    sub_topics = [k for k, v in topics.items() if v.get("subcategory") == sub_id]
+    if sub_topics:
+        return f"❌ Subcategory {sub_id} masih punya {len(sub_topics)} topic. Pindahin atau hapus dulu baru bisa remove."
+    del subcats[sub_id]
+    save(data)
+    return f"✅ Subcategory {sub_id} di Category {cat_id} dihapus"
+
+
 # ──── arg helpers ────
 
 

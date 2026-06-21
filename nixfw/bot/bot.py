@@ -173,44 +173,18 @@ HELP_TEXT = (
     "Aku di sini, kapan aja kamu mau ngobrol. "
     "Mulai aja, aku dengerin~ 😏\n\n"
     "**📋 Perintah:**\n"
-    "/help — nampilin ini\n"
-    "/topics — daftar topik kurikulum (`#XX`)\n"
-    "/slides — daftar slide yang siap post (curriculum + adhoc)\n"
-    "/reset — hapus riwayat obrolan\n"
-    "/run `<cmd>` — jalanin perintah (terbatas)\n"
-    "/generate `C1#07` `[jml_fakta]` — trigger generate carousel SD\n"
-    "/status — cek progress generate terakhir\n"
-    "/post `[C1#07 atau slug]` `[hari jam]` — post carousel (auto-detect kalo tanpa arg)\n"
-    "/confirm — lanjutin posting setelah preview\n"
-    "/editcaption `<instruksi>` — edit caption pending post\n"
-    "/editcaption `C1#XX <instruksi>` — edit caption topik tertentu\n"
-    "/peekcaption `C1#XX` — liat caption topik\n"
-    "/regenerate — generate ulang slide\n"
-    "/cancel — batalin posting\n"
-    "/myid — liat chat ID kamu\n"
-    "/setslot — atur jadwal slot (`add` wizard, `remove`, `sync`)\n"
-    "/schedule — liat jadwal postingan\n"
-    "/delete-schedule `C1#XX` — hapus jadwal dari antrian\n"
-    "/clean `<slug atau C1#XX>` — hapus slide yang gak jadi dipost\n"
-    "/addcategory `<nama>` — tambah category baru\n"
-    "/addsubcategory `<Cid id label>` — tambah subcategory [contoh: `/addsubcategory C2 1 Nama Sub`]\n"
-    "/addtopic `<Cid subcat judul>` — tambah topic baru [contoh: `/addtopic C2 1 Judul Topik`]\n"
-    "/showtopic `<ref>` — liat semua field topic [contoh: `/showtopic C1#07`]\n"
-    "/edittopic `<ref>` `[--field value]...` — edit topic [contoh: `/edittopic C1#07 --status live`]\n"
-    "/deletetopic `<ref>` — hapus topic (topics renumbered otomatis)\n"
-    "/movetopic `<ref>` `<target_cat>` `<target_sc>` — pindah topic [contoh: `/movetopic C1#07 C2 2`]\n\n"
-    "**🧙 Wizard Interaktif:**\n"
-    "Ketik `/setslot add` — bot tanya nama, pilih hari via tombol, jam → auto-sync cron-job.org!\n\n"
-    "**🚀 Cara pake Curriculum:**\n"
-    "1. `/topics` — liat daftar `C1#07` yang tersedia\n"
-    "2. `/generate C1#07` — bikin carousel (10-30 menit di GH Actions)\n"
+    "📁 `/topic` — CRUD kurikulum (`add|show|edit|delete|move|cat|slides`)\n"
+    "📁 `/post` — alur posting (`confirm|cancel|caption|clean`) atau langsung `[ref]`\n"
+    "📁 `/generate` — generate slide (`[ref]`, `--cache`, `--force`)\n"
+    "📁 `/schedule` — manajemen jadwal (`delete|slot`)\n\n"
+    "🔧 `/help`, `/status`, `/reset`, `/run`, `/myid`, `/sync`\n\n"
+    "Cek `/topic help`, `/post help`, `/generate help`, `/schedule help` buat detail subcommand~\n\n"
+    "**🚀 Cara pake:**\n"
+    "1. `/topic` — cari tau `C1#XX` yang tersedia\n"
+    "2. `/generate C1#07` — bikin slide (10-30 menit)\n"
     "3. `/status` — cek udah selesai belum\n"
-    "4. `/post C1#07` — preview slide + caption\n"
-    "5. `/confirm` — upload & jadwal otomatis\n\n"
-    "**🚀 Cara pake Adhoc:**\n"
-    "1. `/slides` — liat slide yang siap post\n"
-    "2. `/post <slug>` — preview + caption\n"
-    "3. `/confirm` — upload & jadwal"
+    "4. `/post C1#07` — preview + caption\n"
+    "5. `/post confirm` — upload & jadwal"
 )
 
 
@@ -1818,6 +1792,237 @@ async def _delete_webhook(app: Application) -> None:
     await _notify_restart_done(app)
 
 
+# ──── Group help texts ────
+
+_TOPIC_HELP = """\
+📁 `/topic <subcommand>` — CRUD kurikulum
+  (tanpa args) → daftar semua topik
+  `add <C#> <sub#> <judul>`           → tambah topic
+  `show <ref>`                         → liat detail topic
+  `edit <ref> --field val [...]`        → edit topic
+  `delete <ref>`                       → hapus topic
+  `move <ref> <C#> <sub#>`             → pindah topic
+  `slides`                             → daftar file slide
+  `cat add <nama>`                     → tambah category
+  `cat rename <C#> <nama>`             → ganti nama category
+  `cat remove <C#>`                    → hapus category
+  `cat sub add <C#> <id> <label>`      → tambah subcategory
+  `cat sub rename <C#> <id> <label>`   → ganti nama subcategory
+  `cat sub remove <C#> <id>`           → hapus subcategory
+  `help`                               → liat ini"""
+
+_POST_HELP = """\
+📁 `/post <subcommand>` — Alur posting
+  `[ref] [hari jam]`       → siapin post (implicit kalo arg pertama bukan subcommand)
+  (tanpa args)              → auto-detect slide terbaru
+  `confirm`                 → upload & jadwalin
+  `cancel`                  → batalin pending post
+  `caption [ref] <instruksi>` → edit caption
+  `caption show <ref>`      → liat caption topik
+  `clean <ref>`             → hapus slide gak jadi
+  `help`                    → liat ini"""
+
+_GENERATE_HELP = """\
+📁 `/generate <ref> [count]` — Generate slide
+  `<ref> [count]`           → generate facts baru + slide
+  `--cache <ref> [count]`   → pake facts lama, slide baru aja
+  `--force <ref> [count]`   → generate facts ulang + slide
+  (kalo ada pending post, <ref> gak perlu)
+  `help`                    → liat ini"""
+
+_SCHEDULE_HELP = """\
+📁 `/schedule <subcommand>` — Manajemen jadwal
+  (tanpa args) → liat jadwal posting
+  `delete <ref>`                     → hapus dari jadwal
+  `slot add`                         → tambah slot (wizard interaktif)
+  `slot remove <id>`                 → hapus slot
+  `slot sync`                        → sync ke cron-job.org
+  `help`                             → liat ini"""
+
+_POST_SUBCOMMANDS = {"help", "confirm", "cancel", "caption", "clean"}
+
+
+# ──── Group dispatchers ────
+
+
+async def topic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args or []
+    if not args:
+        return await topics_cmd(update, context)
+    sub = args[0].lower()
+    rest = args[1:]
+    if sub == "help":
+        return await update.message.reply_text(_TOPIC_HELP)
+    if sub == "slides":
+        context.args = rest
+        return await slides_cmd(update, context)
+    if sub == "add":
+        context.args = rest
+        return await addtopic_cmd(update, context)
+    if sub == "show":
+        context.args = rest
+        return await showtopic_cmd(update, context)
+    if sub == "edit":
+        context.args = rest
+        return await edittopic_cmd(update, context)
+    if sub == "delete":
+        context.args = rest
+        return await deletetopic_cmd(update, context)
+    if sub == "move":
+        context.args = rest
+        return await movetopic_cmd(update, context)
+    if sub == "cat":
+        return await _topic_cat_cmd(update, context, rest)
+    await update.message.reply_text(f"❌ Subcommand `{sub}` gak dikenal.\n\n{_TOPIC_HELP}")
+
+
+async def _topic_cat_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE, args: list):
+    if not args:
+        return await update.message.reply_text(
+            "Gunakan: `/topic cat add|rename|remove|sub`\n\n" + _TOPIC_HELP
+        )
+    sub = args[0].lower()
+    rest = args[1:]
+    if sub == "add":
+        context.args = rest
+        return await addcategory_cmd(update, context)
+    if sub == "rename":
+        # /topic cat rename <C#> <nama>
+        if len(rest) < 2:
+            return await update.message.reply_text("Format: `/topic cat rename <C#> <nama>`")
+        from nixfw.curriculum.manager import telegram_rename_category
+        result = telegram_rename_category(rest[0], " ".join(rest[1:]))
+        return await update.message.reply_text(result)
+    if sub == "remove":
+        # /topic cat remove <C#>
+        if not rest:
+            return await update.message.reply_text("Format: `/topic cat remove <C#>`")
+        from nixfw.curriculum.manager import telegram_remove_category
+        result = telegram_remove_category(rest[0])
+        return await update.message.reply_text(result)
+    if sub == "sub":
+        return await _topic_cat_sub_cmd(update, context, rest)
+    await update.message.reply_text(f"❌ Subcommand `{sub}` gak dikenal.\n\n" + _TOPIC_HELP)
+
+
+async def _topic_cat_sub_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE, args: list):
+    if not args:
+        return await update.message.reply_text(
+            "Gunakan: `/topic cat sub add|rename|remove`\n\n" + _TOPIC_HELP
+        )
+    sub = args[0].lower()
+    rest = args[1:]
+    if sub == "add":
+        context.args = rest
+        return await addsubcategory_cmd(update, context)
+    if sub == "rename":
+        if len(rest) < 3:
+            return await update.message.reply_text("Format: `/topic cat sub rename <C#> <id> <label>`")
+        from nixfw.curriculum.manager import telegram_rename_subcategory
+        result = telegram_rename_subcategory(rest[0], rest[1], " ".join(rest[2:]))
+        return await update.message.reply_text(result)
+    if sub == "remove":
+        if len(rest) < 2:
+            return await update.message.reply_text("Format: `/topic cat sub remove <C#> <id>`")
+        from nixfw.curriculum.manager import telegram_remove_subcategory
+        result = telegram_remove_subcategory(rest[0], rest[1])
+        return await update.message.reply_text(result)
+    await update.message.reply_text(f"❌ Subcommand `{sub}` gak dikenal.\n\n" + _TOPIC_HELP)
+
+
+async def post_dispatch(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args or []
+    if not args:
+        return await post_cmd(update, context)
+    sub = args[0].lower()
+    rest = args[1:]
+    if sub == "help":
+        return await update.message.reply_text(_POST_HELP)
+    if sub == "confirm":
+        context.args = rest
+        return await confirm_cmd(update, context)
+    if sub == "cancel":
+        context.args = rest
+        return await cancel_cmd(update, context)
+    if sub == "caption":
+        if rest and rest[0].lower() == "show":
+            context.args = rest[1:]
+            return await peekcaption_cmd(update, context)
+        context.args = rest
+        return await editcaption_cmd(update, context)
+    if sub == "clean":
+        context.args = rest
+        return await clean_cmd(update, context)
+    if sub in _POST_SUBCOMMANDS:
+        return await update.message.reply_text(f"❌ Format salah.\n\n{_POST_HELP}")
+    # Implicit create: args diperlakukan sebagai [ref, hari, jam, ...]
+    context.args = args
+    return await post_cmd(update, context)
+
+
+async def generate_dispatch(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args or []
+    if not args:
+        return await update.message.reply_text(_GENERATE_HELP)
+    force = "--force" in args
+    cache = "--cache" in args
+    filtered = [a for a in args if a not in ("--force", "--cache")]
+    pending = _pending_posts.get(update.effective_user.id)
+
+    def _pick_slug(filtered, pending):
+        slug = None
+        count = "8"
+        if filtered:
+            slug = filtered[0]
+            if len(filtered) > 1:
+                try:
+                    count = filtered[1]
+                except ValueError:
+                    slug = " ".join(filtered)
+        elif pending:
+            slug = pending.get("slug") or pending.get("topic_ref")
+        return slug, count
+
+    if force:
+        if pending and not filtered:
+            context.args = []
+            return await regenerate_cmd(update, context)
+        slug, count = _pick_slug(filtered, pending)
+        if not slug:
+            return await update.message.reply_text(f"❌ Gak ada ref dan gak ada pending post.\n\n{_GENERATE_HELP}")
+        await _dispatch_workflow(slug, count, True, update)
+        return
+
+    if cache:
+        await update.message.reply_text("⏳ Generate slide (pake facts lama)...")
+        slug, count = _pick_slug(filtered, pending)
+        if not slug:
+            return await update.message.reply_text(f"❌ Gak ada ref dan gak ada pending post.\n\n{_GENERATE_HELP}")
+        await _dispatch_workflow(slug, count, False, update)
+        return
+
+    # Normal generate
+    context.args = filtered
+    return await generate_cmd(update, context)
+
+
+async def schedule_dispatch(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args or []
+    if not args:
+        return await schedule_cmd(update, context)
+    sub = args[0].lower()
+    rest = args[1:]
+    if sub == "help":
+        return await update.message.reply_text(_SCHEDULE_HELP)
+    if sub == "delete":
+        context.args = rest
+        return await delete_schedule_cmd(update, context)
+    if sub == "slot":
+        context.args = rest
+        return await setslot_cmd(update, context)
+    await update.message.reply_text(f"❌ Subcommand `{sub}` gak dikenal.\n\n{_SCHEDULE_HELP}")
+
+
 def main():
     if not TELEGRAM_TOKEN:
         print("TELEGRAM_TOKEN gak ada di .env")
@@ -1831,31 +2036,15 @@ def main():
     app.add_handler(CommandHandler("help", help_cmd))
     app.add_handler(CommandHandler("reset", reset))
     app.add_handler(CommandHandler("run", run_cmd))
-    app.add_handler(CommandHandler("generate", generate_cmd))
-    app.add_handler(CommandHandler("topics", topics_cmd))
-    app.add_handler(CommandHandler("slides", slides_cmd))
     app.add_handler(CommandHandler("status", status_cmd))
-    app.add_handler(CommandHandler("post", post_cmd))
-    app.add_handler(CommandHandler("confirm", confirm_cmd))
-    app.add_handler(CommandHandler("cancel", cancel_cmd))
-    app.add_handler(CommandHandler("clean", clean_cmd))
-    app.add_handler(CommandHandler("editcaption", editcaption_cmd))
-    app.add_handler(CommandHandler("peekcaption", peekcaption_cmd))
-    app.add_handler(CommandHandler("regenerate", regenerate_cmd))
     app.add_handler(CommandHandler("myid", myid_cmd))
-    app.add_handler(CommandHandler("schedule", schedule_cmd))
-    app.add_handler(CommandHandler("delete_schedule", delete_schedule_cmd))
-    app.add_handler(CommandHandler("delete-schedule", delete_schedule_cmd))
-    app.add_handler(CommandHandler("deleteschedule", delete_schedule_cmd))
-    app.add_handler(CommandHandler("setslot", setslot_cmd))
     app.add_handler(CommandHandler("sync", sync_cmd))
-    app.add_handler(CommandHandler("addcategory", addcategory_cmd))
-    app.add_handler(CommandHandler("addsubcategory", addsubcategory_cmd))
-    app.add_handler(CommandHandler("addtopic", addtopic_cmd))
-    app.add_handler(CommandHandler("showtopic", showtopic_cmd))
-    app.add_handler(CommandHandler("edittopic", edittopic_cmd))
-    app.add_handler(CommandHandler("deletetopic", deletetopic_cmd))
-    app.add_handler(CommandHandler("movetopic", movetopic_cmd))
+
+    app.add_handler(CommandHandler("topic", topic_cmd))
+    app.add_handler(CommandHandler("post", post_dispatch))
+    app.add_handler(CommandHandler("generate", generate_dispatch))
+    app.add_handler(CommandHandler("schedule", schedule_dispatch))
+
     app.add_handler(CallbackQueryHandler(wizard_callback, pattern="^wiz:"))
     app.add_handler(CallbackQueryHandler(fact_callback, pattern="^fact:"))
     app.add_handler(CallbackQueryHandler(cancel_wf_callback, pattern="^cancel:wf:"))

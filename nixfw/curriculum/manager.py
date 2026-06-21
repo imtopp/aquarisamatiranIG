@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 
 from nixfw import config
+from nixfw.bio.generator import update_bio
 
 ACCOUNT_BASE = config.PROJECT_ROOT / "accounts" / config.ACCOUNT_NAME
 SRC = ACCOUNT_BASE / "source_of_truth.json"
@@ -336,7 +337,7 @@ def cmd_sync(args):
     data = load()
     _sync_curriculum_md(data)
     _sync_schedule_json(data)
-    _sync_bio_html(data)
+    update_bio(account=config.ACCOUNT_NAME)
     print("\n  ✅ All files synced!")
 
 
@@ -474,96 +475,6 @@ def _sync_schedule_json(data):
 
     SCHEDULE_JSON.write_text(json.dumps(schedule, indent=2, ensure_ascii=False), encoding="utf-8")
     print("  ✅ schedule.json synced")
-
-
-def _sync_bio_html(data):
-    """Regenerate bio/index.html card structure from JSON."""
-    if not BIO_HTML.exists():
-        print("  ⚠️  bio/index.html not found — skip")
-        return
-
-    categories = data.get("categories", {})
-
-    season_blocks = []
-    for cid in sorted(categories, key=int):
-        c = categories[cid]
-        subcats = c.get("subcategories", {})
-        st = data.get("topics", {}).get(str(cid), {})
-        season_html = [f'  <div class="season" data-season="{cid}">']
-        season_html.append('  <div class="season-header">')
-        season_html.append(f'    <h2>🌱 Category {cid}: {c["title"]}</h2>')
-        if c.get("subtitle"):
-            season_html.append(f'    <p>{c["subtitle"]}</p>')
-        season_html.append("  </div>")
-
-        for sc in sorted(subcats, key=int):
-            label = subcats[sc]["title"]
-            season_html.append("")
-            season_html.append('  <div class="section">')
-            sc_icon = {1: "🌱", 2: "🌿", 3: "🌳", 4: "💎"}.get(int(sc), "🌱")
-            season_html.append(f'    <h2>{sc_icon} Subcategory {sc} — {label.split("—")[0].strip()}</h2>')
-            season_html.append(f'    <p class="level-intro">{label}</p>')
-
-            for k in sorted(st, key=int):
-                v = st[k]
-                if v.get("subcategory") != str(sc):
-                    continue
-                title = v.get("title", "?")
-                desc = v.get("subtitle", "") or v.get("display_name", "") or v.get("scientific_name", "")
-                status = v.get("status", "planned")
-                permalink = v.get("permalink", "")
-
-                if status == "live":
-                    tag_cls = "tag-live"
-                    tag_text = "✅ Live"
-                elif status == "scheduled":
-                    tag_cls = "tag-soon"
-                    st_text = v.get("scheduled_time", "")
-                    tag_text = f"📅 {st_text}" if st_text else "📅 Soon"
-                else:
-                    tag_cls = "tag-empty"
-                    tag_text = "🔜"
-
-                href = permalink if permalink else "https://instagram.com/aquarisamatiran"
-                level_class = f"l{sc}"
-                season_html.append(
-                    f'    <a class="card-link" href="{href}" target="_blank" rel="noopener">'
-                    f'<div class="card {level_class}"><div class="num">{int(k)}</div>'
-                    f'<div class="body"><div class="title">{title}</div>'
-                    f'<div class="desc">{desc}</div>'
-                    f'<div class="status"><span class="tag {tag_cls}">{tag_text}</span></div>'
-                    f"</div></div></a>"
-                )
-
-            season_html.append("  </div>")
-
-        season_html.append("  </div>")
-        season_blocks.append("\n".join(season_html))
-
-    old_html = BIO_HTML.read_text(encoding="utf-8")
-    cta_start = old_html.find('<div class="cta">')
-    if cta_start < 0:
-        print("  ⚠️  CTA section not found in bio/index.html — manual update needed")
-        return
-
-    header_end = old_html.find('</div>\n\n  <div class="season"')
-    if header_end == -1:
-        header_end = old_html.find('</div>\n\n\n\n  <div class="season"')
-    if header_end == -1:
-        m = re.search(r'</div>\n{2,10}  <div class="season"', old_html)
-        if m:
-            header_end = m.start()
-    if header_end == -1:
-        header_end = old_html.find('</div>\n\n  <div class="section"')
-
-    if header_end >= 0 and cta_start > header_end:
-        cut = header_end + 8
-        new_html = old_html[:cut] + "\n\n".join(season_blocks) + "\n\n" + old_html[cta_start:]
-        BIO_HTML.write_text(new_html, encoding="utf-8")
-        print("  ✅ bio/index.html regenerated")
-    else:
-        print("  ⚠️  Could not find card section in bio/index.html — manual update needed")
-
 
 # ──── Telegram-callable helpers ────
 

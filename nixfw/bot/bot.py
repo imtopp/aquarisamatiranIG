@@ -1845,6 +1845,7 @@ def main():
     app.add_handler(CommandHandler("myid", myid_cmd))
     app.add_handler(CommandHandler("schedule", schedule_cmd))
     app.add_handler(CommandHandler("delete_schedule", delete_schedule_cmd))
+    app.add_handler(CommandHandler("delete-schedule", delete_schedule_cmd))
     app.add_handler(CommandHandler("deleteschedule", delete_schedule_cmd))
     app.add_handler(CommandHandler("setslot", setslot_cmd))
     app.add_handler(CommandHandler("sync", sync_cmd))

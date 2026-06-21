@@ -1115,11 +1115,17 @@ async def confirm_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     slug = pending["slug"]
     caption = pending["caption"]
-    schedule_time = pending.get("schedule_time_iso") or pending["schedule_time"]
 
-    await update.message.reply_text(f"📤 Upload & jadwalin \"{slug}\"...")
-    try:
+    now = "--now" in (context.args or [])
+    if now:
+        await update.message.reply_text(f"📤 Publish langsung \"{slug}\"...")
+        proc_args = [sys.executable, "main.py", "post-carousel", "--slug", slug, caption]
+    else:
+        schedule_time = pending.get("schedule_time_iso") or pending["schedule_time"]
+        await update.message.reply_text(f"📤 Upload & jadwalin \"{slug}\"...")
         proc_args = [sys.executable, "main.py", "post-carousel", "--slug", slug, "--schedule", "cron", schedule_time, caption]
+
+    try:
         result = subprocess.run(proc_args, capture_output=True, text=True, timeout=300, cwd=str(PROJECT_ROOT))
         out = (result.stdout or "") + (result.stderr or "")
         out = out.strip()[-3000:]

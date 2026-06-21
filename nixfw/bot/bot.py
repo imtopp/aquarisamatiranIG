@@ -1051,7 +1051,11 @@ async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             pending["caption"] = new_caption
         await update.message.reply_text(f"✅ Caption buat {topic_ref} diupdate:\n\n{new_caption[:3500]}")
     except Exception as e:
-        await update.message.reply_text(f"❌ Gagal edit caption: {e}")
+        await update.message.reply_text(
+            "⚠️ Gemini sibuk, caption gak berubah.\n\n"
+            f"Tapi caption bakal dipotong otomatis pas post. "
+            f"Langsung aja `/post confirm --now` kalo mau publish~"
+        )
 
 
 async def _dispatch_workflow(topic: str, num_facts: str, force: bool, update: Update):

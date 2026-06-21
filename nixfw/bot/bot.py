@@ -32,7 +32,19 @@ from nixfw.curriculum.manager import (
     telegram_edit_topic,
     telegram_delete_topic,
     telegram_move_topic,
+    format_ref,
 )
+
+
+def _seq_to_key(data, cid, sc, seq):
+    """Reverse-lookup dict key from sequence number within subcategory."""
+    st = data.get("topics", {}).get(cid, {})
+    items = [(int(k), k) for k, v in st.items() if v.get("subcategory", "1") == sc]
+    items.sort()
+    idx = int(seq) - 1
+    if 0 <= idx < len(items):
+        return items[idx][1]
+    return None
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -87,7 +99,7 @@ if CURRICULUM_PATH.exists():
                         keywords = v.get("keywords", [])
                         kw_str = ", ".join(keywords) if keywords else "(no keywords)"
                         status_tag = " ✅" if status == "live" else (" 📅" if status == "scheduled" else "")
-                        term_lines.append(f"  C{cid}#{k} {v['title']}{status_tag}: {kw_str}")
+                        term_lines.append(f"  {format_ref(cc_raw, cid, k)} {v['title']}{status_tag}: {kw_str}")
             system_prompt += "\n" + "\n".join(term_lines)
     except Exception:
         pass  # best-effort
@@ -183,10 +195,10 @@ HELP_TEXT = (
     "🔧 `/help`, `/status`, `/reset`, `/run`, `/myid`, `/sync`\n\n"
     "Cek `/topic help`, `/post help`, `/generate help`, `/schedule help` buat detail subcommand~\n\n"
     "**🚀 Cara pake:**\n"
-    "1. `/topic` — cari tau `C1#XX` yang tersedia\n"
-    "2. `/generate C1#07` — bikin slide (10-30 menit)\n"
+    "1. `/topic` — cari tau `C1.1#01` yang tersedia\n"
+    "2. `/generate C1.1#07` — bikin slide (10-30 menit)\n"
     "3. `/status` — cek udah selesai belum\n"
-    "4. `/post C1#07` — preview + caption\n"
+    "4. `/post C1.1#07` — preview + caption\n"
     "5. `/post confirm` — upload & jadwal"
 )
 
@@ -201,12 +213,16 @@ async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def _reset_topic_status(topic_ref: str, new_status: str = "generated"):
     """Set status topik di source_of_truth.json."""
-    m = re.match(r"[CS](\d+)#(\d+)", topic_ref)
+    m = re.match(r"[CS](\d+)(?:\.(\d+))?#(\d+)", topic_ref)
     if not m:
         return
     try:
         cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
-        t = cc.get("topics", {}).get(m.group(1), {}).get(m.group(2))
+        sid, sc, seq = m.group(1), m.group(2) or "1", m.group(3).zfill(2)
+        num_key = _seq_to_key(cc, sid, sc, seq) if m.group(2) else seq
+        if not num_key:
+            return
+        t = cc.get("topics", {}).get(sid, {}).get(num_key)
         if t:
             t["status"] = new_status
             CURRICULUM_PATH.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -223,10 +239,10 @@ def _read_schedule() -> str:
     now = datetime.date.today()
     cc = {}
     try:
-        cc_raw = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
-        for s_num, ts in cc_raw.get("topics", {}).items():
-            for t_num, t in ts.items():
-                cc[f"C{s_num}#{t_num}"] = t.get("title", "")
+    cc_raw = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+    for cid, ts in cc_raw.get("topics", {}).items():
+        for t_num, t in ts.items():
+            cc[format_ref(cc_raw, cid, t_num)] = t.get("title", "")
     except Exception:
         pass
     done, upcoming = [], []
@@ -265,17 +281,33 @@ def _read_schedule() -> str:
 
 
 def _load_curriculum() -> dict:
-    """Load and flatten curriculum topics to {C1#01: {...}} format."""
+    """Load and flatten curriculum topics to {C1.1#01: {...}} format."""
     try:
         data = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
         topics = data.get("topics", {})
         flat = {}
         for sid in sorted(topics, key=int):
             for tnum in sorted(topics[sid], key=int):
-                flat[f"C{sid}#{tnum}"] = topics[sid][tnum]
+                flat[format_ref(data, sid, tnum)] = topics[sid][tnum]
         return flat
     except Exception:
         return {}
+
+
+def _topic_title_from_ref(topic_ref):
+    """Extract topic title from curriculum given a ref (old C1#01 or new C1.1#01 format)."""
+    m = re.match(r'[CS](\d+)(?:\.(\d+))?#(\d+)', topic_ref)
+    if not m:
+        return None
+    try:
+        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        sid, sc, seq = m.group(1), m.group(2) or "1", m.group(3).zfill(2)
+        num_key = _seq_to_key(cc, sid, sc, seq) if m.group(2) else seq
+        if num_key:
+            return cc.get("topics", {}).get(sid, {}).get(num_key, {}).get("title")
+    except Exception:
+        pass
+    return None
 
 
 def _match_curriculum_topic(text: str, topics: dict) -> str | None:
@@ -287,8 +319,8 @@ def _match_curriculum_topic(text: str, topics: dict) -> str | None:
         keywords = [k.lower().strip() for k in topic.get("keywords", [])]
         display = topic.get("display_name", "").lower()
         tnum = key.split("#")[1]
-        snum = "s" + key.split("#")[0][1:]  # "s1" from "C1"
-        patterns = [f"#{tnum}", key.lower(), f"{snum}#{tnum}", title_lower, slug.replace("-", " "), display]
+        prefix = key.split("#")[0]
+        patterns = [f"#{tnum}", key.lower(), prefix.lower(), title_lower, slug.replace("-", " "), display]
         patterns.extend(k for k in keywords if len(k) > 3)
         for pat in patterns:
             if pat and pat in text_lower:
@@ -352,9 +384,10 @@ async def topics_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             jadwal = ""
             if st == "scheduled" and t.get("scheduled_time"):
                 jadwal = f" — {t['scheduled_time']} WIB"
-            lines.append(f"  {emoji} `C{sid}#{tnum.zfill(2)}` {dn}{jadwal}")
+            ref = format_ref(cc, sid, tnum.zfill(2))
+            lines.append(f"  {emoji} `{ref}` {dn}{jadwal}")
         lines.append("")
-    lines.append("Contoh: `/generate C1#07`, `/post C2#01`")
+    lines.append("Contoh: `/generate {ref}`, `/post {ref}` — ganti {ref} pake kode di atas")
     await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
 
 
@@ -375,7 +408,7 @@ async def slides_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 t = cc["topics"][sid][tnum]
                 slug = (t.get("slug", "") or "").replace("-", "_")
                 if slug:
-                    tag = f"C{sid}#{tnum}"
+                    tag = format_ref(cc, sid, tnum)
                     slug_to_tag[slug] = tag
                     cur_order.append((slug, tag))
     except Exception:
@@ -484,14 +517,20 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def _latest_slides(topic_ref: str = "") -> tuple[str | None, list[Path]]:
     """Detect carousel slides in PHOTO_DIR. 
-    If topic_ref given (e.g. C1#07), filter by topic slug.
+    If topic_ref given (e.g. C1.1#07 or C1#07), filter by topic slug.
     If it doesn't match tag format, treat as direct slug (e.g. puntius_denisonii)."""
     slides_dir = PHOTO_DIR
     if topic_ref:
-        m = re.match(r'[CS](\d+)#(\d+)', topic_ref)
+        m = re.match(r'[CS](\d+)(?:\.(\d+))?#(\d+)', topic_ref)
         if m:
             cur_data = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
-            topic = cur_data.get("topics", {}).get(m.group(1), {}).get(m.group(2), {})
+            s_num, sc, t_num = m.group(1), m.group(2) or "1", m.group(3).zfill(2)
+            # If ref used per-subcategory seq (C1.1#03), resolve seq→dict_key
+            if m.group(2):
+                num_key = _seq_to_key(cur_data, s_num, sc, t_num)
+            else:
+                num_key = t_num
+            topic = cur_data.get("topics", {}).get(s_num, {}).get(num_key, {}) if num_key else {}
             slug = (topic.get("slug", "") or "").replace("-", "_")
             if not slug:
                 return None, []
@@ -545,13 +584,27 @@ def _resolve_topic(input_str: str) -> tuple[str | None, str | None, str | None]:
         return None, None, None
     topics = cc.get("topics", {})
 
+    # New format: C{cat}.{subcat}#{seq}
+    m = re.match(r'[CS](\d+)\.(\d+)#(\d+)', input_str)
+    if m:
+        sid, sc, seq = m.group(1), m.group(2), m.group(3).zfill(2)
+        num_key = _seq_to_key(cc, sid, sc, seq)
+        if num_key:
+            t = topics.get(sid, {}).get(num_key, {})
+            if t:
+                slug = (t.get("slug", "") or "").replace("-", "_")
+                ref = format_ref(cc, sid, num_key)
+                return t.get("title") or t.get("display_name", input_str), slug or None, ref
+
+    # Legacy format: C{cat}#{num}
     m = re.match(r'[CS](\d+)#(\d+)', input_str)
     if m:
         sid, tnum = m.group(1), m.group(2).zfill(2)
         t = topics.get(sid, {}).get(tnum, {})
         if t:
             slug = (t.get("slug", "") or "").replace("-", "_")
-            return t.get("title") or t.get("display_name", input_str), slug or None, f"C{sid}#{tnum}"
+            ref = format_ref(cc, sid, tnum)
+            return t.get("title") or t.get("display_name", input_str), slug or None, ref
 
     m = re.match(r'#(\d+)', input_str)
     if m:
@@ -560,7 +613,8 @@ def _resolve_topic(input_str: str) -> tuple[str | None, str | None, str | None]:
             t = topics[sid].get(tnum, {})
             if t:
                 slug = (t.get("slug", "") or "").replace("-", "_")
-                return t.get("title") or t.get("display_name", input_str), slug or None, f"C{sid}#{tnum}"
+                ref = format_ref(cc, sid, tnum)
+                return t.get("title") or t.get("display_name", input_str), slug or None, ref
 
     input_lower = input_str.lower().replace(" ", "_")
     for sid in sorted(topics, key=int):
@@ -569,7 +623,8 @@ def _resolve_topic(input_str: str) -> tuple[str | None, str | None, str | None]:
             slug = (t.get("slug", "") or "")
             candidates = [t.get("title", "").lower(), t.get("display_name", "").lower(), slug.lower(), slug.replace("_", " ").lower()]
             if input_lower in candidates:
-                return t.get("title") or t.get("display_name", input_str), slug.replace("-", "_") or None, f"C{sid}#{tnum}"
+                ref = format_ref(cc, sid, tnum)
+                return t.get("title") or t.get("display_name", input_str), slug.replace("-", "_") or None, ref
 
     return None, None, None
 
@@ -783,9 +838,9 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     topic_ref = ""
     schedule_time = ""
-    # Parse args: /post [slug/C1#07] [Kamis 19:00]
+    # Parse args: /post [slug/C1#07/C1.1#01] [Kamis 19:00]
     for a in args:
-        if a.startswith("#") or re.match(r"[CS]\d+#\d+", a):
+        if a.startswith("#") or re.match(r"[CS]\d+(?:\.\d+)?#\d+", a):
             topic_ref = a
         elif re.match(r"^(Mon|Tue|Wed|Thu|Fri|Sat|Sun|Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu)", a, re.IGNORECASE) and len(args) > args.index(a) + 1:
             idx = list(args).index(a)
@@ -820,16 +875,16 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for s_num, ts in cc.get("topics", {}).items():
             for t_num, t in ts.items():
                 if t.get("slug", "").replace("-", "_") == slug:
-                    topic_ref = f"C{s_num}#{t_num}"
+                    topic_ref = format_ref(cc, s_num, t_num)
                     break
             if topic_ref:
                 break
     # Cek kalo udah live atau scheduled
     if topic_ref:
         cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
-        parts = topic_ref.lstrip("CS").split("#")
-        if len(parts) == 2:
-            s_num, t_num = parts
+        m = re.match(r"[CS](\d+)(?:\.(\d+))?#(\d+)", topic_ref)
+        if m:
+            s_num, t_num = m.group(1), m.group(3).zfill(2)
             t = cc.get("topics", {}).get(s_num, {}).get(t_num, {})
             st = t.get("status")
             if st == "live":
@@ -844,7 +899,6 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # Determine schedule time — skip slot yang udah diambil
-    nearest = ""
     if not schedule_time:
         occupied = set()
         try:
@@ -854,11 +908,37 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     occupied.add(e["time"])
         except Exception:
             pass
-        nearest = SLOT_MANAGER.nearest_slot(occupied=occupied)
-        dt = datetime.datetime.strptime(nearest, "%Y-%m-%d %H:%M")
-        day_name = DAYS_ID[dt.weekday()]
-        time_str = dt.strftime("%H:%M")
-        schedule_time = f"{day_name} {time_str}"
+        occurrences = SLOT_MANAGER.next_occurrences(14, occupied=occupied)
+        if not occurrences:
+            await update.message.reply_text("❌ Semua slot penuh, coba lain waktu~")
+            return
+        keyboard = []
+        row = []
+        for i, o in enumerate(occurrences):
+            row.append(InlineKeyboardButton(o["label"], callback_data=f"slot:{o['iso']}"))
+            if len(row) == 2:
+                keyboard.append(row)
+                row = []
+        if row:
+            keyboard.append(row)
+        
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        display_name = _slug_to_topic(slug)
+        title_from_ref = _topic_title_from_ref(topic_ref or "")
+        if title_from_ref:
+            display_name = title_from_ref
+        user_id = update.effective_user.id
+        _pending_posts[user_id] = {
+            "slug": slug,
+            "slides": slides,
+            "topic_ref": topic_ref,
+            "status": "awaiting_slot",
+        }
+        await update.message.reply_text(
+            f"🔍 \"{display_name}\" ({len(slides)} slide)\n\n📅 **Pilih jadwal:**",
+            reply_markup=reply_markup,
+        )
+        return
 
     await update.message.reply_text(f"🔍 Detected: \"{slug}\" ({len(slides)} slide)\n📅 Jadwal: {schedule_time}")
 
@@ -883,12 +963,9 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Generate caption — cek dulu apakah udah ada di source_of_truth
     topic_display = _slug_to_topic(slug)
-    if topic_ref and re.match(r"C(\d+)#(\d+)", topic_ref):
-        m = re.match(r"C(\d+)#(\d+)", topic_ref)
-        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
-        t = cc.get("topics", {}).get(m.group(1), {}).get(m.group(2), {})
-        if t.get("title"):
-            topic_display = t["title"]
+    title_from_ref = _topic_title_from_ref(topic_ref or "")
+    if title_from_ref:
+        topic_display = title_from_ref
     facts_json = None
     existing_caption = _get_caption_from_curriculum(slug)
     if existing_caption:
@@ -936,7 +1013,6 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "slug": slug,
         "caption": caption,
         "schedule_time": schedule_time,
-        "schedule_time_iso": nearest,  # ISO "YYYY-MM-DD HH:MM" biar gak di-recalc
         "topic_display": topic_display,
         "facts_json": facts_json,
         "topic_ref": topic_ref,
@@ -947,7 +1023,7 @@ async def peekcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Lihat caption topik tanpa trigger post flow."""
     args = context.args
     if not args:
-        await update.message.reply_text("Contoh: `/post caption show C1#07`")
+        await update.message.reply_text("Contoh: `/post caption show C1.1#07`")
         return
     topic_input = " ".join(args)
     display_name, slug, topic_ref = _resolve_topic(topic_input)
@@ -966,7 +1042,7 @@ async def showtopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Tampilkan semua field topic dari curriculum."""
     args = context.args
     if not args:
-        await update.message.reply_text("Contoh: `/topic show C1#07`")
+        await update.message.reply_text("Contoh: `/topic show C1.1#07`")
         return
     topic_input = " ".join(args)
     display_name, slug, topic_ref = _resolve_topic(topic_input)
@@ -1113,7 +1189,7 @@ async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             for s_num, ts in cc.get("topics", {}).items():
                 for t_num, t in ts.items():
                     if t.get("slug", "").replace("-", "_") == slug:
-                        topic_ref = f"C{s_num}#{t_num}"
+                        topic_ref = format_ref(cc, s_num, t_num)
                         break
                 if topic_ref:
                     break
@@ -1150,12 +1226,116 @@ async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await _dispatch_workflow(topic_input, "8", force, update)
 
 
+async def slot_pick_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+    iso_time = data.split(":", 1)[1]
+
+    user_id = update.effective_user.id
+    pending = _pending_posts.get(user_id)
+    if not pending or pending.get("status") != "awaiting_slot":
+        await query.edit_message_text("❌ Sesi kedaluarsa, ketik /post lagi~")
+        return
+
+    slug = pending["slug"]
+    slides = pending["slides"]
+    topic_ref = pending.get("topic_ref")
+
+    dt = datetime.datetime.strptime(iso_time, "%Y-%m-%d %H:%M")
+    day_name = DAYS_ID[dt.weekday()]
+    time_str = dt.strftime("%H:%M")
+    schedule_time = f"{day_name} {time_str}"
+
+    await query.edit_message_text(f"📅 **{schedule_time}** — dipilih! 💬")
+
+    # Kirim preview slides
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="📸 Preview slide...")
+    media_group = []
+    for s in sorted(slides):
+        if len(media_group) >= 10:
+            break
+        try:
+            with open(s, "rb") as f:
+                media_group.append(InputMediaPhoto(media=f.read()))
+        except Exception:
+            continue
+    if media_group:
+        try:
+            await asyncio.wait_for(query.message.reply_media_group(media_group), timeout=30)
+        except asyncio.TimeoutError:
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="⚠️ Preview upload timeout, lanjut aja~")
+        except Exception:
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="⚠️ Gagal kirim preview, lanjut aja~")
+
+    # Generate caption
+    topic_display = _slug_to_topic(slug)
+    title_from_ref = _topic_title_from_ref(topic_ref or "")
+    if title_from_ref:
+        topic_display = title_from_ref
+    facts_json = None
+    existing_caption = _get_caption_from_curriculum(slug)
+    if existing_caption:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text="💡 Caption udah ada, pake yang lama~")
+        caption = existing_caption
+    else:
+        facts_path = facts_cache_path(slug)
+        if facts_path.exists():
+            try:
+                facts_json = json.loads(facts_path.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=f"💬 Generate caption buat \"{topic_display}\"...")
+        try:
+            caption = await asyncio.wait_for(_generate_caption(facts_json, topic_display), timeout=60)
+        except asyncio.TimeoutError:
+            _cfg = {}
+            try:
+                _cfg = json.loads((PROJECT_ROOT / "accounts" / "aquarisamatiran" / "config.json").read_text(encoding="utf-8"))
+            except Exception:
+                pass
+            _name = _cfg.get("name", "Aquarisamatiran")
+            _handle = _cfg.get("handle", "@aquarisamatiran")
+            caption = f"{topic_display} — Yuk belajar bareng {_handle}! 🌱 #{_name} #AquascapeIndonesia"
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="⚠️ Caption generation timeout, pakai fallback~")
+        _save_caption_to_curriculum(slug, caption)
+
+    # Preview + confirm
+    msg = (
+        f"📋 **{topic_display}** ({len(slides)} slide)\n"
+        f"📅 Jadwal: {schedule_time}\n\n"
+        f"📝 **Caption (full):**\n{caption[:4000]}\n\n"
+        f"`/post confirm` → upload & jadwal\n"
+        f"`/post confirm --now` → publish langsung sekarang\n"
+        f"`/post caption <instruksi>` → ganti caption\n"
+        f"`/generate --force` → generate ulang slide\n"
+        f"`/post cancel` → batalin"
+    )
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
+
+    # Save full pending state
+    _pending_posts[user_id] = {
+        "slug": slug,
+        "caption": caption,
+        "schedule_time": schedule_time,
+        "schedule_time_iso": iso_time,
+        "topic_display": topic_display,
+        "facts_json": facts_json,
+        "topic_ref": topic_ref,
+    }
+
+
 async def confirm_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    pending = _pending_posts.pop(user_id, None)
+    pending = _pending_posts.get(user_id)
     if not pending:
         await update.message.reply_text("Ngga ada pending post. Coba `/post` dulu~")
         return
+    if pending.get("status") == "awaiting_slot":
+        await update.message.reply_text("Pilih jadwal dulu dari tombol di atas, sayang~ 😏")
+        return
+    _pending_posts.pop(user_id)
+    
 
     slug = pending["slug"]
     caption = pending["caption"]
@@ -1192,18 +1372,23 @@ async def clean_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     if not args:
         await update.message.reply_text(
-            "Gunakan: `/post clean <slug>` atau `/post clean C1#XX`\n"
+            "Gunakan: `/post clean <slug>` atau `/post clean C1.1#XX`\n"
             "Cek `/topic slides` buat liat slug yang tersedia."
         )
         return
 
     raw = args[0]
     slug = ""
-    m = re.match(r'[CS](\d+)#(\d+)', raw)
+    m = re.match(r'[CS](\d+)(?:\.(\d+))?#(\d+)', raw)
     if m:
         try:
             cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
-            topic = cc.get("topics", {}).get(m.group(1), {}).get(m.group(2), {})
+            sid, sc, seq = m.group(1), m.group(2) or "1", m.group(3).zfill(2)
+            num_key = _seq_to_key(cc, sid, sc, seq) if m.group(2) else seq
+            if not num_key:
+                await update.message.reply_text("❌ Topic gak ditemukan di source_of_truth.")
+                return
+            topic = cc.get("topics", {}).get(sid, {}).get(num_key, {})
             if not topic:
                 await update.message.reply_text("❌ Topic gak ditemukan di source_of_truth.")
                 return
@@ -1346,14 +1531,14 @@ async def addtopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def edittopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Edit topic fields via Telegram. Format: /topic edit C1#07 --title Nama --status live"""
+    """Edit topic fields via Telegram. Format: /topic edit C1.1#07 --title Nama --status live"""
     args = context.args or []
     if len(args) < 1:
-        await update.message.reply_text("Contoh: `/topic edit C1#07 --status live`\nField: title, slug, status, subcategory, display_name, subtitle, keywords")
+        await update.message.reply_text("Contoh: `/topic edit C1.1#07 --status live`\nField: title, slug, status, subcategory, display_name, subtitle, keywords")
         return
     topic_ref = args[0]
-    if not re.match(r'[CS]\d+#\d+', topic_ref):
-        await update.message.reply_text(f"❌ Format salah. Contoh: `/topic edit C1#07 --status live`")
+    if not re.match(r'[CS]\d+(?:\.\d+)?#\d+', topic_ref):
+        await update.message.reply_text(f"❌ Format salah. Contoh: `/topic edit C1.1#07 --status live`")
         return
     fields = {}
     i = 1
@@ -1376,7 +1561,7 @@ async def deletetopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Hapus topic via Telegram."""
     args = context.args or []
     if not args:
-        await update.message.reply_text("Contoh: `/topic delete C1#07`")
+        await update.message.reply_text("Contoh: `/topic delete C1.1#07`")
         return
     topic_ref = args[0]
     result = telegram_delete_topic(topic_ref)
@@ -1387,7 +1572,7 @@ async def movetopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Pindah topic ke category/subcategory lain."""
     args = context.args or []
     if len(args) < 3:
-        await update.message.reply_text("Contoh: `/topic move C1#07 C2 2`")
+        await update.message.reply_text("Contoh: `/topic move C1.1#07 C2 2`")
         return
     topic_ref = args[0]
     target_cat = args[1].lstrip("C")
@@ -1409,7 +1594,7 @@ async def delete_schedule_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE
     """Hapus entry dari schedule.json."""
     args = context.args
     if not args:
-        await update.message.reply_text("Contoh: `/schedule delete C1#07`")
+        await update.message.reply_text("Contoh: `/schedule delete C1.1#07`")
         return
 
     topic_input = args[0]
@@ -2117,6 +2302,7 @@ def main():
     app.add_handler(CallbackQueryHandler(wizard_callback, pattern="^wiz:"))
     app.add_handler(CallbackQueryHandler(fact_callback, pattern="^fact:"))
     app.add_handler(CallbackQueryHandler(cancel_wf_callback, pattern="^cancel:wf:"))
+    app.add_handler(CallbackQueryHandler(slot_pick_callback, pattern="^slot:"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, chat))
 
     print("Bot jalan di VPS... chat aku dari Telegram~")

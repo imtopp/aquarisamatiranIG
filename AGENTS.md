@@ -89,6 +89,20 @@ Nambah akun baru: copy folder dari `nixfw/templates/account/`, isi `config.json`
 - All files, references, and config must reside within this repo directory.
 - Use `.venv\Scripts\python.exe` for all Python commands.
 
+## Source Ref Rule (CRITICAL)
+
+Format user-facing ref skrg: `C{cat}.{subcat}#{seq}` (misal `C1.1#03`).  
+**JANGAN PERNAH langsung lookup** `data["topics"]["1"]["03"]` dari string `C1.1#03` — `#03` itu **sequence number**, bukan dict key.
+
+WAJIB pake `resolve_ref(ref, data)` dari `manager.py` dulu:
+```python
+from nixfw.curriculum.manager import resolve_ref
+result = resolve_ref("C1.1#03", data)  # → ("1", "04") — (cid, actual dict_key)
+```
+Atau di bot: `_resolve_topic()` udah handle otomatis, hasil `topic_ref` udah di new format, tapi lookup tetap via `_seq_to_key()` internally.
+
+Rule: **Setiap fitur baru yang nerima user-facing ref → WAJIB lewat resolver dulu, jangan langsung dict access.** Udah ada guard di `_resolve_topic`, `_topic_title_from_ref`, `_latest_slides`, `_reset_topic_status`, `_num_from_ref` (runner.py), dan `_add_schedule_entry`.
+
 ## Seasons
 
 | Season | Title | Topics |

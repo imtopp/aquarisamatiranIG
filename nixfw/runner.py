@@ -25,6 +25,30 @@ def _find_topic_by_num(cc, num):
     return None
 
 
+_re_ref = re.compile(r"[CS](\d+)(?:\.(\d+))?#(\d+)")
+
+
+def _num_from_ref(cc, ref):
+    """Given source_ref (old C1#06 or new C1.1#01), return the dict key to look up."""
+    m = _re_ref.match(ref)
+    if not m:
+        # Fallback: extract bare number
+        m2 = re.search(r"#(\d+)", ref)
+        return m2.group(1) if m2 else ref.lstrip("#")
+    cid, sc_part, num_str = m.group(1), m.group(2), m.group(3)
+    if not sc_part:
+        # Legacy format C1#06 — num is dict key directly
+        return num_str.zfill(2)
+    # New format C1.1#01 — resolve seq → dict key
+    st = cc.get("topics", {}).get(cid, {})
+    items = [(int(k), k) for k, v in st.items() if v.get("subcategory", "1") == sc_part]
+    items.sort()
+    idx = int(num_str) - 1
+    if 0 <= idx < len(items):
+        return items[idx][1]
+    return num_str.zfill(2)
+
+
 def _update_curriculum_after_post(post, content_path=None):
     if content_path is None:
         content_path = CONTENT_PATH
@@ -33,8 +57,7 @@ def _update_curriculum_after_post(post, content_path=None):
         return
     try:
         cc = json.loads(content_path.read_text(encoding="utf-8"))
-        m = re.search(r"#(\d+)", curriculum)
-        num = m.group(1) if m else curriculum.lstrip("#")
+        num = _num_from_ref(cc, curriculum)
         topic = _find_topic_by_num(cc, num)
         if topic:
             topic["status"] = "live"

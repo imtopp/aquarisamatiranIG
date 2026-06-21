@@ -86,25 +86,84 @@ def _next_topic_num(data, category):
     return f"{max(existing) + 1:02d}" if existing else "01"
 
 
-def _renumber_topics(data):
-    """Renumber topics sequentially within each category."""
-    for cid, st in data.get("topics", {}).items():
-        sorted_ = sorted(
-            [(int(k), k, v) for k, v in st.items()],
-            key=lambda x: x[0],
-        )
-        for idx, (old_num, old_key, topic) in enumerate(sorted_, 1):
-            new_key = f"{idx:02d}"
-            if old_key != new_key:
-                st[new_key] = st.pop(old_key)
-    return data
+def _subcat_seq_map(data):
+    """Build {(cid, sc): {num_key: seq}} — sequence number per subcategory."""
+    mapping = {}
+    for cid in sorted(data.get("topics", {}), key=int):
+        st = data["topics"][cid]
+        sc_groups = {}
+        for num_key in st:
+            sc = st[num_key].get("subcategory", "1")
+            sc_groups.setdefault(sc, []).append(int(num_key))
+        for sc, nums in sc_groups.items():
+            nums.sort()
+            for seq, num in enumerate(nums, 1):
+                mapping.setdefault((cid, sc), {})[str(num).zfill(2)] = seq
+    return mapping
+
+
+def _format_src_ref(cid, sc, seq):
+    """Format source_ref as C{cid}.{sc}#{seq:02d}."""
+    return f"C{cid}.{sc}#{seq:02d}"
+
+
+def format_ref(data, cid, num_key):
+    """Public helper: format a topic reference using its subcategory and sequence."""
+    sc = data.get("topics", {}).get(cid, {}).get(num_key, {}).get("subcategory", "1")
+    seq_map = _subcat_seq_map(data)
+    seq = seq_map.get((cid, sc), {}).get(num_key.zfill(2))
+    if seq is None:
+        return f"C{cid}#{num_key}"
+    return _format_src_ref(cid, sc, seq)
+
+
+def build_ref_map(data):
+    """Build {src_ref: (cid, num_key)} mapping for input resolution (both old & new format)."""
+    mapping = {}
+    for cid in sorted(data.get("topics", {}), key=int):
+        st = data["topics"][cid]
+        for num_key in st:
+            sc = st[num_key].get("subcategory", "1")
+            old_ref = f"C{cid}#{num_key}"
+            mapping[old_ref] = (cid, num_key)
+            seq_map = _subcat_seq_map(data)
+            seq = seq_map.get((cid, sc), {}).get(num_key.zfill(2))
+            if seq is not None:
+                new_ref = _format_src_ref(cid, sc, seq)
+                mapping[new_ref] = (cid, num_key)
+    return mapping
+
+
+def resolve_ref(ref: str, data) -> tuple | None:
+    """Resolve a user-provided ref (old C1#01 or new C1.1#01) to (cid, num_key) or None."""
+    mapping = build_ref_map(data)
+    normalized = ref.replace("S", "C")  # S1#01 → C1#01
+    if normalized in mapping:
+        return mapping[normalized]
+    # Try partial match: #01 only
+    m = re.search(r"#(\d+)", ref)
+    if m:
+        num = m.group(1).zfill(2)
+        for (cid, nk) in mapping.values():
+            if nk == num:
+                return (cid, nk)
+    return None
 
 
 def _all_topics(data):
-    """Yield (category_id, topic_num_str, topic_dict) across all categories."""
+    """Yield (category_id, topic_num_str, topic_dict) across all categories.
+    Backfills UUID for topics that don't have one."""
+    import uuid
+    changed = False
     for cid in sorted(data.get("topics", {}), key=int):
         for k in sorted(data["topics"][cid], key=int):
-            yield str(cid), k, data["topics"][cid][k]
+            v = data["topics"][cid][k]
+            if "id" not in v or not v["id"]:
+                v["id"] = str(uuid.uuid4())
+                changed = True
+            yield str(cid), k, v
+    if changed:
+        save(data)
 
 
 def _subcategory_topics(data, cid, sc):
@@ -233,8 +292,9 @@ def cmd_add_topic(args):
     slug = _get_arg(args, "--slug") or title.lower().replace(" ", "-").replace(":", "").replace("?", "")[:30]
     keywords_raw = _get_arg(args, "--keywords", "")
     keywords = [k.strip() for k in keywords_raw.split(",") if k.strip()]
-
+    import uuid
     topic = {
+        "id": str(uuid.uuid4()),
         "slug": slug,
         "title": title,
         "subcategory": str(sc),
@@ -250,7 +310,8 @@ def cmd_add_topic(args):
 
     _get_category_topics(data, cat_id)[new_key] = topic
     save(data)
-    print(f"  ✅ C{cat_id}#{new_key}: {title} (SC{sc}) added")
+    ref = format_ref(data, cat_id, new_key)
+    print(f"  ✅ {ref}: {title} added")
 
 
 def cmd_edit_topic(args):
@@ -262,7 +323,8 @@ def cmd_edit_topic(args):
         return
     st = _get_category_topics(data, cat_id)
     if num not in st:
-        print(f"❌ C{cat_id}#{num} tidak ditemukan")
+        ref = format_ref(data, cat_id, num)
+        print(f"❌ {ref} tidak ditemukan")
         return
 
     topic = st[num]
@@ -281,7 +343,8 @@ def cmd_edit_topic(args):
         topic["keywords"] = [k.strip() for k in keywords_raw.split(",") if k.strip()]
 
     save(data)
-    print(f"  ✅ C{cat_id}#{num} updated")
+    ref = format_ref(data, cat_id, num)
+    print(f"  ✅ {ref} updated")
 
 
 def cmd_delete_topic(args):
@@ -293,13 +356,14 @@ def cmd_delete_topic(args):
         return
     st = _get_category_topics(data, cat_id)
     if num not in st:
-        print(f"❌ C{cat_id}#{num} tidak ditemukan")
+        ref = format_ref(data, cat_id, num)
+        print(f"❌ {ref} tidak ditemukan")
         return
 
     del st[num]
-    data = _renumber_topics(data)
     save(data)
-    print(f"  ✅ C{cat_id}#{num} deleted (topics renumbered)")
+    ref = format_ref(data, cat_id, num)
+    print(f"  ✅ {ref} deleted")
 
 
 def cmd_list(args):
@@ -327,7 +391,8 @@ def cmd_list(args):
                 print("    (empty)")
             for k, v in sc_topics:
                 status_icon = {"live": "✅", "scheduled": "📅", "planned": "⬜"}.get(v.get("status", ""), "⬜")
-                print(f"    {status_icon} #{k} {v['title']:30s} [{v.get('status','planned')}]")
+                ref = format_ref(data, str(cid), k)
+                print(f"    {status_icon} {ref:14s} {v['title']:30s} [{v.get('status','planned')}]")
 
 
 # ──── sync ────
@@ -362,6 +427,7 @@ def _sync_curriculum_md(data):
             lines.append("| # | Topik | Status |\n")
             lines.append("|---|-------|--------|\n")
 
+            seq_map = _subcat_seq_map(data)
             for k in sorted(st, key=int):
                 v = st[k]
                 if v.get("subcategory") != str(sc):
@@ -371,7 +437,9 @@ def _sync_curriculum_md(data):
                 icon = {"live": "✅", "scheduled": "📅", "planned": "⬜"}.get(status, "⬜")
                 tgl = v.get("scheduled_time", "")
                 tgl_str = f" ({tgl})" if tgl else ""
-                lines.append(f"| {k} | {title}{tgl_str} | {icon} |\n")
+                seq = seq_map.get((str(cid), str(sc)), {}).get(k)
+                num = f"{seq:02d}" if seq else k
+                lines.append(f"| {num} | {title}{tgl_str} | {icon} |\n")
 
     CUR_MD.write_text("".join(lines), encoding="utf-8")
     print("  ✅ curriculum.md regenerated")
@@ -386,9 +454,13 @@ def _sync_schedule_json(data):
     schedule = json.loads(SCHEDULE_JSON.read_text(encoding="utf-8"))
 
     # Build identity maps from existing schedule entries
+    uuid_map = {}
     result_id_map = {}
     permalink_map = {}
     for i, entry in enumerate(schedule):
+        tu = entry.get("topic_uuid", "")
+        if tu:
+            uuid_map[tu] = i
         rid = entry.get("result_id", "")
         if rid:
             result_id_map[rid] = i
@@ -396,14 +468,23 @@ def _sync_schedule_json(data):
         if pl and pl.strip():
             permalink_map[pl.strip().rstrip("/")] = i
 
+    seq_map = _subcat_seq_map(data)
+
     # Iterate all topics across all categories
     for cid, num, v in _all_topics(data):
-        target_label = f"C{cid}#{num}"
+        sc = v.get("subcategory", "1")
+        seq = seq_map.get((cid, sc), {}).get(num)
+        if seq is None:
+            continue
+        target_label = _format_src_ref(cid, sc, seq)
+        tuuid = v.get("id", "")
         rid = v.get("result_id", "")
         pl = v.get("permalink", "").strip().rstrip("/")
 
         idx = None
-        if rid and rid in result_id_map:
+        if tuuid and tuuid in uuid_map:
+            idx = uuid_map[tuuid]
+        elif rid and rid in result_id_map:
             idx = result_id_map[rid]
         elif pl and pl in permalink_map:
             idx = permalink_map[pl]
@@ -422,8 +503,11 @@ def _sync_schedule_json(data):
         if entry is not None:
             entry["source_ref"] = target_label
             entry["category"] = int(cid)
+            entry["topic_uuid"] = tuuid
             if v.get("scheduled_time"):
                 entry["time"] = v["scheduled_time"]
+            elif v.get("status") == "live" and not entry.get("time"):
+                entry["time"] = v.get("posted_at", "")
             if v.get("status") == "live":
                 entry["done"] = True
             elif v.get("status") == "scheduled":
@@ -433,14 +517,15 @@ def _sync_schedule_json(data):
             if v.get("result_id"):
                 entry["result_id"] = v["result_id"]
             if old_label and old_label != target_label:
-                print(f"  🔄 schedule.json: {old_label} → C{cid}#{num}")
+                print(f"  🔄 schedule.json: {old_label} → {target_label}")
         elif v.get("status") in ("live", "scheduled"):
             entry = {
                 "source_ref": target_label,
                 "category": int(cid),
-                "time": v.get("scheduled_time", ""),
+                "time": v.get("scheduled_time", "") or v.get("posted_at", ""),
                 "type": "carousel",
                 "done": v.get("status") == "live",
+                "topic_uuid": tuuid,
             }
             if v.get("permalink"):
                 entry["permalink"] = v["permalink"]
@@ -451,14 +536,23 @@ def _sync_schedule_json(data):
                 entry["urls"] = []
             entry["caption"] = v.get("caption", "")
             schedule.append(entry)
-            print(f"  📋 schedule.json: added C{cid}#{num}")
+            print(f"  📋 schedule.json: added {target_label}")
 
-    # Build set of valid curriculum+category combos
+    # Build set of valid UUIDs + curriculum+category combos
+    valid_uuids = set()
     valid_keys = set()
-    for cid, num, _ in _all_topics(data):
-        valid_keys.add((num, int(cid)))
+    for cid, num, v in _all_topics(data):
+        valid_uuids.add(v.get("id", ""))
+        sc = v.get("subcategory", "1")
+        seq = seq_map.get((cid, sc), {}).get(num)
+        valid_keys.add((num, int(cid)))  # dict key (for legacy format matching)
+        if seq is not None:
+            valid_keys.add((f"{seq:02d}", int(cid)))  # seq (for new format matching)
 
     def keep(entry):
+        tu = entry.get("topic_uuid", "")
+        if tu and tu in valid_uuids:
+            return True
         c = entry.get("source_ref") or entry.get("curriculum", "")
         s = entry.get("category") or entry.get("season")
         if not c:
@@ -513,10 +607,12 @@ def telegram_add_topic(cat_id: str, subcat: str, title: str, slug: str | None = 
         return "❌ --category wajib diisi"
     if not title:
         return "❌ --title wajib diisi"
+    import uuid
     data = load()
     new_key = _next_topic_num(data, cat_id)
     slug = slug or title.lower().replace(" ", "-").replace(":", "").replace("?", "")[:30]
     topic = {
+        "id": str(uuid.uuid4()),
         "slug": slug,
         "title": title,
         "subcategory": str(subcat),
@@ -525,7 +621,7 @@ def telegram_add_topic(cat_id: str, subcat: str, title: str, slug: str | None = 
     }
     _get_category_topics(data, cat_id)[new_key] = topic
     save(data)
-    ref = f"C{cat_id}#{new_key}"
+    ref = format_ref(data, cat_id, new_key)
     return f"✅ {ref}: {title} ditambahkan ke Category {cat_id}"
 
 
@@ -563,9 +659,8 @@ def telegram_delete_topic(topic_ref: str) -> str:
         return f"❌ {topic_ref} tidak ditemukan"
     title = st[num].get("title", "")
     del st[num]
-    _renumber_topics(data)
     save(data)
-    return f"✅ {topic_ref} ({title}) dihapus (topics renumbered)"
+    return f"✅ {topic_ref} ({title}) dihapus"
 
 
 def telegram_move_topic(topic_ref: str, target_cat: str, target_sc: str) -> str:
@@ -582,14 +677,13 @@ def telegram_move_topic(topic_ref: str, target_cat: str, target_sc: str) -> str:
         return f"❌ {topic_ref} tidak ditemukan"
     topic = src_topics.pop(num)
     topic["subcategory"] = str(target_sc)
-    # Renumber source
-    data = _renumber_topics(data)
     # Add to target
     target_topics = _get_category_topics(data, target_cat)
     new_key = _next_topic_num(data, target_cat)
     target_topics[new_key] = topic
     save(data)
-    return f"✅ {topic_ref} dipindah ke C{target_cat}#{new_key}"
+    new_ref = format_ref(data, target_cat, new_key)
+    return f"✅ {topic_ref} dipindah ke {new_ref}"
 
 
 def telegram_rename_category(cat_id: str, new_title: str) -> str:

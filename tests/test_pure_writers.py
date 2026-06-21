@@ -1,6 +1,7 @@
 """Test functions that WRITE data fields across the codebase."""
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -27,9 +28,9 @@ class TestScheduleWriter:
         assert len(data) == 1
         e = data[0]
         if "source_ref" in e:
-            assert e["source_ref"] == "C1#04"
+            assert e["source_ref"] == "C1.1#01"
         elif "curriculum" in e:
-            assert e["curriculum"] == "C1#04"
+            assert e["curriculum"] == "C1.1#01"
         assert e["time"] == "2026-06-20 19:00"
         assert e["type"] == "carousel"
         assert e["caption"] == "Cap"
@@ -106,9 +107,9 @@ class TestCurriculumManagerWriters:
         assert len(schedule) == 2
         for entry in schedule:
             if "source_ref" in entry:
-                assert entry["source_ref"].startswith("C1#")
+                assert re.match(r"C1\.\d+#\d{2}", entry["source_ref"])
             elif "curriculum" in entry:
-                assert entry["curriculum"].startswith("C1#")
+                assert re.match(r"C1\.\d+#\d{2}", entry["curriculum"])
 
     def test_sync_schedule_json_preserves_existing(self, v4_content, monkeypatch, tmp_path):
         import nixfw.curriculum.manager as cm

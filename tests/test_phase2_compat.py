@@ -8,6 +8,7 @@ So most functions already work with v5 without changes.
 """
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -141,9 +142,9 @@ class TestSyncScheduleJson:
         schedule = json.loads(sched_path.read_text(encoding="utf-8"))
         for entry in schedule:
             if "source_ref" in entry:
-                assert entry["source_ref"].startswith("C1#")
+                assert re.match(r"C1\.\d+#\d{2}", entry["source_ref"])
             elif "curriculum" in entry:
-                assert entry["curriculum"].startswith("C1#")
+                assert re.match(r"C1\.\d+#\d{2}", entry["curriculum"])
 
     def test_sync_with_v4_preserves_existing(self, v4_content, monkeypatch, tmp_path):
         import nixfw.curriculum.manager as cm
@@ -208,9 +209,9 @@ class TestSyncScheduleJson:
         schedule = json.loads(sched_path.read_text(encoding="utf-8"))
         for entry in schedule:
             if "source_ref" in entry:
-                assert entry["source_ref"].startswith("C1#")
+                assert re.match(r"C1\.\d+#\d{2}", entry["source_ref"])
             elif "curriculum" in entry:
-                assert entry["curriculum"].startswith("C1#")
+                assert re.match(r"C1\.\d+#\d{2}", entry["curriculum"])
 
 
 class TestUpdateCurriculumContent:

@@ -72,7 +72,7 @@ class TestMainReaders:
 
         import main as main_mod
         result = main_mod._find_curriculum_key_by_slug("test-slug")
-        assert result == "C1#04"
+        assert result == "C1.1#01"
 
     def test_find_key_by_slug_not_found(self, monkeypatch, tmp_path):
         import nixfw.config as cfg
@@ -113,9 +113,9 @@ class TestMainReaders:
         assert len(schedule) == 1
         entry = schedule[0]
         if "source_ref" in entry:
-            assert entry["source_ref"] == "C1#04"
+            assert entry["source_ref"] == "C1.1#01"
         elif "curriculum" in entry:
-            assert entry["curriculum"] == "C1#04"
+            assert entry["curriculum"] == "C1.1#01"
         assert entry["type"] == "carousel"
         assert entry["urls"] == ["url1"]
 

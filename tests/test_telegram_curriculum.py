@@ -79,7 +79,7 @@ class TestTelegramAddTopic:
         monkeypatch.setattr(mgr, "SRC", src)
         monkeypatch.setattr("builtins.print", lambda *a, **kw: None)
         result = mgr.telegram_add_topic("1", "2", "My New Topic")
-        assert "02" in result
+        assert "C1.2#01" in result
         data = json.loads(src.read_text(encoding="utf-8"))
         assert data["topics"]["1"]["02"]["title"] == "My New Topic"
         assert data["topics"]["1"]["02"]["subcategory"] == "2"
@@ -214,7 +214,7 @@ class TestTelegramMoveTopic:
         monkeypatch.setattr("builtins.print", lambda *a, **kw: None)
         result = mgr.telegram_move_topic("C1#01", "2", "1")
         assert "dipindah" in result
-        assert "C2#01" in result
+        assert "C2." in result and "#01" in result
         data = json.loads(src.read_text(encoding="utf-8"))
         assert "01" not in data["topics"].get("1", {})
         assert data["topics"]["2"]["01"]["title"] == "Test Topic"

@@ -1,5 +1,6 @@
 """Aquarisamatiran — Instagram Manager CLI"""
 
+import datetime
 import json
 import os
 import shutil
@@ -34,7 +35,7 @@ def _notify_telegram(msg: str):
 
 from nixfw.ig_client import InstagramClient, parse_schedule
 from nixfw.editor import replace_audio, compress_video, upload_file, copy_to_published, VIDEO_DIR, MUSIC_DIR, PHOTO_DIR, OUTPUT_DIR, PUBLISHED_DIR, MAX_UPLOAD_MB
-from nixfw.curriculum.manager import cmd_curriculum
+from nixfw.curriculum.manager import cmd_curriculum, format_ref
 from nixfw.bio.generator import update_bio
 from nixfw.cli.refresh_token import main as _refresh_token_main
 
@@ -134,7 +135,7 @@ def cmd_post_photo(client, args):
 
 
 def _find_curriculum_key_by_slug(slug: str) -> str | None:
-    """Cari #XX dari curriculum_content.json berdasarkan slug."""
+    """Cari source_ref dari curriculum_content.json berdasarkan slug (new format C{cid}.{sc}#{seq})."""
     cpath = config.CONTENT_PATH
     if not cpath.exists():
         return None
@@ -145,7 +146,7 @@ def _find_curriculum_key_by_slug(slug: str) -> str | None:
     for sid, st in cc.get("topics", {}).items():
         for num, topic in st.items():
             if topic.get("slug") == slug or topic.get("slug", "").replace("-", "_") == slug:
-                return f"C{sid}#{num}"
+                return format_ref(cc, sid, num)
     return None
 
 
@@ -167,12 +168,25 @@ def _find_topic_title_by_slug(slug: str) -> str | None:
 
 
 def _add_schedule_entry(slug: str, ptype: str, urls_or_url: str | list[str],
-                         caption: str, time_str: str, done: bool = False):
+                         caption: str, time_str: str, done: bool = False,
+                         result_id: str = "", permalink: str = ""):
     """Tambah entry ke schedule.json."""
-    import json
+    import json, re
     spath = config.SCHEDULE_PATH
     schedule = json.loads(spath.read_text(encoding="utf-8")) if spath.exists() else []
     curriculum_key = _find_curriculum_key_by_slug(slug)
+    topic_uuid = ""
+    if curriculum_key:
+        m = re.match(r"[CS](\d+)\.(\d+)#(\d+)", curriculum_key)
+        if not m:
+            m = re.match(r"[CS](\d+)#(\d+)", curriculum_key)
+        if m:
+            try:
+                cc = json.loads(config.CONTENT_PATH.read_text(encoding="utf-8"))
+                t = cc.get("topics", {}).get(m.group(1), {}).get(m.group(2), {})
+                topic_uuid = t.get("id", "")
+            except Exception:
+                pass
     entry = {
         "source_ref": curriculum_key,
         "time": time_str,
@@ -181,6 +195,12 @@ def _add_schedule_entry(slug: str, ptype: str, urls_or_url: str | list[str],
         "done": done,
         "category": 1,
     }
+    if topic_uuid:
+        entry["topic_uuid"] = topic_uuid
+    if result_id:
+        entry["result_id"] = result_id
+    if permalink:
+        entry["permalink"] = permalink
     if ptype == "carousel":
         entry["urls"] = list(urls_or_url) if isinstance(urls_or_url, list) else [urls_or_url]
     else:
@@ -414,9 +434,9 @@ def cmd_post_carousel(client, args):
     # Update curriculum_content.json
     _update_curriculum_content(latest_prefix, result_id=media_id, status="live", caption=caption)
     # Add done entry ke schedule.json biar bio page tau
-    from datetime import datetime
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
-    _add_schedule_entry(latest_prefix, "carousel", urls, caption, now_str, done=True)
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    _add_schedule_entry(latest_prefix, "carousel", urls, caption, now_str,
+                        done=True, result_id=media_id or "")
     # Update bio page
     update_bio(account=config.ACCOUNT_NAME)
 
@@ -1142,20 +1162,20 @@ def cmd_generate_carousel_sd(_client, args):
     topic = parsed.topic
     slug = re.sub(r'[^\w\-]', '', topic.lower().replace(" ", "_").replace("-", "_"))[:30].rstrip("_")
 
-    # Resolve C1#07 / #07 ke nama topik asli dari curriculum
+    # Resolve C1.1#01 / C1#01 / #01 ke nama topik asli dari curriculum
     topic_name = topic
     season_tag = ""
     try:
         cc_path = config.CONTENT_PATH
         if cc_path.exists():
             cc = json.loads(cc_path.read_text(encoding="utf-8"))
-            m = re.match(r"[CS](\d+)#(\d+)", topic)
+            m = re.match(r"[CS](\d+)(?:\.(\d+))?#(\d+)", topic)
             if m:
-                s_num, t_num = m.group(1), m.group(2).zfill(2)
+                s_num, t_num = m.group(1), m.group(3).zfill(2)
                 t = cc.get("topics", {}).get(s_num, {}).get(t_num)
                 if t:
                     topic_name = t.get("display_name", t.get("title", topic))
-                    season_tag = f"S{s_num}#{t_num} "
+                    season_tag = f"{format_ref(cc, s_num, t_num)} "
                     slug = t.get("slug", slug).replace("-", "_")
             else:
                 t_num = topic.lstrip("#").zfill(2)
@@ -1163,7 +1183,7 @@ def cmd_generate_carousel_sd(_client, args):
                     if t_num in ts:
                         t = ts[t_num]
                         topic_name = t.get("display_name", t.get("title", topic))
-                        season_tag = f"S{s_num}#{t_num} "
+                        season_tag = f"{format_ref(cc, s_num, t_num)} "
                         slug = t.get("slug", slug).replace("-", "_")
                         break
     except Exception:
@@ -1205,7 +1225,7 @@ def cmd_generate_carousel_sd(_client, args):
                 for s_num, ts in cc.get("topics", {}).items():
                     if t_num in ts:
                         t = ts[t_num]
-                        season_tag = f"C{s_num}#{t_num} "
+                        season_tag = f"{format_ref(cc, s_num, t_num)} "
                         display = t.get("display_name", display)
                         break
         except Exception:
@@ -1604,6 +1624,8 @@ def _update_curriculum_content(slug: str, facts: dict | None = None,
         topic["permalink"] = permalink
     if status:
         topic["status"] = status
+    if status == "live":
+        topic["posted_at"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     if caption:
         topic["caption"] = caption
     cpath.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -1717,7 +1739,7 @@ def cmd_clean(_client, args):
             for num, t in d['topics'][sid].items():
                 s = t.get('slug', '').replace('-', '_')
                 if s == slug:
-                    tag = f'C{sid}#{num}'
+                    tag = format_ref(d, sid, num)
                     status = t.get('status', '')
                     print(f'tag={tag}')
                     print(f'status={status}')

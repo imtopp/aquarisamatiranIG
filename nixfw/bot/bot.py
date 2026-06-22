@@ -1949,9 +1949,14 @@ async def sync_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if diff.returncode != 0:
             _sh(["git", "commit", "-m", "auto: pre-sync save"])
 
-        # 2. Sync with remote
-        _sh(["git", "fetch", "origin", "main"])
-        _sh(["git", "rebase", "origin/main"], timeout=60)
+        # 2. Sync with remote — merge with ours strategy to preserve local data
+        _sh(["git", "merge", "--abort"], timeout=10)
+        _sh(["git", "fetch", "origin", "main"], timeout=30)
+        merge = _sh(["git", "merge", "origin/main", "--strategy-option=ours", "--no-edit"], timeout=60)
+        if merge.returncode != 0:
+            _sh(["git", "merge", "--abort"])
+            await msg.edit_text("❌ Sync failed — merge conflict unresolved:\n" + merge.stderr[:300])
+            return
 
         # 3. Install deps
         pip_res = _sh([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], timeout=120)

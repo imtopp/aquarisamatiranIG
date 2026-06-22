@@ -1,0 +1,89 @@
+{
+  "topic": "Soil, Pasir, Gravel",
+  "display_name": "Panduan Substrat: Soil, Pasir, Gravel",
+  "subtitle": "Pilih Alas Idealmu!",
+  "scientific_name": null,
+  "facts": [
+    {
+      "number": "01",
+      "title": "Apa Itu Substrat? 🧐",
+      "description": "Substrat adalah lapisan dasar di aquariummu. Bukan cuma untuk estetika, tapi juga berfungsi vital sebagai media tumbuh tanaman, rumah bagi bakteri baik, dan penunjang ekosistem akuarium secara keseluruhan.",
+      "tags": [
+        "DasarAquarium",
+        "EkosistemMini",
+        "FilterBiologis"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Soil Khusus Aquarium 🌱",
+      "description": "Aqua soil adalah substrat kaya nutrisi yang didesain khusus untuk aquascape. Cocok banget buat kamu yang ingin punya tanaman air tumbuh subur karena mengandung banyak unsur hara esensial dan bisa bantu menurunkan pH air.",
+      "tags": [
+        "AquaSoil",
+        "NutrisiTanaman",
+        "TanamanAir"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Kekurangan Soil 💸",
+      "description": "Meskipun bagus, aqua soil cenderung lebih mahal dan punya umur pakai. Ketika diaduk, soil bisa mudah hancur dan membuat air keruh, jadi butuh penanganan ekstra saat setting atau maintenance.",
+      "tags": [
+        "PerawatanAquarium",
+        "BudgetAquarium",
+        "AirKeruh"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Pasir Halus 🐠",
+      "description": "Pasir memberikan tampilan alami dan sangat cocok untuk ikan-ikan yang suka menggali atau ikan dasar. Partikelnya yang rapat juga membantu mencegah sisa makanan atau kotoran masuk terlalu dalam, menjadikannya lebih mudah dibersihkan permukaannya.",
+      "tags": [
+        "IkanPenggali",
+        "EstetikaAquarium",
+        "PasirSilika"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Hati-hati dengan Pasir! ⏳",
+      "description": "Tanpa perawatan yang tepat, pasir bisa memadat dan menghambat sirkulasi air di bawahnya. Ini bisa menciptakan 'dead spots' atau area anaerobik yang berbahaya bagi ekosistem akuariummu, jadi pastikan sering diaduk atau gunakan alat pembersih pasir.",
+      "tags": [
+        "MaintenanceAquarium",
+        "DeadSpots",
+        "SirkulasiAir"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Gravel: Klasik & Praktis 💧",
+      "description": "Gravel atau kerikil adalah pilihan substrat paling umum dan ekonomis. Ukurannya yang besar memudahkan sirkulasi air dan pembersihan, menjadikannya pilihan ideal bagi pemula atau aquarium dengan ikan berukuran besar.",
+      "tags": [
+        "GravelAquarium",
+        "MudahBersih",
+        "PemulaFriendly"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Gravel untuk Tanaman? 🤔",
+      "description": "Gravel tidak menyediakan nutrisi langsung untuk tanaman akar, sehingga tanamanmu mungkin butuh pupuk tambahan (seperti pupuk tablet). Kelemahannya, sisa makanan atau kotoran bisa mudah terselip di antara kerikil jika tidak rutin disedot.",
+      "tags": [
+        "PupukAquarium",
+        "TanamanLowTech",
+        "FilterMekanik"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Pilih yang Mana? ✨",
+      "description": "Pilihan substrat tergantung kebutuhan dan tujuan aquariummu. Pertimbangkan jenis ikan, tanaman, dan budget. Kombinasi substrat (misal: soil di bawah, pasir/gravel di atas) juga bisa jadi solusi terbaik untuk menciptakan ekosistem yang seimbang dan indah.",
+      "tags": [
+        "SetupAquarium",
+        "TipsAquarium",
+        "AquascapePemula"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

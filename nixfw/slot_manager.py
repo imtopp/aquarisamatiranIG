@@ -128,7 +128,7 @@ class SlotManager:
                 dt = target.replace(hour=int(hh), minute=int(mm), second=0, microsecond=0)
                 day_name = DAYS_ID[wday]
                 results.append({
-                    "label": f"{day_name} {best[1]}",
+                    "label": f"{day_name} {dt.strftime('%d/%m')} {best[1]}",
                     "iso": dt.strftime("%Y-%m-%d %H:%M"),
                 })
                 seen_dates.add(date_key)

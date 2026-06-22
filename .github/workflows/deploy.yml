@@ -26,9 +26,10 @@ jobs:
             git add -A
             git diff --cached --quiet || git commit -m 'auto: pre-deploy save'
 
-            # Sync with remote
+            # Sync with remote — merge with ours strategy to preserve local data
+            git merge --abort 2>/dev/null || true
             git fetch origin main
-            git rebase origin/main
+            git merge origin/main --strategy-option=ours --no-edit
 
             # Install deps + sync curriculum (regenerates bio/index.html)
             .venv/bin/pip install -q -r requirements.txt

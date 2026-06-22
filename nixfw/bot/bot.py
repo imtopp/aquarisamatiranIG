@@ -2372,19 +2372,6 @@ def main():
         print("TELEGRAM_TOKEN gak ada di .env")
         return
 
-    # Startup pull — sync state terbaru dari repo sebelum bot jalan
-    try:
-        r = subprocess.run(
-            ["git", "pull", "--rebase", "origin", "main"], cwd=PROJECT_ROOT,
-            timeout=30, capture_output=True, text=True
-        )
-        if r.returncode == 0:
-            print("✅ Startup pull selesai")
-        else:
-            print(f"⚠️ Startup pull: {r.stderr[:200]}")
-    except Exception as e:
-        print(f"⚠️ Startup pull gagal (bot tetap jalan): {e}")
-
     init_db()
     request = HTTPXRequest(connect_timeout=30, read_timeout=30, write_timeout=30)
     app = Application.builder().token(TELEGRAM_TOKEN).request(request).post_init(_delete_webhook).build()

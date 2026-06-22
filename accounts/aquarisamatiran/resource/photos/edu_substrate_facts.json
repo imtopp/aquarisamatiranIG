@@ -1,87 +1,87 @@
 {
   "topic": "Substrate Deep Dive",
-  "display_name": "Membongkar Rahasia Substrat! 🕵️‍♀️",
-  "subtitle": "Pondasi Aquarium Impianmu",
-  "scientific_name": "n/a",
+  "display_name": "Rahasia Dunia Bawah Substrat Aquarium",
+  "subtitle": "Pondasi Kehidupan Akuatikmu!",
+  "scientific_name": "Edaphologi Akuatik",
   "facts": [
     {
       "number": "01",
-      "title": "Apa itu Substrat? 🤔",
-      "description": "Substrat adalah lapisan dasar di aquarium kita, ibarat pondasi rumah bagi biota dan tanaman. Bukan sekadar hiasan, tapi komponen vital dalam ekosistem akuatik. Fungsinya jauh lebih dari sekadar estetika!",
+      "title": "Apa Itu Substrat? 🌊",
+      "description": "Substrat adalah lapisan dasar di aquariummu, bukan cuma dekorasi, tapi inti dari ekosistem air! Ia menyediakan 'rumah' bagi bakteri baik dan media tumbuh untuk tanamanmu.",
       "tags": [
-        "LapisanDasar",
-        "EkosistemMini",
-        "FondasiAquarium"
+        "Dasar Aquarium",
+        "Media Tumbuh",
+        "Biofilter"
       ]
     },
     {
       "number": "02",
-      "title": "Fungsi Utama Substrat ✨",
-      "description": "Substrat punya tiga peran utama: sebagai media tanam bagi akar tanaman, rumah bagi bakteri nitrifikasi baik, dan tentu saja, mempercantik tampilan aquarium. Pemilihan yang tepat bisa mendukung kesehatan jangka panjang biota airmu.",
+      "title": "Jagoan Bakteri Baik! 🦠",
+      "description": "Miliar bakteri nitrifikasi hidup di dalam substrat. Mereka mengubah amonia beracun menjadi nitrit dan nitrat yang lebih aman, menjaga air aquarium tetap bersih dan sehat untuk ikanmu.",
       "tags": [
-        "MediaTanam",
-        "FilterBiologi",
-        "EstetikaAquarium"
+        "Siklus Nitrogen",
+        "Bakteri Nitrifikasi",
+        "Detoksifikasi"
       ]
     },
     {
       "number": "03",
-      "title": "Jenis Substrat Inert 🏞️",
-      "description": "Substrat inert adalah jenis yang tidak akan mengubah parameter air (pH, KH, GH). Contohnya pasir silika, gravel, dan beberapa jenis batu. Ini pilihan bagus untuk pemula karena minim risiko perubahan kimia air.",
+      "title": "Fondasi Taman Airmu 🌿",
+      "description": "Bagi aquascape, substrat adalah segalanya! Ia menahan akar tanaman, menyediakan nutrisi esensial secara langsung, dan memungkinkan pertukaran gas yang sehat di zona akar.",
       "tags": [
-        "PasirSilika",
-        "Gravel",
-        "TidakUbahParameter"
+        "Nutrisi Tanaman",
+        "Zona Akar",
+        "Substrat Aktif"
       ]
     },
     {
       "number": "04",
-      "title": "Jenis Substrat Aktif 🌱",
-      "description": "Berbeda dengan inert, substrat aktif (seperti aquarium soil) mampu melepaskan nutrisi dan mengubah parameter air, seringnya menurunkan pH dan KH. Sangat ideal untuk aquascape, udang hias, atau ikan yang suka air asam.",
+      "title": "Berbagai Jenis Substrat ✨",
+      "description": "Ada pasir untuk ikan penggali, gravel untuk tampilan klasik, hingga soil khusus tanaman yang kaya nutrisi. Pilihlah yang sesuai dengan jenis penghuni dan tujuan aquariummu!",
       "tags": [
-        "AquariumSoil",
-        "SubstratNutrisi",
-        "PenurunpH"
+        "Pasir Aquarium",
+        "Gravel",
+        "Aquarium Soil"
       ]
     },
     {
       "number": "05",
-      "title": "Ketebalan Substrat Ideal 📏",
-      "description": "Untuk aquarium tanpa tanaman, cukup 1-2 cm agar mudah dibersihkan. Untuk aquascape, disarankan 3-5 cm di depan dan 7-10 cm di belakang untuk efek gradasi dan ruang akar. Hindari terlalu tebal tanpa sirkulasi yang baik.",
+      "title": "Ketebalan Ideal itu Penting! 📏",
+      "description": "Terlalu tipis, akar tanaman kurang pegangan. Terlalu tebal, bisa membentuk kantung anaerobik yang menghasilkan gas beracun (H2S). Idealnya 5-8 cm di bagian depan dan lebih tebal ke belakang.",
       "tags": [
-        "KetebalanSubstrat",
-        "AquascapeTips",
-        "Gradasi"
+        "Ketebalan Substrat",
+        "Zona Anaerobik",
+        "Sirkulasi Air"
       ]
     },
     {
       "number": "06",
-      "title": "Pentingnya Sirkulasi Substrat 💨",
-      "description": "Substrat yang terlalu padat atau tebal bisa menciptakan zona anoksik (tanpa oksigen) di mana bakteri jahat menghasilkan gas beracun. Pastikan ada sirkulasi air yang baik atau gunakan powerhead untuk mencegah masalah ini.",
+      "title": "Perawatan Substratmu 🧹",
+      "description": "Gunakan siphon khusus substrat untuk membersihkan sisa makanan dan kotoran tanpa mengganggu bakteri. Untuk soil aktif, cukup bersihkan permukaan agar nutrisinya tetap terjaga.",
       "tags": [
-        "ZonaAnoksik",
-        "GasBeracun",
-        "SirkulasiAir"
+        "Siphon Substrat",
+        "Pembersihan Dasar",
+        "Kotoran Organik"
       ]
     },
     {
       "number": "07",
-      "title": "Membersihkan Substrat yang Benar 🧼",
-      "description": "Gunakan gravel vacuum secara rutin saat pergantian air untuk menyedot kotoran. Jangan mengaduk substrat terlalu dalam jika ada tanaman, cukup bagian atasnya saja untuk menghindari pelepasan amonia atau merusak akar.",
+      "title": "Jangan Salah Pilih Substrat! ⚠️",
+      "description": "Pastikan substrat yang kamu pilih tidak tajam untuk ikan-ikan dasar, tidak mengubah parameter air secara drastis (kecuali disengaja), dan mendukung kehidupan yang ingin kamu pelihara.",
       "tags": [
-        "GravelVacuum",
-        "Siphon",
-        "RutinitasPerawatan"
+        "Kesesuaian Spesies",
+        "Parameter Air",
+        "Bahan Inert"
       ]
     },
     {
       "number": "08",
-      "title": "Substrat untuk Pemula 🔰",
-      "description": "Bagi pemula, pasir silika atau gravel adalah pilihan paling aman dan terjangkau. Mereka mudah dibersihkan dan tidak mempengaruhi parameter air. Jika ingin bertanam, mulailah dengan tanaman yang akarnya tidak terlalu rewel.",
+      "title": "Substrat 'Aktif' vs. 'Inert' 🧪",
+      "description": "Substrat aktif (seperti soil) melepaskan nutrisi dan bisa menurunkan pH/GH. Substrat inert (seperti pasir atau gravel biasa) tidak memengaruhi kimia air dan cocok untuk banyak setting.",
       "tags": [
-        "SubstratPemula",
-        "PilihanAman",
-        "AquariumDasar"
+        "Substrat Aktif",
+        "Substrat Inert",
+        "pH & GH"
       ]
     }
   ],

@@ -23,6 +23,7 @@ from pathlib import Path
 
 from nixfw import config
 from nixfw.bio.generator import update_bio
+from nixfw.config import SCHEDULER_OUTPUT_DIR
 
 ACCOUNT_BASE = config.PROJECT_ROOT / "accounts" / config.ACCOUNT_NAME
 SRC = ACCOUNT_BASE / "source_of_truth.json"
@@ -570,6 +571,105 @@ def _sync_schedule_json(data):
 
     SCHEDULE_JSON.write_text(json.dumps(schedule, indent=2, ensure_ascii=False), encoding="utf-8")
     print("  ✅ schedule.json synced")
+
+# ──── scheduler output processing ────
+
+
+def process_scheduler_results(account: str = "aquarisamatiran") -> int:
+    """Process .scheduler_output/*.json files from GH Actions scheduler.
+    Reads each file, updates schedule.json + source_of_truth.json,
+    then deletes the output file. Idempotent — safe to call multiple times.
+    Returns number of processed files."""
+    output_dir = SCHEDULER_OUTPUT_DIR
+    if not output_dir.is_dir():
+        return 0
+
+    files = sorted(output_dir.glob("*.json"))
+    if not files:
+        return 0
+
+    data = load()
+
+    schedule = []
+    if SCHEDULE_JSON.exists():
+        schedule = json.loads(SCHEDULE_JSON.read_text(encoding="utf-8"))
+
+    processed = 0
+    for f in files:
+        try:
+            result = json.loads(f.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+
+        source_ref = result.get("source_ref", "")
+        result_id = result.get("result_id", "")
+        permalink = result.get("permalink", "")
+        caption = result.get("caption", "")
+        urls = result.get("urls", [])
+
+        if not source_ref:
+            f.unlink(missing_ok=True)
+            continue
+
+        # Resolve ref to category + num_key
+        resolved = resolve_ref(source_ref, data)
+        if not resolved:
+            print(f"  ⚠️  scheduler output {f.name}: {source_ref} gak dikenal, skip")
+            continue
+        cid, num_key = resolved
+
+        # 1. Update source_of_truth.json
+        topic = data.get("topics", {}).get(cid, {}).get(num_key)
+        if topic:
+            topic["status"] = "live"
+            if result_id:
+                topic["result_id"] = result_id
+            if permalink:
+                topic["permalink"] = permalink
+            if caption:
+                topic["caption"] = caption
+            print(f"  ✅ source_of_truth: {source_ref} → live")
+
+        # 2. Update schedule.json
+        entry = None
+        for e in schedule:
+            if e.get("source_ref") == source_ref:
+                entry = e
+                break
+        if not entry and topic:
+            entry = {
+                "source_ref": source_ref,
+                "category": int(cid),
+                "time": topic.get("scheduled_time", ""),
+                "type": "carousel",
+                "done": True,
+                "topic_uuid": topic.get("id", ""),
+            }
+            schedule.append(entry)
+        if entry:
+            entry["done"] = True
+            if result_id:
+                entry["result_id"] = result_id
+            if permalink:
+                entry["permalink"] = permalink
+            if caption:
+                entry["caption"] = caption
+            if urls:
+                entry["urls"] = urls
+            print(f"  ✅ schedule.json: {source_ref} → done")
+
+        # 3. Delete output file
+        f.unlink(missing_ok=True)
+        processed += 1
+
+    if processed:
+        save(data)
+        SCHEDULE_JSON.write_text(json.dumps(schedule, indent=2, ensure_ascii=False), encoding="utf-8")
+        update_bio(account=account)
+        print(f"  ✅ Bio page updated after {processed} scheduler result(s)")
+
+    return processed
+
 
 # ──── Telegram-callable helpers ────
 

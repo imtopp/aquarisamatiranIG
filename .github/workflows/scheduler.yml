@@ -3,6 +3,10 @@ name: Scheduler — triggered by cron-job.org
 on:
   workflow_dispatch:
 
+concurrency:
+  group: scheduler
+  cancel-in-progress: false
+
 permissions:
   contents: write
   actions: write
@@ -32,26 +36,16 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_API_KEY_1: ${{ secrets.BACKUP_GEMINI_API_KEY }}
 
-      - name: Commit & push changes
+      - name: Commit & push scheduler outputs
+        if: always()
         run: |
           git config user.name "Nix Bot"
           git config user.email "nix@aquarisamatiran.dev"
-          git add accounts/aquarisamatiran/schedule.json accounts/aquarisamatiran/source_of_truth.json accounts/aquarisamatiran/bio/index.html
-          git diff --cached --quiet || git commit -m "auto: post + update bio"
-          git push origin main
+          test -d accounts/aquarisamatiran/resource/.scheduler_output/ && git add accounts/aquarisamatiran/resource/.scheduler_output/ || true
+          git diff --cached --quiet || git commit -m "auto: scheduler output"
+          git push origin main || echo '⚠️  Push failed (may be empty or conflict) — deploy will handle'
 
       - name: Trigger deploy
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run deploy.yml --ref main
-
-      - name: Push bio to pages repo
-        run: |
-          git clone https://${{ secrets.GH_PAT }}@github.com/imtopp/aquarisamatiran-pages.git /tmp/pages-repo
-          cp accounts/aquarisamatiran/bio/index.html /tmp/pages-repo/index.html
-          cd /tmp/pages-repo
-          git config user.name "Nix Bot"
-          git config user.email "nix@aquarisamatiran.dev"
-          git add index.html
-          git diff --cached --quiet || git commit -m "auto: update bio from scheduler"
-          git push origin main

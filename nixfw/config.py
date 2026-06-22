@@ -17,6 +17,7 @@ CONTENT_PATH = PROJECT_ROOT / "accounts" / "aquarisamatiran" / "source_of_truth.
 BIO_HTML_PATH = PROJECT_ROOT / "accounts" / "aquarisamatiran" / "bio" / "index.html"
 RESOURCE_DIR = PROJECT_ROOT / "accounts" / "aquarisamatiran" / "resource"
 PHOTO_DIR = RESOURCE_DIR / "photos"
+SCHEDULER_OUTPUT_DIR = RESOURCE_DIR / ".scheduler_output"
 AGENTS_MD = PROJECT_ROOT / "AGENTS.md"
 DB_PATH = PROJECT_ROOT / "bot" / "chat_history.db"
 

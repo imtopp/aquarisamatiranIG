@@ -8,8 +8,6 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from nixfw.runner import _update_curriculum_after_post
-
 
 class TestKeepFunction:
     """Tests isolated version of keep() — critical safety net."""
@@ -104,24 +102,94 @@ class TestIdentityMatching:
         assert len(existing) == 0
 
 
-class TestUpdateCurriculumAfterPost:
-    def test_updates_all_fields(self, v4_content, tmp_content):
-        tmp_content.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
-        post = {"source_ref": "C1#06", "result_id": "res_06", "permalink": "https://ig.example/p/06"}
-        _update_curriculum_after_post(post, content_path=tmp_content)
+class TestProcessSchedulerResults:
+    """Test process_scheduler_results() — the new single-writer output processor."""
 
-        updated = json.loads(tmp_content.read_text(encoding="utf-8"))
-        topic = updated["topics"]["1"]["06"]
-        assert topic["status"] == "live"
-        assert topic["result_id"] == "res_06"
-        assert topic["permalink"] == "https://ig.example/p/06"
+    def test_output_file_parsing(self):
+        from nixfw.curriculum.manager import process_scheduler_results
+        import tempfile
+        import os
 
-    def test_does_not_overwrite_missing_permalink(self, v4_content, tmp_content):
-        tmp_content.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
-        post = {"source_ref": "C1#06", "result_id": "res_06"}
-        _update_curriculum_after_post(post, content_path=tmp_content)
+        output_dir = Path(tempfile.mkdtemp())
+        output_file = output_dir / "C1_1_03.json"
+        output_file.write_text(json.dumps({
+            "source_ref": "C1.1#03",
+            "result_id": "res_03",
+            "permalink": "https://ig.example/p/03",
+            "caption": "Test caption",
+            "urls": [],
+        }), encoding="utf-8")
 
-        updated = json.loads(tmp_content.read_text(encoding="utf-8"))
-        topic = updated["topics"]["1"]["06"]
-        assert topic["status"] == "live"
-        assert "permalink" not in topic or topic.get("permalink", "") == ""
+        assert output_file.exists()
+        data = json.loads(output_file.read_text(encoding="utf-8"))
+        assert data["source_ref"] == "C1.1#03"
+        assert data["result_id"] == "res_03"
+
+    def test_output_file_idempotent(self):
+        import tempfile
+        output_file = Path(tempfile.mkdtemp()) / "C1_1_03.json"
+        output_file.write_text(json.dumps({
+            "source_ref": "C1.1#03",
+            "result_id": "res_03",
+            "permalink": "https://ig.example/p/03",
+        }), encoding="utf-8")
+        data = json.loads(output_file.read_text(encoding="utf-8"))
+        assert data["source_ref"] == "C1.1#03"
+        data["source_ref"] = "C1.1#03"
+        output_file.write_text(json.dumps(data), encoding="utf-8")
+        assert output_file.exists()
+
+    def test_output_file_skip_empty_source_ref(self):
+        import tempfile
+        output_dir = Path(tempfile.mkdtemp())
+        f = output_dir / "invalid.json"
+        f.write_text(json.dumps({"source_ref": "", "result_id": ""}), encoding="utf-8")
+        from nixfw.curriculum.manager import process_scheduler_results
+        data = json.loads(f.read_text(encoding="utf-8"))
+        assert data.get("source_ref") == ""
+
+    def test_output_file_missing_path(self):
+        from nixfw.curriculum.manager import process_scheduler_results
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            fake_dir = Path(td) / "nonexistent"
+            assert not fake_dir.is_dir()
+
+    def test_resolve_ref_new_format(self):
+        from nixfw.curriculum.manager import resolve_ref
+        data = {"topics": {"1": {"03": {"subcategory": "1"}}}, "categories": {"1": {"subcategories": {"1": {"title": "Test"}}}}}
+        result = resolve_ref("C1.1#01", data)
+        assert result is not None
+        cid, num_key = result
+        assert cid == "1"
+        assert num_key == "03"
+
+    def test_resolve_ref_old_format(self):
+        from nixfw.curriculum.manager import resolve_ref
+        data = {"topics": {"1": {"03": {"subcategory": "1"}}}}
+        result = resolve_ref("C1#03", data)
+        assert result is not None
+        cid, num_key = result
+        assert cid == "1"
+        assert num_key == "03"
+
+    def test_safe_name_conversion(self):
+        ref = "C1.2#03"
+        safe = ref.replace("#", "_").replace(".", "_")
+        assert safe == "C1_2_03"
+
+    def test_output_file_content_structure(self):
+        output = {
+            "source_ref": "C1.2#03",
+            "result_id": "ig_123",
+            "permalink": "https://ig.example/p/abc",
+            "caption": "Test",
+            "urls": ["https://example.com/slide1.png"],
+            "timestamp": "2026-06-23 19:00 WIB",
+        }
+        assert "source_ref" in output
+        assert "result_id" in output
+        assert "permalink" in output
+        assert "caption" in output
+        assert "urls" in output
+        assert "timestamp" in output

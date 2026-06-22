@@ -7,12 +7,12 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from nixfw.runner import _find_topic_by_num, _update_curriculum_after_post
+from nixfw.runner import _find_topic_by_num
 from nixfw.bio.generator import build_card_statuses
 
 
 class TestRunnerReaders:
-    """Tests for runner module _find_topic_by_num and _update_curriculum_after_post readers."""
+    """Tests for runner module _find_topic_by_num reader."""
 
     def test_find_topic_by_num_v4(self, v4_content):
         topic = _find_topic_by_num(v4_content, "01")
@@ -27,36 +27,6 @@ class TestRunnerReaders:
         topic = _find_topic_by_num(v5_content, "01")
         assert topic is not None
         assert topic["slug"] == "aquarium-itu-apa"
-
-    def test_update_after_post_with_curriculum_key(self, v4_content, tmp_content):
-        tmp_content.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
-        post = {"source_ref": "C1#06", "result_id": "new_id", "permalink": "https://ig.example/p/new"}
-        _update_curriculum_after_post(post, content_path=tmp_content)
-
-        updated = json.loads(tmp_content.read_text(encoding="utf-8"))
-        assert updated["topics"]["1"]["06"]["status"] == "live"
-        assert updated["topics"]["1"]["06"]["result_id"] == "new_id"
-
-    def test_update_after_post_with_source_ref_key(self, v4_content, tmp_content):
-        tmp_content.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
-        post = {"source_ref": "C1#06", "result_id": "new_id"}
-        _update_curriculum_after_post(post, content_path=tmp_content)
-
-        updated = json.loads(tmp_content.read_text(encoding="utf-8"))
-        assert updated["topics"]["1"]["06"]["status"] == "live"
-        assert updated["topics"]["1"]["06"]["result_id"] == "new_id"
-
-    def test_update_after_post_no_match_skips(self, v4_content, tmp_content):
-        tmp_content.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
-        post = {"source_ref": "C1#99"}
-        _update_curriculum_after_post(post, content_path=tmp_content)
-        assert True
-
-    def test_update_after_post_empty_curriculum_skips(self, v4_content, tmp_content):
-        tmp_content.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
-        post = {"source_ref": ""}
-        _update_curriculum_after_post(post, content_path=tmp_content)
-        assert True
 
 
 class TestMainReaders:

@@ -33,6 +33,7 @@ from nixfw.curriculum.manager import (
     telegram_delete_topic,
     telegram_move_topic,
     format_ref,
+    process_scheduler_results,
 )
 
 
@@ -70,11 +71,10 @@ SLOT_MANAGER = SlotManager()
 _sync_lock = asyncio.Lock()
 
 async def _git_sync_after(commit_msg: str) -> bool:
-    """Commit pending lokal + push ke GitHub.
-    Non-critical — return False kalo gagal, gak raise.
+    """Single-writer sync: fetch remote → process scheduler outputs → commit → push.
+    GH Actions writes .scheduler_output/ files; VPS processes them into master data.
+    Retry 3x on push rejection. Lock prevents concurrent syncs.
     Otomatis skip kalo jalan di GitHub Actions.
-    Ada lock biar gak tabrakan kalo 2 command datang berurutan.
-    Retry 3x dengan pull --strategy-option=ours di antara.
     """
     if os.environ.get("GITHUB_ACTIONS") == "true":
         return True
@@ -82,6 +82,31 @@ async def _git_sync_after(commit_msg: str) -> bool:
         loop = asyncio.get_event_loop()
         for attempt in range(3):
             try:
+                # Phase 1: Fetch + merge remote (bring in .scheduler_output/ files)
+                r = await loop.run_in_executor(None, lambda: subprocess.run(
+                    ["git", "fetch", "origin", "main"], cwd=PROJECT_ROOT,
+                    capture_output=True, text=True, timeout=30
+                ))
+                if r.returncode != 0:
+                    print(f"  ⚠️ git fetch gagal (attempt {attempt+1})")
+                    continue
+                r = await loop.run_in_executor(None, lambda: subprocess.run(
+                    ["git", "merge", "--ff-only", "origin/main"], cwd=PROJECT_ROOT,
+                    capture_output=True, text=True, timeout=30
+                ))
+                if r.returncode != 0:
+                    r = await loop.run_in_executor(None, lambda: subprocess.run(
+                        ["git", "merge", "origin/main", "--strategy-option=ours", "--no-edit"],
+                        cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=30
+                    ))
+                    if r.returncode != 0:
+                        print(f"  ⚠️ git merge gagal (attempt {attempt+1})")
+                        continue
+
+                # Phase 2: Process scheduler outputs (apply .scheduler_output/ → master data)
+                await loop.run_in_executor(None, process_scheduler_results)
+
+                # Phase 3: Commit local changes (master data updates + output deletions)
                 r = await loop.run_in_executor(None, lambda: subprocess.run(
                     ["git", "add", "-A"], cwd=PROJECT_ROOT,
                     capture_output=True, text=True, timeout=15
@@ -100,17 +125,21 @@ async def _git_sync_after(commit_msg: str) -> bool:
                 ))
                 if r.returncode != 0:
                     continue
+
+                # Phase 4: Push
                 r = await loop.run_in_executor(None, lambda: subprocess.run(
                     ["git", "push", "origin", "main"], cwd=PROJECT_ROOT,
                     capture_output=True, text=True, timeout=30
                 ))
                 if r.returncode == 0:
                     return True
-                await loop.run_in_executor(None, lambda: subprocess.run(
-                    ["git", "pull", "--strategy-option=ours", "--no-rebase", "origin", "main"],
-                    cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=30
-                ))
+
+                # Push rejected — remote has new commits, retry with fresh fetch+merge
+                print(f"  ⚠️ push ditolak (attempt {attempt+1}), retry...")
+                continue
+
             except subprocess.TimeoutExpired:
+                print(f"  ⚠️ Timeout (attempt {attempt+1})")
                 continue
             except Exception as e:
                 print(f"  ⚠️ _git_sync_after error (attempt {attempt+1}): {e}")
@@ -2045,15 +2074,23 @@ async def sync_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await msg.edit_text("❌ Sync failed — merge conflict unresolved:\n" + merge.stderr[:300])
             return
 
-        # 3. Install deps
+        # 3. Process scheduler outputs (.scheduler_output/ → master data)
+        try:
+            count = process_scheduler_results()
+            if count:
+                await msg.edit_text(f"⏳ {count} scheduler output(s) diproses...")
+        except Exception as e:
+            print(f"  ⚠️  process_scheduler_results: {e}")
+
+        # 4. Install deps
         pip_res = _sh([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], timeout=120)
         if pip_res.returncode != 0:
             await msg.edit_text(f"⚠️ pip install error:\n{pip_res.stderr[:300]}")
 
-        # 4. Curriculum sync — regenerates bio/index.html
+        # 5. Curriculum sync — regenerates bio/index.html
         _sh([sys.executable, "main.py", "curriculum", "sync"], timeout=60)
 
-        # 5. Commit bio changes
+        # 6. Commit bio changes
         _sh(["git", "add", BIO_PATH])
         bio_diff = _sh(["git", "diff", "--cached", "--quiet"])
         if bio_diff.returncode != 0:
@@ -2095,14 +2132,14 @@ async def sync_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception as pages_err:
             print(f"  ⚠️  Pages push skipped: {pages_err}")
 
-        # 8. Save flag for restart notification
+        # 9. Save flag for restart notification
         (PROJECT_ROOT / ".restart_flag").write_text(
             json.dumps({"chat_id": chat_id}), encoding="utf-8"
         )
 
         await msg.edit_text("✅ Sync done!\n🔄 Restart bot system...")
 
-        # 9. Restart via systemctl with small delay
+        # 10. Restart via systemctl with small delay
         subprocess.Popen(
             ["nohup", "sh", "-c", "sleep 2 && sudo systemctl restart nix-bot"],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
@@ -2381,6 +2418,23 @@ def main():
     if not TELEGRAM_TOKEN:
         print("TELEGRAM_TOKEN gak ada di .env")
         return
+
+    # Startup: sync remote + process any pending scheduler outputs
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        try:
+            subprocess.run(
+                ["git", "pull", "--ff-only", "origin", "main"],
+                cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=30,
+            )
+            print("✅ Startup git pull —ff-only selesai")
+        except Exception as e:
+            print(f"⚠️  Startup git pull gagal: {e}")
+        try:
+            count = process_scheduler_results()
+            if count:
+                print(f"✅ Startup: {count} scheduler output(s) diproses")
+        except Exception as e:
+            print(f"⚠️  Startup process_scheduler_results gagal: {e}")
 
     init_db()
     request = HTTPXRequest(connect_timeout=30, read_timeout=30, write_timeout=30)

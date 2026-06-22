@@ -26,19 +26,18 @@ jobs:
             git add -A
             git diff --cached --quiet || git commit -m 'auto: pre-deploy save'
 
-            # Sync with remote — merge with ours strategy to preserve local data
+            # Sync with remote — bring in any .scheduler_output/ files
             git merge --abort 2>/dev/null || true
             git fetch origin main
             git merge origin/main --strategy-option=ours --no-edit
 
-            # Force checkout data files from remote — VPS local version
-            # may be stale/corrupted from bot running with outdated curriculum
-            git checkout origin/main -- \
-              accounts/aquarisamatiran/source_of_truth.json \
-              accounts/aquarisamatiran/schedule.json
+            # Process scheduler outputs (.scheduler_output/ → master data)
+            .venv/bin/python -c 'from nixfw.curriculum.manager import process_scheduler_results; count = process_scheduler_results(); print(f"Processed {count} scheduler output(s)")'
 
-            # Install deps + sync curriculum (regenerates bio/index.html)
+            # Install deps
             .venv/bin/pip install -q -r requirements.txt
+
+            # Sync curriculum (regenerates bio/index.html) — also processes any remaining outputs
             .venv/bin/python main.py curriculum sync
 
             # Commit bio changes + push ke repo ini

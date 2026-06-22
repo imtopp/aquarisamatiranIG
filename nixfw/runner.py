@@ -1,4 +1,7 @@
-"""NixFW Runner — post from schedule.json."""
+"""NixFW Runner — post from schedule.json.
+SINGLE WRITER: outputs go to resource/.scheduler_output/{ref}.json
+instead of modifying master data files directly.
+VPS process_scheduler_results() reads + applies + deletes these outputs."""
 import json
 import os
 import re
@@ -9,13 +12,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from nixfw.ig_client import InstagramClient
-from nixfw.bio.generator import update_bio
 
 WIB = timezone(timedelta(hours=7))
 
-# Module-level paths (overridable for testing)
-CONTENT_PATH = Path(__file__).resolve().parent.parent / "accounts" / "aquarisamatiran" / "source_of_truth.json"
-SCHED_PATH = Path(__file__).resolve().parent.parent / "accounts" / "aquarisamatiran" / "schedule.json"
+ACCOUNT_BASE = Path(__file__).resolve().parent.parent / "accounts" / "aquarisamatiran"
+CONTENT_PATH = ACCOUNT_BASE / "source_of_truth.json"
+SCHED_PATH = ACCOUNT_BASE / "schedule.json"
+SCHEDULER_OUTPUT_DIR = ACCOUNT_BASE / "resource" / ".scheduler_output"
 
 
 def _find_topic_by_num(cc, num):
@@ -29,17 +32,13 @@ _re_ref = re.compile(r"[CS](\d+)(?:\.(\d+))?#(\d+)")
 
 
 def _num_from_ref(cc, ref):
-    """Given source_ref (old C1#06 or new C1.1#01), return the dict key to look up."""
     m = _re_ref.match(ref)
     if not m:
-        # Fallback: extract bare number
         m2 = re.search(r"#(\d+)", ref)
         return m2.group(1) if m2 else ref.lstrip("#")
     cid, sc_part, num_str = m.group(1), m.group(2), m.group(3)
     if not sc_part:
-        # Legacy format C1#06 — num is dict key directly
         return num_str.zfill(2)
-    # New format C1.1#01 — resolve seq → dict key
     st = cc.get("topics", {}).get(cid, {})
     items = [(int(k), k) for k, v in st.items() if v.get("subcategory", "1") == sc_part]
     items.sort()
@@ -49,40 +48,41 @@ def _num_from_ref(cc, ref):
     return num_str.zfill(2)
 
 
-def _update_curriculum_after_post(post, content_path=None):
-    if content_path is None:
-        content_path = CONTENT_PATH
-    curriculum = post.get("source_ref") or post.get("curriculum", "")
-    if not curriculum or not content_path.exists():
-        return
-    try:
-        cc = json.loads(content_path.read_text(encoding="utf-8"))
-        num = _num_from_ref(cc, curriculum)
-        topic = _find_topic_by_num(cc, num)
-        if topic:
-            topic["status"] = "live"
-            if post.get("result_id"):
-                topic["result_id"] = post["result_id"]
-            if post.get("permalink"):
-                topic["permalink"] = post["permalink"]
-            content_path.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
-            print(f"   📝 source_of_truth.json diupdate untuk #{num}")
-    except Exception:
-        pass
+def _write_output_file(source_ref: str, result_id: str, permalink: str, caption: str = "", urls: list = None):
+    """Write a .scheduler_output/{safe_ref}.json file for VPS to process."""
+    SCHEDULER_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    safe_name = source_ref.replace("#", "_").replace(".", "_")
+    output = {
+        "source_ref": source_ref,
+        "result_id": result_id,
+        "permalink": permalink,
+        "caption": caption,
+        "urls": urls or [],
+        "timestamp": datetime.now(WIB).strftime("%Y-%m-%d %H:%M WIB"),
+    }
+    out_path = SCHEDULER_OUTPUT_DIR / f"{safe_name}.json"
+    out_path.write_text(json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"   📝 .scheduler_output/{safe_name}.json ditulis")
+
+
+def _output_file_exists(source_ref: str) -> bool:
+    """Check if an output file already exists for this ref (skip guard)."""
+    safe_name = source_ref.replace("#", "_").replace(".", "_")
+    return (SCHEDULER_OUTPUT_DIR / f"{safe_name}.json").exists()
 
 
 def run(account: str = "aquarisamatiran"):
     base = Path(__file__).resolve().parent.parent / "accounts" / account
     content_path = base / "source_of_truth.json"
     sched_path = base / "schedule.json"
+    output_dir = base / "resource" / ".scheduler_output"
+    global SCHEDULER_OUTPUT_DIR
+    SCHEDULER_OUTPUT_DIR = output_dir
 
     def load_schedule():
         if not sched_path.exists():
             return []
         return json.loads(sched_path.read_text(encoding="utf-8"))
-
-    def save_schedule(data):
-        sched_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
     now = datetime.now(WIB)
     now_str = now.strftime("%Y-%m-%d %H:%M")
@@ -102,32 +102,48 @@ def run(account: str = "aquarisamatiran"):
 
     client = InstagramClient()
 
+    # Backfill permalink for posts that have result_id but no permalink
     for post in schedule:
         if post.get("result_id") and not post.get("permalink"):
+            ref = post.get("source_ref") or post.get("curriculum", "")
+            if ref and _output_file_exists(ref):
+                continue
             print(f"   🔄 Backfill permalink buat {post.get('result_id')}...")
             try:
                 info = client.get_media_by_id(post["result_id"])
-                post["permalink"] = info.get("permalink", "")
-                if post["permalink"]:
-                    print(f"      ✅ {post['permalink']}")
+                permalink = info.get("permalink", "")
+                if permalink:
+                    post["permalink"] = permalink
+                    # Write output file for VPS to pick up
+                    _write_output_file(
+                        source_ref=ref,
+                        result_id=post["result_id"],
+                        permalink=permalink,
+                        caption=post.get("caption", ""),
+                        urls=post.get("urls"),
+                    )
             except Exception as e:
                 print(f"      ⚠️  Gagal: {e}")
-    save_schedule(schedule)
 
     if not target:
         print("✅ Semua postingan udah selesai")
-        update_bio(account=account)
         return
 
     for post in target:
         ptype = post.get("type", "?")
         ptime = post.get("time", "?")
+        ref = post.get("source_ref") or post.get("curriculum", "")
         print(f"\n📤 {ptype} — {ptime}")
 
         if ptype == "carousel" and not post.get("urls"):
             print(f"   ⏭️  url kosong — skip"); continue
         if ptype != "carousel" and not post.get("url"):
             print(f"   ⏭️  url kosong — skip"); continue
+
+        # Guard: skip if output file already exists (partial run completed post)
+        if ref and _output_file_exists(ref):
+            print(f"   ⏭️  output file udah ada — skip (VPS akan process)")
+            continue
 
         caption = post.get("caption", "")
         try:
@@ -146,25 +162,28 @@ def run(account: str = "aquarisamatiran"):
             else:
                 print(f"   ⚠️  Tipe '{ptype}' ngga dikenal"); continue
 
-            post["done"] = True
-            post["result_id"] = result.get("id", "")
+            result_id = result.get("id", "")
+            permalink = ""
             try:
-                media_info = client.get_media_by_id(post["result_id"])
-                post["permalink"] = media_info.get("permalink", "")
+                media_info = client.get_media_by_id(result_id)
+                permalink = media_info.get("permalink", "")
             except Exception:
-                post["permalink"] = ""
-            save_schedule(schedule)
-            print(f"   ✅ ID: {result.get('id')}")
-            if post.get("permalink"):
-                print(f"   🔗 {post['permalink']}")
-            print(f"   📝 schedule.json diupdate")
-            _update_curriculum_after_post(post, content_path=content_path)
-            update_bio(account=account)
+                pass
+
+            # Write .scheduler_output/{ref}.json instead of modifying master data
+            _write_output_file(
+                source_ref=ref,
+                result_id=result_id,
+                permalink=permalink,
+                caption=caption,
+                urls=post.get("urls"),
+            )
+            print(f"   ✅ ID: {result_id}")
+            if permalink:
+                print(f"   🔗 {permalink}")
 
         except Exception as e:
             print(f"   ❌ Gagal: {e}")
-
-    update_bio(account=account)
 
 
 if __name__ == "__main__":

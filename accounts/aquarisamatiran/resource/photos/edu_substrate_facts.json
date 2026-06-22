@@ -1,0 +1,89 @@
+{
+  "topic": "Substrate Deep Dive",
+  "display_name": "Membongkar Rahasia Substrat! 🕵️‍♀️",
+  "subtitle": "Pondasi Aquarium Impianmu",
+  "scientific_name": "n/a",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Apa itu Substrat? 🤔",
+      "description": "Substrat adalah lapisan dasar di aquarium kita, ibarat pondasi rumah bagi biota dan tanaman. Bukan sekadar hiasan, tapi komponen vital dalam ekosistem akuatik. Fungsinya jauh lebih dari sekadar estetika!",
+      "tags": [
+        "LapisanDasar",
+        "EkosistemMini",
+        "FondasiAquarium"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Fungsi Utama Substrat ✨",
+      "description": "Substrat punya tiga peran utama: sebagai media tanam bagi akar tanaman, rumah bagi bakteri nitrifikasi baik, dan tentu saja, mempercantik tampilan aquarium. Pemilihan yang tepat bisa mendukung kesehatan jangka panjang biota airmu.",
+      "tags": [
+        "MediaTanam",
+        "FilterBiologi",
+        "EstetikaAquarium"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Jenis Substrat Inert 🏞️",
+      "description": "Substrat inert adalah jenis yang tidak akan mengubah parameter air (pH, KH, GH). Contohnya pasir silika, gravel, dan beberapa jenis batu. Ini pilihan bagus untuk pemula karena minim risiko perubahan kimia air.",
+      "tags": [
+        "PasirSilika",
+        "Gravel",
+        "TidakUbahParameter"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Jenis Substrat Aktif 🌱",
+      "description": "Berbeda dengan inert, substrat aktif (seperti aquarium soil) mampu melepaskan nutrisi dan mengubah parameter air, seringnya menurunkan pH dan KH. Sangat ideal untuk aquascape, udang hias, atau ikan yang suka air asam.",
+      "tags": [
+        "AquariumSoil",
+        "SubstratNutrisi",
+        "PenurunpH"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Ketebalan Substrat Ideal 📏",
+      "description": "Untuk aquarium tanpa tanaman, cukup 1-2 cm agar mudah dibersihkan. Untuk aquascape, disarankan 3-5 cm di depan dan 7-10 cm di belakang untuk efek gradasi dan ruang akar. Hindari terlalu tebal tanpa sirkulasi yang baik.",
+      "tags": [
+        "KetebalanSubstrat",
+        "AquascapeTips",
+        "Gradasi"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Pentingnya Sirkulasi Substrat 💨",
+      "description": "Substrat yang terlalu padat atau tebal bisa menciptakan zona anoksik (tanpa oksigen) di mana bakteri jahat menghasilkan gas beracun. Pastikan ada sirkulasi air yang baik atau gunakan powerhead untuk mencegah masalah ini.",
+      "tags": [
+        "ZonaAnoksik",
+        "GasBeracun",
+        "SirkulasiAir"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Membersihkan Substrat yang Benar 🧼",
+      "description": "Gunakan gravel vacuum secara rutin saat pergantian air untuk menyedot kotoran. Jangan mengaduk substrat terlalu dalam jika ada tanaman, cukup bagian atasnya saja untuk menghindari pelepasan amonia atau merusak akar.",
+      "tags": [
+        "GravelVacuum",
+        "Siphon",
+        "RutinitasPerawatan"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Substrat untuk Pemula 🔰",
+      "description": "Bagi pemula, pasir silika atau gravel adalah pilihan paling aman dan terjangkau. Mereka mudah dibersihkan dan tidak mempengaruhi parameter air. Jika ingin bertanam, mulailah dengan tanaman yang akarnya tidak terlalu rewel.",
+      "tags": [
+        "SubstratPemula",
+        "PilihanAman",
+        "AquariumDasar"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

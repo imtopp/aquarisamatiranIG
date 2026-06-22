@@ -781,7 +781,8 @@
             ]
           }
         ],
-        "id": "bd6b1f2b-c31e-4f79-9813-701e6c2c3990"
+        "id": "bd6b1f2b-c31e-4f79-9813-701e6c2c3990",
+        "scheduled_time": "2026-06-23 19:00"
       },
       "10": {
         "slug": "penyakit-ikan",
@@ -893,7 +894,8 @@
             ]
           }
         ],
-        "id": "09f00cdc-f862-4d27-b59d-7ebbd608b265"
+        "id": "09f00cdc-f862-4d27-b59d-7ebbd608b265",
+        "scheduled_time": "2026-06-24 19:00"
       },
       "11": {
         "slug": "parameter-air",

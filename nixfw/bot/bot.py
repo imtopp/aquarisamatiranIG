@@ -2232,6 +2232,7 @@ async def _topic_cat_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE, arg
             return await update.message.reply_text("Format: `/topic cat rename <C#> <nama>`")
         from nixfw.curriculum.manager import telegram_rename_category
         result = telegram_rename_category(rest[0], " ".join(rest[1:]))
+        asyncio.create_task(_git_sync_after(f"auto: rename cat {rest[0]}"))
         return await update.message.reply_text(result)
     if sub == "remove":
         # /topic cat remove <C#>
@@ -2239,6 +2240,7 @@ async def _topic_cat_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE, arg
             return await update.message.reply_text("Format: `/topic cat remove <C#>`")
         from nixfw.curriculum.manager import telegram_remove_category
         result = telegram_remove_category(rest[0])
+        asyncio.create_task(_git_sync_after(f"auto: remove cat {rest[0]}"))
         return await update.message.reply_text(result)
     if sub == "sub":
         return await _topic_cat_sub_cmd(update, context, rest)
@@ -2260,12 +2262,14 @@ async def _topic_cat_sub_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE,
             return await update.message.reply_text("Format: `/topic cat sub rename <C#> <id> <label>`")
         from nixfw.curriculum.manager import telegram_rename_subcategory
         result = telegram_rename_subcategory(rest[0], rest[1], " ".join(rest[2:]))
+        asyncio.create_task(_git_sync_after(f"auto: rename subcat {rest[0]}.{rest[1]}"))
         return await update.message.reply_text(result)
     if sub == "remove":
         if len(rest) < 2:
             return await update.message.reply_text("Format: `/topic cat sub remove <C#> <id>`")
         from nixfw.curriculum.manager import telegram_remove_subcategory
         result = telegram_remove_subcategory(rest[0], rest[1])
+        asyncio.create_task(_git_sync_after(f"auto: remove subcat {rest[0]}.{rest[1]}"))
         return await update.message.reply_text(result)
     await update.message.reply_text(f"❌ Subcommand `{sub}` gak dikenal.\n\n" + _TOPIC_HELP)
 

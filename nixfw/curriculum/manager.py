@@ -511,7 +511,8 @@ def _sync_schedule_json(data):
             if v.get("status") == "live":
                 entry["done"] = True
             elif v.get("status") == "scheduled":
-                entry["done"] = False
+                if not entry.get("result_id"):
+                    entry["done"] = False
             if v.get("permalink"):
                 entry["permalink"] = v["permalink"]
             if v.get("result_id"):

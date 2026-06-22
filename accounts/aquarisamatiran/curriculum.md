@@ -20,8 +20,8 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 |---|-------|--------|
 | 01 | Macam-macam Filter | ✅ |
 | 02 | Tanaman Aquascape Pemula | 📅 |
-| 03 | Ganti Air & Perawatan | 📅 |
-| 04 | Penyakit Ikan | 📅 |
+| 03 | Ganti Air & Perawatan | ⬜ |
+| 04 | Penyakit Ikan | ⬜ |
 | 05 | Parameter Air | ⬜ |
 | 06 | Substrate Deep Dive | ⬜ |
 

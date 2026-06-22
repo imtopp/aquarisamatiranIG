@@ -296,13 +296,9 @@ def _read_schedule() -> str:
                 cc[format_ref(cc_raw, cid, t_num)] = t.get("title", "")
     except Exception:
         pass
-    done, upcoming = [], []
+    done, upcoming, unscheduled = [], [], []
     for entry in data:
         t = entry.get("time", "")
-        try:
-            d = datetime.datetime.strptime(t[:10], "%Y-%m-%d").date()
-        except (ValueError, IndexError):
-            continue
         ref = entry.get("source_ref") or entry.get("curriculum") or ""
         title = cc.get(ref, "") if ref else ""
         if title:
@@ -313,6 +309,17 @@ def _read_schedule() -> str:
             cap = entry.get("caption", "")
             snippet = cap[:60].replace("\n", " ") + "…" if len(cap) > 60 else cap.replace("\n", " ")
             topic = f"{entry.get('type', 'post')}: \"{snippet}\"" if snippet else entry.get('type', 'post')
+        if not t:
+            if entry.get("done"):
+                done.append(f"{topic} ✅")
+            else:
+                unscheduled.append(f"{topic} — ⏳ Belum dijadwalkan")
+            continue
+        try:
+            d = datetime.datetime.strptime(t[:10], "%Y-%m-%d").date()
+        except (ValueError, IndexError):
+            done.append(f"{topic} ✅")
+            continue
         if entry.get("done"):
             done.append(f"{topic}: {d.strftime('%d %b')} ✅")
         elif d < now:
@@ -322,11 +329,14 @@ def _read_schedule() -> str:
             label = "HARI INI 🟡" if days == 0 else f"{days} hari lagi"
             upcoming.append(f"{topic}: {d.strftime('%d %b')} {entry['time'][11:16]} WIB — {label}")
     lines = ["**📋 Schedule Posting:**"]
+    if unscheduled:
+        lines.append("\n⏳ **Belum dijadwalkan:**")
+        lines.extend(f"• {u}" for u in unscheduled)
     if upcoming:
         lines.append("\n**Belum posting:**")
         lines.extend(f"• {u}" for u in upcoming)
     if done:
-        lines.append("\n**Udah dipublish:**")
+        lines.append(f"\n✅ **Udah dipublish ({len(done)}):**")
         lines.extend(f"• {d}" for d in done)
     return "\n".join(lines)
 

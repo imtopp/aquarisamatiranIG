@@ -900,7 +900,7 @@
       "11": {
         "slug": "parameter-air",
         "title": "Parameter Air",
-        "status": "planned",
+        "status": "scheduled",
         "keywords": [
           "pH",
           "GH",
@@ -909,10 +909,106 @@
           "test kit",
           "buffer"
         ],
-        "display_name": "pH, GH, KH, TDS",
+        "display_name": "Parameter Air: Kunci Kehidupan Aquariummu!",
         "subcategory": "2",
         "caption": "Halo Aquaris! 🙋‍♂️🙋‍♀️ Sering dengar soal \"Parameter Air\"? Ini tuh 'raport' kondisi kimia air di akuarium kita, krusial banget buat kesehatan penghuni. Kayak suhu, pH, atau bahkan racun tersembunyi. Yuk, kita obrolin singkat biar makin paham!\n\n🌡️ **Suhu Air:** Tiap ikan ada rentang idealnya. Terlalu panas/dingin bikin stres, sakit, bahkan bisa lewat. Pantau termometer akuariummu ya!\n\n🧪 **pH Air:** Tingkat keasaman/kebasaan (skala 0-14). Ikan punya preferensi pH masing-masing. Salah pH bisa bikin mereka gak nyaman.\n\n☠️ **Amonia (NH3) & Nitrit (NO2):** DUO RACUN MEMATIKAN! Hasil dari kotoran ikan/sisa makanan. Keduanya HARUS 0 di akuarium yang sehat, kalau enggak ikanmu bisa keracunan parah!\n\n🌱 **Nitrat (NO3):** Hasil akhir siklus nitrogen. Relatif nggak seberacun amonia/nitrit, tapi kalau kebanyakan bisa picu alga dan bikin ikan stres. Rutin ganti air solusinya.\n\n⛰️ **Kesadahan Air (GH & KH):** Penting buat keseimbangan mineral dan kesehatan ikan serta pertumbuhan tanaman.\n\nGimana, Aquaris? Udah kebayang kan kenapa parameter air ini penting banget? Yuk, mulai pantau akuariummu lebih detail! 😉\n#Aquarisamatiran #ParameterAir #AquascapeIndonesia #IkanHias #BelajarAquascape",
-        "id": "66ccc56d-33ce-4dde-a6ba-d585c37de89f"
+        "id": "66ccc56d-33ce-4dde-a6ba-d585c37de89f",
+        "subtitle": "Jaga Air, Ikan Sehat!",
+        "slides": [
+          {
+            "type": "cover",
+            "title": "Parameter Air: Kunci Kehidupan Aquariummu!",
+            "subtitle": "Jaga Air, Ikan Sehat!"
+          },
+          {
+            "type": "fact",
+            "number": 1,
+            "title": "Apa itu Parameter Air? 💧",
+            "description": "Parameter air adalah kondisi kimia dan fisika air di aquariummu, seperti suhu, pH, dan kadar racun. Ini ibarat 'udara' bagi ikanmu. Memahaminya sangat penting agar ikan dan tanaman air bisa hidup sehat dan bahagia.",
+            "tags": [
+              "DasarAquarium",
+              "KualitasAir",
+              "LingkunganIkan"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 2,
+            "title": "Suhu Air: Nyaman atau Stres? 🌡️",
+            "description": "Setiap jenis ikan memiliki rentang suhu idealnya sendiri. Suhu yang terlalu tinggi atau rendah bisa menyebabkan stres, penyakit, bahkan kematian. Gunakan heater dan termometer untuk menjaga suhu tetap stabil dan sesuai.",
+            "tags": [
+              "Termometer",
+              "HeaterAquarium",
+              "MetabolismeIkan"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 3,
+            "title": "pH Air: Asam atau Basa? 🧪",
+            "description": "pH mengukur tingkat keasaman atau kebasaan air. Skalanya dari 0-14, dengan 7 sebagai netral. Ikanmu membutuhkan pH yang spesifik, dan fluktuasi pH bisa sangat berbahaya bagi insang dan sistem tubuh mereka.",
+            "tags": [
+              "SkalapH",
+              "AsamBasa",
+              "KesehatanInsang"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 4,
+            "title": "Amonia (NH3/NH4+): Racun Mematikan! ☠️",
+            "description": "Amonia adalah hasil buangan kotoran ikan dan sisa makanan yang sangat beracun. Kadar amonia harus 0 di aquarium yang sudah mature. Ini adalah penyebab utama kematian ikan baru di aquarium yang belum melalui siklus nitrogen.",
+            "tags": [
+              "SiklusNitrogen",
+              "RacunIkan",
+              "FilterBiologis"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 5,
+            "title": "Nitrit (NO2-): Ancaman Tersembunyi! 😱",
+            "description": "Setelah amonia, nitrit terbentuk dan juga sangat berbahaya bagi ikan, mengganggu kemampuan darah mereka mengangkut oksigen. Kadar nitrit juga harus 0. Penting untuk memastikan bakteri baik di filtermu bekerja optimal.",
+            "tags": [
+              "BahayaIkan",
+              "OksigenDarah",
+              "BakteriNitrifikasi"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 6,
+            "title": "Nitrat (NO3-): Akhir Siklus Nitrogen 🌱",
+            "description": "Nitrat adalah hasil akhir dari siklus nitrogen, dan relatif tidak beracun pada konsentrasi rendah. Namun, kadar nitrat yang tinggi bisa memicu pertumbuhan alga berlebih dan melemahkan ikan. Ganti air rutin adalah solusinya!",
+            "tags": [
+              "GantiAirRutin",
+              "AlgaControl",
+              "PupukTanaman"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 7,
+            "title": "Kesadahan Air (GH & KH): Stabilitas Lingkungan ⛰️",
+            "description": "GH (General Hardness) mengukur total mineral seperti kalsium dan magnesium, penting untuk osmoregulasi ikan. KH (Carbonate Hardness) adalah 'buffer' yang menjaga pH tetap stabil. Keduanya penting agar air tidak mudah berubah drastis.",
+            "tags": [
+              "MineralAir",
+              "StabilisasipH",
+              "Osmoregulasi"
+            ]
+          },
+          {
+            "type": "fact",
+            "number": 8,
+            "title": "Yuk Uji Air Aquariummu! 📊",
+            "description": "Untuk tahu parameter airmu, kamu perlu test kit! Ada strip test yang praktis dan liquid test kit yang lebih akurat. Lakukan pengujian secara rutin, terutama saat baru memulai aquarium atau jika ada masalah. Jangan cuma kira-kira!",
+            "tags": [
+              "TestKitAquarium",
+              "RutinCek",
+              "MencegahPenyakit"
+            ]
+          }
+        ]
       },
       "12": {
         "slug": "substrate",

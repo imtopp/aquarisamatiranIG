@@ -91,6 +91,50 @@ class SlotManager:
             return True
         return False
 
+    @staticmethod
+    def _slot_priority(time_str: str) -> int:
+        return {"19:00": 4, "15:00": 3, "12:00": 2, "09:00": 1}.get(time_str, 0)
+
+    def next_occurrences(self, n: int = 14, occupied: set | None = None) -> list[dict]:
+        now = datetime.datetime.now(WIB)
+        occupied = occupied or set()
+        results = []
+        seen_dates = set()
+
+        for offset in range(n * 7):
+            if len(results) >= n:
+                break
+            target = now + datetime.timedelta(days=offset)
+            date_key = target.strftime("%Y-%m-%d")
+            if date_key in seen_dates:
+                continue
+            wday = target.weekday()
+            candidates = []
+            for slot in self.slots:
+                if wday in slot["days"]:
+                    hh, mm = slot["time"].split(":")
+                    h, m = int(hh), int(mm)
+                    dt = target.replace(hour=h, minute=m, second=0, microsecond=0)
+                    ts = dt.strftime("%Y-%m-%d %H:%M")
+                    if ts in occupied:
+                        continue
+                    if offset == 0 and dt <= now:
+                        continue
+                    candidates.append((self._slot_priority(slot["time"]), slot["time"], ts))
+            if candidates:
+                candidates.sort(key=lambda x: -x[0])
+                best = candidates[0]
+                hh, mm = best[1].split(":")
+                dt = target.replace(hour=int(hh), minute=int(mm), second=0, microsecond=0)
+                day_name = DAYS_ID[wday]
+                results.append({
+                    "label": f"{day_name} {best[1]}",
+                    "iso": dt.strftime("%Y-%m-%d %H:%M"),
+                })
+                seen_dates.add(date_key)
+
+        return results
+
     def format_list(self) -> str:
         lines = []
         for s in self.slots:

@@ -45,6 +45,6 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 
 ## 🌱 Category 2: Hidupkan Aquascape-mu: Jelajah Ragam Fauna & Flora
 
-### Subcategory 1: New Subcategory 1
+### Subcategory 1: Ikan Impian: Kenali Calon Penghuni Tankmu
 | # | Topik | Status |
 |---|-------|--------|

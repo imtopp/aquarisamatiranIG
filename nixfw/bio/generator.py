@@ -104,6 +104,9 @@ def update_bio(schedule=None, account: str = "aquarisamatiran"):
     statuses = build_card_statuses(schedule, truth)
     _merge_permalinks(statuses, topics)
 
+    from nixfw.curriculum.manager import _subcat_seq_map
+    seq_map = _subcat_seq_map(truth)
+
     config = {}
     if config_path.exists():
         config = json.loads(config_path.read_text(encoding="utf-8"))
@@ -136,6 +139,7 @@ def update_bio(schedule=None, account: str = "aquarisamatiran"):
         categories=categories,
         topics=topics,
         statuses=statuses,
+        seq_map=seq_map,
         cta_text="Jalanin kurikulum ini bareng aku di Instagram! 🐟",
         footer_text=f"dibuat dengan 🐟 oleh {handle_clean.title()} — 2026",
     )

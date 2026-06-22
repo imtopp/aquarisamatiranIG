@@ -99,10 +99,12 @@
     <p class="level-intro">{{ subcat.title }}</p>
     {% for num, topic in topics.get(cat_id, {})|dictsort %}
     {% if topic.subcategory == subcat_id %}
+    {% set seq = seq_map.get((cat_id, subcat_id), {}).get(num) %}
+    {% set display_num = "%02d"|format(seq) if seq else num %}
     {% set st = statuses.get(num|int, {'tag_class': 'tag-empty', 'tag_text': '🔜', 'permalink': ''}) %}
     <a class="card-link" href="{{ st.permalink or '#' }}" target="_blank" rel="noopener"{% if not st.permalink %} onclick="return false;"{% endif %}>
       <div class="card l{{ subcat_id }}">
-        <div class="num">{{ num }}</div>
+        <div class="num">{{ display_num }}</div>
         <div class="body">
           <div class="title">{{ topic.title or topic.display_name }}</div>
           {% set desc = topic.subtitle or topic.display_name or topic.scientific_name %}

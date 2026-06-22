@@ -67,6 +67,57 @@ GH_API = "https://api.github.com"
 
 SLOT_MANAGER = SlotManager()
 
+_sync_lock = asyncio.Lock()
+
+async def _git_sync_after(commit_msg: str) -> bool:
+    """Commit pending lokal + push ke GitHub.
+    Non-critical — return False kalo gagal, gak raise.
+    Otomatis skip kalo jalan di GitHub Actions.
+    Ada lock biar gak tabrakan kalo 2 command datang berurutan.
+    Retry 3x dengan pull --strategy-option=ours di antara.
+    """
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        return True
+    async with _sync_lock:
+        loop = asyncio.get_event_loop()
+        for attempt in range(3):
+            try:
+                r = await loop.run_in_executor(None, lambda: subprocess.run(
+                    ["git", "add", "-A"], cwd=PROJECT_ROOT,
+                    capture_output=True, text=True, timeout=15
+                ))
+                if r.returncode != 0:
+                    continue
+                r = await loop.run_in_executor(None, lambda: subprocess.run(
+                    ["git", "diff", "--cached", "--quiet"], cwd=PROJECT_ROOT,
+                    capture_output=True, text=True, timeout=15
+                ))
+                if r.returncode == 0:
+                    return True
+                r = await loop.run_in_executor(None, lambda: subprocess.run(
+                    ["git", "commit", "-m", commit_msg], cwd=PROJECT_ROOT,
+                    capture_output=True, text=True, timeout=15
+                ))
+                if r.returncode != 0:
+                    continue
+                r = await loop.run_in_executor(None, lambda: subprocess.run(
+                    ["git", "push", "origin", "main"], cwd=PROJECT_ROOT,
+                    capture_output=True, text=True, timeout=30
+                ))
+                if r.returncode == 0:
+                    return True
+                await loop.run_in_executor(None, lambda: subprocess.run(
+                    ["git", "pull", "--strategy-option=ours", "--no-rebase", "origin", "main"],
+                    cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=30
+                ))
+            except subprocess.TimeoutExpired:
+                continue
+            except Exception as e:
+                print(f"  ⚠️ _git_sync_after error (attempt {attempt+1}): {e}")
+                continue
+        print(f"  ⚠️ _git_sync_after GAGAL setelah 3x retry: {commit_msg}")
+        return False
+
 system_prompt = ""
 if AGENTS_MD.exists():
     system_prompt = AGENTS_MD.read_text(encoding="utf-8")
@@ -376,8 +427,15 @@ async def topics_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     for sid in sorted(topics, key=int):
         sname = categories.get(sid, {}).get("title", f"Category {sid}")
         lines.append(f"**{sname}**")
+        subs = categories.get(sid, {}).get("subcategories", {})
+        last_sub = None
         for tnum in sorted(topics[sid], key=int):
             t = topics[sid][tnum]
+            sub_id = t.get("subcategory", "1")
+            if sub_id != last_sub:
+                sub_title = subs.get(sub_id, {}).get("title", f"Sub {sub_id}")
+                lines.append(f"  ─ **{sub_id}. {sub_title}** ─")
+                last_sub = sub_id
             st = t.get("status", "planned")
             emoji = {"live": "✅", "scheduled": "📅", "planned": "🔜"}.get(st, "❓")
             dn = t.get("display_name", t.get("title", "?"))
@@ -385,9 +443,30 @@ async def topics_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if st == "scheduled" and t.get("scheduled_time"):
                 jadwal = f" — {t['scheduled_time']} WIB"
             ref = format_ref(cc, sid, tnum.zfill(2))
-            lines.append(f"  {emoji} `{ref}` {dn}{jadwal}")
+            lines.append(f"    {emoji} `{ref}` {dn}{jadwal}")
         lines.append("")
     lines.append("Contoh: `/generate {ref}`, `/post {ref}` — ganti {ref} pake kode di atas")
+    await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
+
+
+async def catlist_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show all categories with their subcategories."""
+    try:
+        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        await update.message.reply_text("❌ Gagal baca source_of_truth.json")
+        return
+    cats = cc.get("categories", {})
+    lines = ["**📁 Category & Subcategory**\n"]
+    for cid in sorted(cats, key=int):
+        cat = cats[cid]
+        lines.append(f"📁 `C{cid}` — {cat.get('title', '?')}")
+        subs = cat.get("subcategories", {})
+        for sid in sorted(subs, key=int):
+            sub = subs[sid]
+            lines.append(f"  📂 `C{cid}.{sid}` — {sub.get('title', '?')}")
+        lines.append("")
+    lines.append("Gunakan ref `C{cat}.{sub}#{seq}` buat referensi topic.")
     await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
 
 
@@ -1151,6 +1230,7 @@ async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if is_pending_mode:
             pending["caption"] = new_caption
         await update.message.reply_text(f"✅ Caption buat {topic_ref} diupdate:\n\n{new_caption[:3500]}")
+        asyncio.create_task(_git_sync_after(f"auto: caption {slug}"))
     except Exception as e:
         await update.message.reply_text(
             "⚠️ Gemini sibuk, caption gak berubah.\n\n"
@@ -1356,6 +1436,9 @@ async def confirm_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         out = out.strip()[-3000:]
         status = "✅" if result.returncode == 0 else "❌"
         await update.message.reply_text(f"{status} Result:\n```\n{out}\n```")
+        if result.returncode == 0:
+            prefix = "post" if now else "schedule"
+            asyncio.create_task(_git_sync_after(f"auto: {prefix} {slug}"))
     except subprocess.TimeoutExpired:
         await update.message.reply_text("⏳ Kelamaan (>5 menit). Kalo gagal, tinggal `/post` lagi — slide yang udah keupload bakal di-skip dari cache~")
     except Exception as e:
@@ -1503,6 +1586,7 @@ async def addcategory_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     title = " ".join(args)
     result = telegram_add_category(title)
     await update.message.reply_text(result)
+    asyncio.create_task(_git_sync_after("auto: add category"))
 
 
 async def addsubcategory_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1516,6 +1600,7 @@ async def addsubcategory_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE)
     label = " ".join(args[2:]) if len(args) > 2 else ""
     result = telegram_add_subcategory(cat_id, number, label)
     await update.message.reply_text(result)
+    asyncio.create_task(_git_sync_after("auto: add subcategory"))
 
 
 async def addtopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1529,6 +1614,7 @@ async def addtopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     title = " ".join(args[2:]) if len(args) > 2 else ""
     result = telegram_add_topic(cat_id, subcat, title)
     await update.message.reply_text(result)
+    asyncio.create_task(_git_sync_after("auto: add topic"))
 
 
 async def edittopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1556,6 +1642,7 @@ async def edittopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             i += 1
     result = telegram_edit_topic(topic_ref, **fields)
     await update.message.reply_text(result)
+    asyncio.create_task(_git_sync_after(f"auto: edit {topic_ref}"))
 
 
 async def deletetopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1567,6 +1654,7 @@ async def deletetopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     topic_ref = args[0]
     result = telegram_delete_topic(topic_ref)
     await update.message.reply_text(result)
+    asyncio.create_task(_git_sync_after(f"auto: delete {topic_ref}"))
 
 
 async def movetopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1580,6 +1668,7 @@ async def movetopic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     target_sc = args[2]
     result = telegram_move_topic(topic_ref, target_cat, target_sc)
     await update.message.reply_text(result)
+    asyncio.create_task(_git_sync_after(f"auto: move {topic_ref}"))
 
 
 async def schedule_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1631,6 +1720,7 @@ async def delete_schedule_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Reset status di curriculum biar bisa /post lagi
     _reset_topic_status(topic_ref, "generated")
     await update.message.reply_text(f"✅ Jadwal {topic_ref} dihapus dari antrian. Status di-reset ke 'generated'. Bisa `/post {topic_ref}` lagi~")
+    asyncio.create_task(_git_sync_after(f"auto: unschedule {topic_ref}"))
 
 
 async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1652,6 +1742,7 @@ async def setslot_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ok = SLOT_MANAGER.remove_slot(args[1])
         if ok:
             await update.message.reply_text(f"✅ Slot `{args[1]}` dihapus")
+            asyncio.create_task(_git_sync_after(f"auto: slot remove {args[1]}"))
             sync_msg = await update.message.reply_text("🔄 Auto-sync ke cron-job.org...")
             result = await SLOT_MANAGER.sync_cronjob()
             await sync_msg.edit_text(f"📋 Sync selesai:\n{result}")
@@ -1715,6 +1806,7 @@ async def wizard_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(f"✅ Slot `{sid}` disimpan!\n🔄 Auto-sync ke cron-job.org...")
         result = await SLOT_MANAGER.sync_cronjob()
         await query.edit_message_text(f"✅ Slot `{sid}` disimpan!\n📋 Sync selesai:\n{result}")
+        asyncio.create_task(_git_sync_after(f"auto: slot add {sid}"))
         return
 
 
@@ -1758,24 +1850,9 @@ async def fact_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             facts_path = facts_cache_path(pending["slug"])
             facts_path.write_text(json.dumps(facts_data, indent=2, ensure_ascii=False), encoding="utf-8")
 
-            subprocess.run(["git", "add", str(facts_path)], cwd=PROJECT_ROOT, capture_output=True, timeout=10)
-            subprocess.run(
-                ["git", "commit", "-m", f"auto: facts confirmed for {pending['topic_display']}"],
-                cwd=PROJECT_ROOT, capture_output=True, timeout=10,
-            )
-            subprocess.run(
-                ["git", "pull", "--rebase", "origin", "main"],
-                cwd=PROJECT_ROOT, capture_output=True, timeout=30,
-            )
-            push = subprocess.run(
-                ["git", "push", "origin", "main"],
-                cwd=PROJECT_ROOT, capture_output=True, timeout=30,
-            )
-            if push.returncode != 0:
-                await query.edit_message_text(f"⚠️ Fakta disimpan, tapi push error: {push.stderr[:200]}\nCoba /sync nanti")
-                return
+            asyncio.create_task(_git_sync_after(f"auto: facts {pending['slug']}"))
 
-            topic_ref = pending.get("topic_ref", "") or slug.replace("_", "-")
+            topic_ref = pending.get("topic_ref", "") or pending["slug"].replace("_", "-")
             body = json.dumps({"ref": "main", "inputs": {"topic": topic_ref, "num_facts": str(pending["num_facts"]), "force": "false"}})
             headers = {"Accept": "application/vnd.github+json", "Authorization": f"Bearer {GH_PAT}", "Content-Type": "application/json"}
             resp = await HTTPX_CLIENT.post(f"{GH_API}/repos/{GH_REPO}/actions/workflows/295601892/dispatches", content=body, headers=headers)
@@ -2064,6 +2141,7 @@ _TOPIC_HELP = """\
   `move <ref> <C#> <sub#>`             → pindah topic
   `slides`                             → daftar file slide
   `cat add <nama>`                     → tambah category
+  `cat list`                           → liat daftar category + subcategory
   `cat rename <C#> <nama>`             → ganti nama category
   `cat remove <C#>`                    → hapus category
   `cat sub add <C#> <id> <label>`      → tambah subcategory
@@ -2139,13 +2217,15 @@ async def topic_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def _topic_cat_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE, args: list):
     if not args:
         return await update.message.reply_text(
-            "Gunakan: `/topic cat add|rename|remove|sub`\n\n" + _TOPIC_HELP
+            "Gunakan: `/topic cat add|rename|remove|list|sub`\n\n" + _TOPIC_HELP
         )
     sub = args[0].lower()
     rest = args[1:]
     if sub == "add":
         context.args = rest
         return await addcategory_cmd(update, context)
+    if sub == "list":
+        return await catlist_cmd(update, context)
     if sub == "rename":
         # /topic cat rename <C#> <nama>
         if len(rest) < 2:
@@ -2287,6 +2367,19 @@ def main():
     if not TELEGRAM_TOKEN:
         print("TELEGRAM_TOKEN gak ada di .env")
         return
+
+    # Startup pull — sync state terbaru dari repo sebelum bot jalan
+    try:
+        r = subprocess.run(
+            ["git", "pull", "--rebase", "origin", "main"], cwd=PROJECT_ROOT,
+            timeout=30, capture_output=True, text=True
+        )
+        if r.returncode == 0:
+            print("✅ Startup pull selesai")
+        else:
+            print(f"⚠️ Startup pull: {r.stderr[:200]}")
+    except Exception as e:
+        print(f"⚠️ Startup pull gagal (bot tetap jalan): {e}")
 
     init_db()
     request = HTTPXRequest(connect_timeout=30, read_timeout=30, write_timeout=30)

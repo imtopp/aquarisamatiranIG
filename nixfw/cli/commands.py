@@ -1189,8 +1189,10 @@ def cmd_generate_carousel_sd(_client, args):
                     items = sorted([(int(k), k) for k, v in st.items() if v.get("subcategory", "1") == sc])
                     idx = int(t_num_seq) - 1
                     num_key = items[idx][1] if 0 <= idx < len(items) else t_num_seq
+                    t_num = num_key
                 else:
                     num_key = t_num_seq
+                    t_num = num_key
                 t = cc.get("topics", {}).get(s_num, {}).get(num_key, {})
                 if t:
                     topic_name = t.get("display_name", t.get("title", topic))

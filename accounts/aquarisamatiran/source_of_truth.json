@@ -674,7 +674,7 @@
       "09": {
         "slug": "ganti-air",
         "title": "Ganti Air & Perawatan",
-        "status": "scheduled",
+        "status": "live",
         "keywords": [
           "dechlorinator",
           "selang siphon",
@@ -782,7 +782,9 @@
           }
         ],
         "id": "bd6b1f2b-c31e-4f79-9813-701e6c2c3990",
-        "scheduled_time": "2026-06-23 19:00"
+        "scheduled_time": "2026-06-23 19:00",
+        "result_id": "18534923905073819",
+        "permalink": "https://www.instagram.com/p/DZ7XrCKmhRH/"
       },
       "10": {
         "slug": "penyakit-ikan",

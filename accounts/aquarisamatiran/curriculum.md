@@ -23,7 +23,7 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 | 03 | Ganti Air & Perawatan (2026-06-23 19:00) | 📅 |
 | 04 | Penyakit Ikan (2026-06-24 19:00) | 📅 |
 | 05 | Parameter Air | 📅 |
-| 06 | Substrate Deep Dive | ⬜ |
+| 06 | Substrate Deep Dive | 📅 |
 
 ### Subcategory 3: Naik Kelas
 | # | Topik | Status |
@@ -45,6 +45,14 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 
 ## 🌱 Category 2: Hidupkan Aquascape-mu: Jelajah Ragam Fauna & Flora
 
-### Subcategory 1: New Subcategory 1
+### Subcategory 1: 🐟 Koleksi Ikan Hias
+| # | Topik | Status |
+|---|-------|--------|
+
+### Subcategory 2: 🌱 Tanaman Aquascape
+| # | Topik | Status |
+|---|-------|--------|
+
+### Subcategory 3: 🐌 Tim Pembersih & Eksotis
 | # | Topik | Status |
 |---|-------|--------|

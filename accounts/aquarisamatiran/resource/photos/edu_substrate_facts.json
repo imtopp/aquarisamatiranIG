@@ -1,87 +1,87 @@
 {
   "topic": "Substrate Deep Dive",
-  "display_name": "Rahasia Dunia Bawah Substrat Aquarium",
-  "subtitle": "Pondasi Kehidupan Akuatikmu!",
-  "scientific_name": "Edaphologi Akuatik",
+  "display_name": "Seluk Beluk Substrat Aquarium",
+  "subtitle": "Dasar Aquarium, Fondasi Kehidupan",
+  "scientific_name": "N/A",
   "facts": [
     {
       "number": "01",
       "title": "Apa Itu Substrat? 🌊",
-      "description": "Substrat adalah lapisan dasar di aquariummu, bukan cuma dekorasi, tapi inti dari ekosistem air! Ia menyediakan 'rumah' bagi bakteri baik dan media tumbuh untuk tanamanmu.",
+      "description": "Substrat adalah lapisan material di dasar aquariummu. Bukan cuma hiasan, tapi juga fondasi penting bagi ekosistem aquarium, dari bakteri baik hingga tanaman air!",
       "tags": [
-        "Dasar Aquarium",
-        "Media Tumbuh",
-        "Biofilter"
+        "DasarAquarium",
+        "Ekosistem",
+        "Fondasi"
       ]
     },
     {
       "number": "02",
-      "title": "Jagoan Bakteri Baik! 🦠",
-      "description": "Miliar bakteri nitrifikasi hidup di dalam substrat. Mereka mengubah amonia beracun menjadi nitrit dan nitrat yang lebih aman, menjaga air aquarium tetap bersih dan sehat untuk ikanmu.",
+      "title": "Jenis Substrat: Gravel 🏞️",
+      "description": "Gravel atau kerikil adalah pilihan klasik dan paling umum. Tersedia dalam berbagai ukuran dan warna, cocok untuk berbagai jenis ikan dan mudah dibersihkan.",
       "tags": [
-        "Siklus Nitrogen",
-        "Bakteri Nitrifikasi",
-        "Detoksifikasi"
+        "Kerikil",
+        "MudahDibersihkan",
+        "PilihanKlasik"
       ]
     },
     {
       "number": "03",
-      "title": "Fondasi Taman Airmu 🌿",
-      "description": "Bagi aquascape, substrat adalah segalanya! Ia menahan akar tanaman, menyediakan nutrisi esensial secara langsung, dan memungkinkan pertukaran gas yang sehat di zona akar.",
+      "title": "Jenis Substrat: Pasir 🏖️",
+      "description": "Pasir memberikan tampilan alami yang indah dan disukai ikan-ikan bottom dweller. Namun, ukurannya yang halus perlu perhatian ekstra agar tidak memadat dan membentuk kantong gas berbahaya.",
       "tags": [
-        "Nutrisi Tanaman",
-        "Zona Akar",
-        "Substrat Aktif"
+        "TampilanAlami",
+        "BottomDweller",
+        "TeksturHalus"
       ]
     },
     {
       "number": "04",
-      "title": "Berbagai Jenis Substrat ✨",
-      "description": "Ada pasir untuk ikan penggali, gravel untuk tampilan klasik, hingga soil khusus tanaman yang kaya nutrisi. Pilihlah yang sesuai dengan jenis penghuni dan tujuan aquariummu!",
+      "title": "Jenis Substrat: Aqua Soil/Tanah Khusus 🌱",
+      "description": "Aqua soil atau tanah khusus dirancang untuk aquascape. Kaya nutrisi esensial, sangat baik untuk pertumbuhan tanaman air, dan membantu menjaga kestabilan parameter air.",
       "tags": [
-        "Pasir Aquarium",
-        "Gravel",
-        "Aquarium Soil"
+        "Aquascape",
+        "NutrisiTinggi",
+        "pHBuffering"
       ]
     },
     {
       "number": "05",
-      "title": "Ketebalan Ideal itu Penting! 📏",
-      "description": "Terlalu tipis, akar tanaman kurang pegangan. Terlalu tebal, bisa membentuk kantung anaerobik yang menghasilkan gas beracun (H2S). Idealnya 5-8 cm di bagian depan dan lebih tebal ke belakang.",
+      "title": "Fungsi Substrat: Filter Biologis 🦠",
+      "description": "Substrat menyediakan area permukaan luas bagi bakteri nitrifikasi baik untuk tumbuh dan berkembang. Bakteri ini krusial dalam siklus nitrogen, mengubah amonia berbahaya menjadi nitrat yang lebih aman.",
       "tags": [
-        "Ketebalan Substrat",
-        "Zona Anaerobik",
-        "Sirkulasi Air"
+        "SiklusNitrogen",
+        "BakteriNitrifikasi",
+        "LuasPermukaan"
       ]
     },
     {
       "number": "06",
-      "title": "Perawatan Substratmu 🧹",
-      "description": "Gunakan siphon khusus substrat untuk membersihkan sisa makanan dan kotoran tanpa mengganggu bakteri. Untuk soil aktif, cukup bersihkan permukaan agar nutrisinya tetap terjaga.",
+      "title": "Fungsi Substrat: Penopang Tanaman & Estetika 🪴",
+      "description": "Untuk tanaman, substrat adalah jangkar akar yang stabil dan sumber nutrisi esensial. Secara visual, ia melengkapi tema aquarium dan menciptakan kontras yang menarik dengan penghuni lainnya.",
       "tags": [
-        "Siphon Substrat",
-        "Pembersihan Dasar",
-        "Kotoran Organik"
+        "JangkarAkar",
+        "NutrisiTanaman",
+        "TampilanVisual"
       ]
     },
     {
       "number": "07",
-      "title": "Jangan Salah Pilih Substrat! ⚠️",
-      "description": "Pastikan substrat yang kamu pilih tidak tajam untuk ikan-ikan dasar, tidak mengubah parameter air secara drastis (kecuali disengaja), dan mendukung kehidupan yang ingin kamu pelihara.",
+      "title": "Memilih Substrat yang Tepat 🤔",
+      "description": "Pilihan substratmu tergantung pada jenis penghuni (ikan & tanaman) dan estetika yang diinginkan. Pertimbangkan ukuran, tekstur, dan kandungan nutrisi agar sesuai dengan kebutuhan spesifik aquariummu.",
       "tags": [
-        "Kesesuaian Spesies",
-        "Parameter Air",
-        "Bahan Inert"
+        "JenisIkan",
+        "KebutuhanTanaman",
+        "Estetika"
       ]
     },
     {
       "number": "08",
-      "title": "Substrat 'Aktif' vs. 'Inert' 🧪",
-      "description": "Substrat aktif (seperti soil) melepaskan nutrisi dan bisa menurunkan pH/GH. Substrat inert (seperti pasir atau gravel biasa) tidak memengaruhi kimia air dan cocok untuk banyak setting.",
+      "title": "Tips Perawatan Substrat ✨",
+      "description": "Rutin sedot kotoran (gravel vacuum) untuk mencegah penumpukan sisa makanan dan kotoran ikan. Jika menggunakan pasir, aduk perlahan sesekali untuk mencegah area anaerobik yang berbahaya.",
       "tags": [
-        "Substrat Aktif",
-        "Substrat Inert",
-        "pH & GH"
+        "GravelVacuum",
+        "PencegahanAnaerobik",
+        "KebersihanRutinan"
       ]
     }
   ],

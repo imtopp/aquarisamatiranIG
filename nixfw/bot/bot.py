@@ -1099,8 +1099,9 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 pass
 
         await update.message.reply_text(f"💬 Generate caption buat \"{topic_display}\"...")
+        _is_fallback = False
         try:
-            caption = await asyncio.wait_for(_generate_caption(facts_json, topic_display), timeout=60)
+            caption = await asyncio.wait_for(_generate_caption(facts_json, topic_display), timeout=120)
         except asyncio.TimeoutError:
             _cfg = {}
             try:
@@ -1110,8 +1111,10 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
             _name = _cfg.get("name", "Aquarisamatiran")
             _handle = _cfg.get("handle", "@aquarisamatiran")
             caption = f"{topic_display} — Yuk belajar bareng {_handle}! 🌱 #{_name} #AquascapeIndonesia"
+            _is_fallback = True
             await update.message.reply_text("⚠️ Caption generation timeout, pakai fallback~")
-        _save_caption_to_curriculum(slug, caption)
+        if not _is_fallback:
+            _save_caption_to_curriculum(slug, caption)
 
     # Preview + confirm
     msg = (

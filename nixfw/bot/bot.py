@@ -966,6 +966,12 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif not topic_ref:
             topic_ref = a  # treat as direct slug
 
+    # Sync repo dulu — biar slides hasil GH Actions kegenerate ke lokal
+    subprocess.run(
+        ["git", "pull", "--rebase", "origin", "main"],
+        cwd=PROJECT_ROOT, capture_output=True, timeout=30,
+    )
+
     # Auto-detect latest slides (filter by topic_ref if given)
     slug, slides = _latest_slides(topic_ref)
     if not slug:
@@ -981,12 +987,6 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await update.message.reply_text("❌ Gak ada slide carousel di resource/photos/")
         return
-
-    # Sync source_of_truth dari repo sebelum baca data
-    subprocess.run(
-        ["git", "pull", "--rebase", "origin", "main"],
-        cwd=PROJECT_ROOT, capture_output=True, timeout=30,
-    )
 
     if not topic_ref:
         cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))

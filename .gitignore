@@ -31,8 +31,8 @@ resource/output/
 resource/photos/*_slide_*.png
 resource/photos/edu_*.jpg
 
-# Temp scripts
-_*.py
+# Temp scripts (root-level only)
+/_*.py
 
 # Temp GH logs
 _gh_*

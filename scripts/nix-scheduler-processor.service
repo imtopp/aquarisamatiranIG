@@ -1,0 +1,15 @@
+[Unit]
+Description=Nix — scheduler output processor (safety net)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=topp
+WorkingDirectory=/home/topp/aquarisamatiranIG
+ExecStart=/home/topp/aquarisamatiranIG/.venv/bin/python -m nixfw process-scheduler-results
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

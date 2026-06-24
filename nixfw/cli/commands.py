@@ -1879,6 +1879,12 @@ def cmd_clean(_client, args):
         print(f'Subcommand tidak dikenal: {sub}')
 
 
+def cmd_process_scheduler_results(client=None, args=None):
+    from nixfw.curriculum.manager import process_scheduler_results
+    count = process_scheduler_results(account=config.ACCOUNT_NAME)
+    print(f"  ✅ Processed {count} scheduler output file(s)")
+
+
 def main():
     # Parse --niche dulu sebelum dispatch (biar ga masuk ke args perintah)
     if "--niche" in sys.argv:
@@ -1924,6 +1930,7 @@ def main():
         print("    clean reset-topic <tag>    reset status ke planned")
         print("    clean clean-uploaded <slug> bersihin .uploaded.json")
         print("  sync-slots                 — sync slot jadwal ke cron-job.org")
+        print("  process-scheduler-results  — proses .scheduler_output/ files (safety net)")
         print()
         print("Opsi global:")
         print(f"  --niche NAMA               pilih niche. Tersedia: {niche_list}")
@@ -1932,7 +1939,7 @@ def main():
     cmd = sys.argv[1]
     args = sys.argv[2:]
 
-    no_ig_cmds = {"generate-carousel-sd", "compress-slides", "curriculum", "generate-caption", "sync-slots", "clean"}
+    no_ig_cmds = {"generate-carousel-sd", "compress-slides", "curriculum", "generate-caption", "sync-slots", "clean", "process-scheduler-results"}
     client = InstagramClient() if cmd not in no_ig_cmds else None
 
     cmds = {
@@ -1957,6 +1964,7 @@ def main():
         "curriculum": cmd_curriculum,
         "sync-slots": cmd_sync_slots,
         "refresh-token": cmd_refresh_token,
+        "process-scheduler-results": cmd_process_scheduler_results,
         "clean": cmd_clean,
     }
 

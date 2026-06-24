@@ -48,6 +48,7 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 ### Subcategory 1: 🐟 Koleksi Ikan Hias
 | # | Topik | Status |
 |---|-------|--------|
+| 01 | ikan guppy | ⬜ |
 
 ### Subcategory 2: 🌱 Tanaman Aquascape
 | # | Topik | Status |

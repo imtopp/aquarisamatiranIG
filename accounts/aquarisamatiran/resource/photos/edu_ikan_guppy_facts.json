@@ -1,0 +1,89 @@
+{
+  "topic": "Ikan Guppy",
+  "display_name": "Ikan Guppy",
+  "subtitle": "Si Mungil Penuh Warna",
+  "scientific_name": "Poecilia reticulata",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Pesona Ikan Seribu Warna 🌈",
+      "description": "Ikan Guppy dikenal sebagai 'ikan seribu warna' karena variasi corak dan bentuk siripnya yang sangat beragam. Setiap Guppy punya keunikan tersendiri, menjadikannya bintang di akuariummu!",
+      "tags": [
+        "Ikan Hias",
+        "Warnawarni",
+        "Sirip Indah"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Asal-Usul Tropis 🌎",
+      "description": "Berhabitat asli di perairan tawar Amerika Selatan dan Karibia, seperti Venezuela dan Trinidad. Di alam liar, mereka hidup di sungai dan aliran air yang tenang, mencari makan serangga kecil.",
+      "tags": [
+        "Amerika Selatan",
+        "Air Tawar",
+        "Habitat Alami"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Cocok Untuk Pemula 🤗",
+      "description": "Guppy adalah pilihan tepat untuk aquarist pemula berkat perawatannya yang relatif mudah dan sifatnya yang damai. Mereka bisa hidup berdampingan dengan ikan kecil non-agresif lainnya dalam satu akuarium.",
+      "tags": [
+        "Damai",
+        "Community Tank",
+        "Mudah Dipelihara"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Lahir Tanpa Telur 🐟👶",
+      "description": "Uniknya, Guppy adalah ikan vivipar atau 'livebearer', yang artinya mereka melahirkan anakan yang sudah terbentuk, bukan bertelur. Jangan heran jika populasi Guppy-mu cepat bertambah!",
+      "tags": [
+        "Vivipar",
+        "Livebearer",
+        "Berkembang Biak Cepat"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Parameter Air Ideal 🌡️💧",
+      "description": "Untuk Guppy yang sehat, jaga suhu air di 22-28°C dan pH antara 6.5-8.0. Kualitas air yang stabil dan bersih sangat krusial, jadi rutinlah ganti air sebagian agar Guppy tetap bahagia.",
+      "tags": [
+        "Suhu Air",
+        "pH Netral",
+        "Kualitas Air"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Menu Makanan Favorit 🍽️🦐",
+      "description": "Guppy adalah omnivora dan tidak pilih-pilih soal makanan. Beri mereka pelet atau flake berkualitas tinggi, serta sesekali selingi dengan pakan hidup atau beku seperti artemia dan cacing darah untuk nutrisi lengkap.",
+      "tags": [
+        "Omnivora",
+        "Pelet Flake",
+        "Pakan Hidup"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Usia Harapan Hidup ⏳",
+      "description": "Dengan perawatan yang baik dan lingkungan akuarium yang stabil, ikan Guppy umumnya dapat hidup selama 1 hingga 3 tahun. Perhatikan kualitas air dan pola makan untuk memaksimalkan usia mereka.",
+      "tags": [
+        "1-3 Tahun",
+        "Perawatan Baik",
+        "Lingkungan Stabil"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Kunci Kesehatan: Air Bersih ✨",
+      "description": "Meski tahan banting, Guppy sensitif terhadap perubahan kualitas air yang drastis. Pastikan ada filter yang berfungsi baik dan lakukan penggantian air parsial secara rutin untuk mencegah penumpukan amonia dan nitrit.",
+      "tags": [
+        "Filter Akuarium",
+        "Ganti Air",
+        "Ammonia Nitrit"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

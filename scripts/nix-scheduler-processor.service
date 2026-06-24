@@ -6,8 +6,8 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 User=topp
-WorkingDirectory=/home/topp/aquarisamatiranIG
-ExecStart=/home/topp/aquarisamatiranIG/.venv/bin/python -m nixfw process-scheduler-results
+WorkingDirectory=/home/topp/projects/aquarisamatiran
+ExecStart=/home/topp/projects/aquarisamatiran/.venv/bin/python -m nixfw process-scheduler-results
 StandardOutput=journal
 StandardError=journal
 

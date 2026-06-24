@@ -38,12 +38,12 @@ Rencana → Generate → Review → Jadwalkan/Tayangkan → Catat → Evaluasi
 ```
 Niche (domain, misal: aquascape, food, travel)
 │
-├─ Curriculum (seri konten berkesinambungan)
+├─ Series (seri konten berkesinambungan)
 │   └─ Category (grouping besar — dulu "season")
 │       └─ Subcategory (sub-grouping — dulu "level")
 │           └─ Topic (materi individual)
 │
-└─ Adhoc Topic (konten independent, di luar curriculum)
+└─ Adhoc Topic (konten independent, di luar series)
 ```
 
 **Definisi:**
@@ -51,18 +51,18 @@ Niche (domain, misal: aquascape, food, travel)
 | Istilah | Makna | Contoh |
 |---------|-------|--------|
 | **Niche** | Domain konten | `aquascape`, `food`, `travel` |
-| **Curriculum** | Satu seri konten yang saling berkorelasi dan berurutan | "Perjalanan dari Nol Sampai Pro" |
-| **Category** | Grouping besar dalam curriculum — dulu "season" | "Perjalanan dari Nol" |
+| **Series** | Satu seri konten yang saling berkorelasi dan berurutan | "Perjalanan dari Nol Sampai Pro" |
+| **Category** | Grouping besar dalam series — dulu "season" | "Perjalanan dari Nol" |
 | **Subcategory** | Sub-grouping dalam category — dulu "level" | "Pemula Absolut", "Mulai Pede" |
 | **Topic** | Materi konten individual, wajib dalam subcategory | "#01 Filter Air" |
-| **Adhoc Topic** | Konten lepas tanpa curriculum | "Tips Harian Aquascape" |
+| **Adhoc Topic** | Konten lepas tanpa series | "Tips Harian Aquascape" |
 
 **Aturan:**
-- Satu niche bisa punya banyak curriculum
-- Satu curriculum bisa punya banyak category
+- Satu niche bisa punya banyak series
+- Satu series bisa punya banyak category
 - Satu category bisa punya banyak subcategory
 - **Topic wajib punya subcategory** (dulu "level")
-- Adhoc topic tidak terikat curriculum manapun
+- Adhoc topic tidak terikat series manapun
 
 ### 2.2 Content State Machine
 
@@ -86,12 +86,12 @@ PLANNED ──▶ GENERATED ──▶ REVIEWED ──▶ SCHEDULED ──▶ LIV
 
 ### 2.3 Adhoc Topic
 
-Topic yang tidak termasuk curriculum manapun. Berguna untuk:
+Topic yang tidak termasuk series manapun. Berguna untuk:
 - Konten musiman (lebaran, tahun baru)
 - Promo / kolaborasi
 - Konten spontan "behind the scene"
 
-Adhoc topic tetap melalui pipeline generate → review → schedule/post yang sama, tapi tidak punya nomor urut curriculum.
+Adhoc topic tetap melalui pipeline generate → review → schedule/post yang sama, tapi tidak punya nomor urut series.
 
 ---
 
@@ -102,19 +102,19 @@ Adhoc topic tetap melalui pipeline generate → review → schedule/post yang sa
 Ada **2 file master** dengan tanggung jawab berbeda, bukan 1 file tunggal:
 
 ```
-source_of_truth.json  ← MASTER konten (curriculum, slides, facts, caption)
+source_of_truth.json  ← MASTER konten (series, slides, facts, caption)
 schedule.json          ← MASTER eksekusi (jadwal, status posting, result_id)
 
 accounts/<name>/bio/index.html  ← DERIVED dari source_of_truth + schedule.json (data live)
 accounts/<name>/resource/photos/ ← CACHE slide images + facts JSON
-curriculum.md          ← DERIVED dokumentasi (opsional)
+series.md          ← DERIVED dokumentasi (opsional)
 ```
 
 **Pembagian tanggung jawab:**
 
 | Aspek | Ditulis oleh | Dimana |
 |-------|-------------|--------|
-| Curriculum structure | User / CRUD | `source_of_truth.json` |
+| Series structure | User / CRUD | `source_of_truth.json` |
 | Slides + facts + caption | Generate command | `source_of_truth.json` |
 | Status `planned` → `generated` → `reviewed` | Generate / Review | `source_of_truth.json` |
 | Jadwal posting | Post / Confirm | `schedule.json` (+ `source_of_truth.json` menyimpan `scheduled_time` sebagai referensi) |
@@ -126,21 +126,21 @@ curriculum.md          ← DERIVED dokumentasi (opsional)
 
 Setiap entry di `schedule.json` punya field `source_ref` yang berisi **path ke topic/content di source_of_truth**.
 
-- **Curriculum topic (bagian dari curriculum):**
+- **Series topic (bagian dari series):**
   ```json
   { "source_ref": "aquarisamatiran:perjalanan-dari-nol:1:2:01" }
   ```
-  Format: `{account}:{curriculum_id}:{category}:{subcategory}:{topic}`
-  Referensi lengkap ke topic dalam curriculum.
+  Format: `{account}:{series_id}:{category}:{subcategory}:{topic}`
+  Referensi lengkap ke topic dalam series.
 
-- **Adhoc topic (independent, bukan bagian curriculum):**
+- **Adhoc topic (independent, bukan bagian series):**
   ```json
   { "source_ref": "aquarisamatiran:adhoc:tip-harian-001" }
   ```
   Format: `{account}:adhoc:{adhoc_id}`
   Tidak punya category/subcategory karena konten independent.
 
-- **Non-curriculum entry (reel/foto bebas tanpa referensi):**
+- **Non-series entry (reel/foto bebas tanpa referensi):**
   ```json
   { "source_ref": null }
   ```
@@ -153,7 +153,7 @@ Ini memungkinkan:
 
 ### 3.2 Proposed JSON Structure
 
-Berdasarkan taxonomy: Curriculum → Category → Subcategory → Topic.
+Berdasarkan taxonomy: Series → Category → Subcategory → Topic.
 
 Subcategory **diletakkan di dalam category** masing-masing, bukan flat list global. Ini mencegah conflict ID antar category dan memperjelas hierarki.
 
@@ -163,7 +163,7 @@ Subcategory **diletakkan di dalam category** masing-masing, bukan flat list glob
   "accounts": {
     "aquarisamatiran": {
       "niche": "aquascape",
-      "curriculums": [
+      "series": [
         {
           "id": "perjalanan-dari-nol",
           "title": "Perjalanan dari Nol Sampai Pro",
@@ -225,7 +225,7 @@ Subcategory **diletakkan di dalam category** masing-masing, bukan flat list glob
 
 **Key points:**
 - Subcategory **nested di dalam category**, bukan flat list — jadi ID subcategory unik per-category
-- Topic punya `category` + `subcategory` (keduanya wajib untuk curriculum topic)
+- Topic punya `category` + `subcategory` (keduanya wajib untuk series topic)
 - Category dan subcategory title hanya ditulis **satu kali** sebagai source of truth — tidak ada duplikasi yang bisa typo
 - `slides` array menyimpan struktur slide tanpa duplikasi konten penuh
 - `facts_cache` merujuk ke file JSON terpisah (biar source_of_truth tetap ringan)
@@ -260,24 +260,24 @@ Setiap entry punya referensi **cross ke source_of_truth** via field `source_ref`
 
 | Jenis | Format `source_ref` | Contoh |
 |-------|---------------------|--------|
-| **Curriculum topic** | `{account}:{curriculum_id}:{category}:{subcategory}:{topic}` | `aquarisamatiran:perjalanan-dari-nol:1:2:01` |
+| **Series topic** | `{account}:{series_id}:{category}:{subcategory}:{topic}` | `aquarisamatiran:perjalanan-dari-nol:1:2:01` |
 | **Adhoc topic** | `{account}:adhoc:{adhoc_id}` | `aquarisamatiran:adhoc:tip-harian-001` |
-| **Non-curriculum** (reel/foto bebas) | `null` atau field dihilangkan | `"source_ref": null` |
+| **Non-series** (reel/foto bebas) | `null` atau field dihilangkan | `"source_ref": null` |
 
 **Siklus update:**
 1. 🖊️ **Confirm/schedule** → tulis entry ke schedule.json + source_of_truth `status: scheduled`, `scheduled_time: ...`
 2. 🏃 **Runner posting** → update `done`, `result_id`, `permalink` di schedule.json
 3. 📝 **Runner selesai** → cocokkan via `source_ref`, update `status: live`, `result_id`, `permalink` di source_of_truth
-   - Curriculum topic → parse source_ref, temukan topic di source_of_truth
+   - Series topic → parse source_ref, temukan topic di source_of_truth
    - Adhoc topic → parse adhoc_id, temukan di adhoc_topics[]
-   - Non-curriculum → tidak update source_of_truth (source_ref null)
+   - Non-series → tidak update source_of_truth (source_ref null)
 4. 🌿 **Bio page** → re-generate dari source_of_truth (live + planned + scheduled)
 
 **Aturan konsistensi:**
 - Entry schedule dengan `source_ref` tidak null WAJIB punya referensi valid di source_of_truth
 - `source_ref` tidak boleh diubah manual — hanya sync yang boleh rebuild
 - `result_id` dan `permalink` harus identik di kedua file (validasi via consistency check)
-- Entry non-curriculum (`source_ref: null`) tetap diproses runner, tapi tidak terikat ke source_of_truth
+- Entry non-series (`source_ref: null`) tetap diproses runner, tapi tidak terikat ke source_of_truth
 
 ---
 
@@ -438,8 +438,13 @@ NIX_ACCOUNTS_AQUARISAMATIRAN_PEXELS_KEY=...
 │  PHASE 4: RECORD                                          │
 │                                                          │
 │  [Step 7] Runner selesai posting                         │
-│    → schedule.json: done=true, result_id, permalink      │
-│    → source_of_truth: status="live", result_id, permalink│
+│    → writes .scheduler_output/{ref}_{uuid}.json          │
+│    → commits + pushes ke repo                            │
+│                                                          │
+│  [Step 8] Processor membaca output file                  │
+│    → update schedule.json: done=true, result_id, permalink│
+│    → update source_of_truth: status="live", result_id    │
+│    → delete output file                                  │
 │    → update_bio(): regenerate bio page                   │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
@@ -537,11 +542,30 @@ cron-job.org API               ← sync slot definitions otomatis
        │
 cron-job.org triggers          ← HTTP call ke GitHub API
        │
-GH Actions scheduler.yml       ← workflow_dispatch → runner.py
-       │
-runner.py                      ← baca schedule.json, posting ke IG
-       │
-selesai → update schedule.json + source_of_truth + bio
+┌──────────────────────────────────────────────────────┐
+│  SINGLE WRITER PATTERN — semua path → output files  │
+│                                                      │
+│  GH Actions scheduler.yml                            │
+│  VPS Telegram bot (/post confirm)                    │
+│         │                                            │
+│         └──→ .scheduler_output/{ref}_{uuid}.json     │
+│                    │                                 │
+│                    ├──→ git commit + push            │
+│                    │                                 │
+│                    ↓                                 │
+│              Process Scheduler Output                 │
+│              (VPS deploy / systemd timer / bot inline)│
+│                    │                                 │
+│                    └──→ update master data            │
+│                        (schedule.json + source_of_truth)
+│                        → delete output file           │
+│                        → update_bio()                 │
+└──────────────────────────────────────────────────────┘
+
+BOT / CLI                    ← touchpoint lain
+  │
+  └──→ post langsung → .scheduler_output/ (sama seperti runner)
+  └──→ schedule → tulis ke schedule.json + .scheduler_output/
 ```
 
 ### 6.2 Slot Definitions
@@ -569,14 +593,31 @@ Ini akan menulis entry ke schedule.json dengan waktu spesifik. Runner akan nge-p
 - One-time slot → langsung tulis ke `schedule.json` tanpa daftarin slot
 - Runner nge-post semua entry yang `done=false` dan `time <= now`, terlepas dari slot mana asalnya
 
-### 6.3 Runner
+### 6.3 Runner (Unified Architecture)
 
-**Lokasi eksekusi:** Hanya GH Actions (`.github/workflows/scheduler.yml`)
-**Trigger:** cron-job.org → workflow_dispatch
+**Prinsip:** Semua proses yang nge-post ke IG **tidak pernah langsung edit master data**. Hasil posting ditulis sebagai output file di `.scheduler_output/`, lalu diproses oleh **processor** yang jadi satu-satunya writer master data.
 
-**VPS tidak menjalankan runner.** VPS hanya untuk:
-- Telegram bot (systemd service)
-- CLI akses manual
+**Sumber posting:**
+
+| Sumber | Trigger | Output |
+|--------|---------|--------|
+| GH Actions `scheduler.yml` | cron-job.org → workflow_dispatch | `.scheduler_output/{ref}_{uuid}.json` |
+| VPS Bot `/post confirm` | User via Telegram | `.scheduler_output/{ref}_{uuid}.json` |
+| CLI `post-carousel` | User terminal | `.scheduler_output/{ref}_{uuid}.json` |
+
+**Processor (single writer master data):**
+
+| Jalur | Kapan | Fungsi |
+|-------|-------|--------|
+| **Inline** | Segera setelah bot/CLI nulis output | `process_scheduler_results()` |
+| **Deploy** | Setiap push ke main (`deploy.yml`) | `process_scheduler_results()` |
+| **systemd timer** | Setiap 5 menit (safety net) | `process_scheduler_results()` |
+
+**Processor idempotent:**
+- Output file berisi `source_ref` + `result_id` + `permalink`
+- Processor cocokkan via `resolve_ref()` → update status + metadata
+- Jika topic sudah `live`, processor **skip** (tidak double-post)
+- Output file di-delete setelah sukses diproses
 
 ### 6.4 Post Now
 
@@ -640,7 +681,7 @@ Post langsung (tanpa jadwal) bisa dari:
 /reset                     — Hapus riwayat chat
 /run <cmd>                 — Jalanin perintah VPS
 /myid                      — Info chat ID
-/sync                      — Sync curriculum → schedule + bio
+/sync                      — Sync series → schedule + bio
 ```
 
 ### 7.2 CLI
@@ -649,7 +690,7 @@ Post langsung (tanpa jadwal) bisa dari:
 python main.py <command> [options]
 
 Commands:
-  curriculum                  — CRUD + sync source of truth
+  series                  — CRUD + sync source of truth
   generate-carousel-sd <topic>  — Generate carousel dgn SD (GH Actions)
   generate-carousel <topic>     — Generate carousel dgn Pexels (local)
   post-carousel               — Upload + jadwalkan/tayangkan carousel
@@ -693,9 +734,9 @@ Proses `update_bio` akan:
 ```
 aquarisamatiran-pages/
 ├── index.html              (bio page — hub)
-├── curriculum/
-│   └── <curriculum-id>/
-│       └── index.html      (detail curriculum)
+├── series/
+│   └── <series-id>/
+│       └── index.html      (detail series)
 ├── topic/
 │   └── <slug>/
 │       └── index.html      (detail topic + IG embed)
@@ -743,7 +784,7 @@ Setiap habis `sync`, validasi otomatis:
 ```
 GIVEN seorang user ingin membuat konten baru
 WHEN user melalui pipeline:
-  1. Buat topic (curriculum atau adhoc)
+  1. Buat topic (series atau adhoc)
   2. Generate konten (fakta + gambar + caption)
   3. Review dan approve
   4. Jadwalkan atau tayangkan langsung
@@ -790,7 +831,7 @@ THEN:
 | **Analytics** | Low | Engagement stats, best posting time |
 | **Content Calendar View** | Low | Visual kalender schedule |
 | **Auto-hashtag generator** | Low | Dari topic keywords |
-| **Bulk import curriculum** | Low | Dari CSV / template |
+| **Bulk import series** | Low | Dari CSV / template |
 | **IG Story scheduler** | Low | Stories juga perlu di-schedule |
 | **A/B testing caption** | Very Low | Multiple caption variants |
 
@@ -801,11 +842,11 @@ THEN:
 | Istilah | Definisi |
 |---------|----------|
 | **Niche** | Domain/industri konten (aquascape, food, travel) |
-| **Curriculum** | Seri konten berkesinambungan dalam satu niche |
-| **Category** | Grouping besar dalam curriculum — dulu "season" |
+| **Series** | Seri konten berkesinambungan dalam satu niche |
+| **Category** | Grouping besar dalam series — dulu "season" |
 | **Subcategory** | Sub-grouping dalam category — dulu "level" |
 | **Topic** | Materi konten individual, wajib dalam subcategory |
-| **Adhoc** | Konten independent di luar curriculum |
+| **Adhoc** | Konten independent di luar series |
 | **Source of Truth** | File master yang jadi acuan semua data |
 | **Derived** | File yang di-generate dari source of truth |
 | **Runner** | Proses yang nge-post konten ke IG sesuai jadwal |
@@ -856,8 +897,8 @@ nixfw/
 ├── slot_manager.py       — jadwal loader/syncer
 ├── cli/
 │   └── dispatch.py       — CLI command dispatch
-├── curriculum/
-│   └── manager.py        — CRUD curriculum
+├── series/
+│   └── manager.py        — CRUD series
 ├── carousel/
 │   ├── composer.py       — komposisi slide
 │   └── slides/           — cover, fact, cta
@@ -899,6 +940,6 @@ accounts/<name>/resource/
 ```
 
 Akun baru: copy `nixfw/templates/account/`, isi `config.json`, jalankan
-`curriculum sync`.
+`series sync`.
 
 ---

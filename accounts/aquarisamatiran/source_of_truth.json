@@ -789,7 +789,7 @@
       "10": {
         "slug": "penyakit-ikan",
         "title": "Penyakit Ikan",
-        "status": "scheduled",
+        "status": "live",
         "keywords": [
           "ich",
           "white spot",
@@ -897,7 +897,9 @@
           }
         ],
         "id": "09f00cdc-f862-4d27-b59d-7ebbd608b265",
-        "scheduled_time": "2026-06-24 19:00"
+        "scheduled_time": "2026-06-24 19:00",
+        "result_id": "18106653199972084",
+        "permalink": "https://www.instagram.com/p/DZ98dAPFkSt/"
       },
       "11": {
         "slug": "parameter-air",

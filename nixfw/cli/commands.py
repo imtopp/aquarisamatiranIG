@@ -398,6 +398,18 @@ def cmd_post_carousel(client, args):
         except Exception:
             pass
 
+    # Resolve source_ref from slug
+    from nixfw.curriculum.manager import write_output_file, process_scheduler_results, resolve_ref
+    _data = json.loads(config.CONTENT_PATH.read_text(encoding="utf-8"))
+    _ref = None
+    for _sid, _st in _data.get("topics", {}).items():
+        for _num, _t in _st.items():
+            if _t.get("slug") == latest_prefix or _t.get("slug", "").replace("-", "_") == latest_prefix:
+                _ref = f"C{_sid}.{_t.get('subcategory', '1')}#{_num}"
+                break
+        if _ref:
+            break
+
     if upload_only:
         print()
         print(f"📌 Upload-only mode — ngga dipublish ke IG")
@@ -405,23 +417,29 @@ def cmd_post_carousel(client, args):
         _update_curriculum_content(latest_prefix, facts=_facts_for_cc)
         return
 
-    if schedule_mode == "cron":
-        from datetime import datetime
-        dt = datetime.fromtimestamp(schedule_ts)
+    if schedule_mode in ("cron", "ig"):
+        from datetime import datetime as _dt
+        dt = _dt.fromtimestamp(schedule_ts)
         time_str = dt.strftime("%Y-%m-%d %H:%M")
-        _add_schedule_entry(latest_prefix, "carousel", urls, caption, time_str)
-        _update_curriculum_content(latest_prefix, facts=_facts_for_cc, status="scheduled", caption=caption)
-        print(f"\n📅 Carousel masuk antrian schedule.json: {time_str}")
-        return
 
-    # IG langsung
-    if schedule_ts and schedule_mode == "ig":
-        print(f"   ⚠️  Carousel scheduling via IG butuh whitelist — fallback ke cron mode")
-        from datetime import datetime
-        dt = datetime.fromtimestamp(schedule_ts)
-        _add_schedule_entry(latest_prefix, "carousel", urls, caption, dt.strftime("%Y-%m-%d %H:%M"))
-        _update_curriculum_content(latest_prefix, facts=_facts_for_cc, status="scheduled", caption=caption)
-        print(f"\n📅 Carousel masuk antrian schedule.json: {dt.strftime('%Y-%m-%d %H:%M')}")
+        if schedule_mode == "ig":
+            print(f"   ⚠️  Carousel scheduling via IG butuh whitelist — fallback ke cron mode")
+
+        if _ref:
+            write_output_file(
+                source_ref=_ref,
+                caption=caption,
+                urls=urls,
+                action="schedule",
+                schedule_time=time_str,
+            )
+            process_scheduler_results(account=config.ACCOUNT_NAME)
+            print(f"\n📅 Carousel masuk antrian schedule: {time_str}")
+        else:
+            print(f"⚠️  Gak bisa resolve ref buat {latest_prefix} — fallback ke direct add")
+            _add_schedule_entry(latest_prefix, "carousel", urls, caption, time_str)
+            _update_curriculum_content(latest_prefix, facts=_facts_for_cc, status="scheduled", caption=caption)
+            print(f"\n📅 Carousel masuk antrian schedule.json: {time_str}")
         return
 
     # IG caption limit: 2200 chars — potong di batas kalimat
@@ -443,14 +461,24 @@ def cmd_post_carousel(client, args):
     for p in latest:
         _save_to_published(p, media_id, group_slug=latest_prefix)
 
-    # Update curriculum_content.json
-    _update_curriculum_content(latest_prefix, result_id=media_id, status="live", caption=caption)
-    # Add done entry ke schedule.json biar bio page tau
-    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    _add_schedule_entry(latest_prefix, "carousel", urls, caption, now_str,
-                        done=True, result_id=media_id or "")
-    # Update bio page
-    update_bio(account=config.ACCOUNT_NAME)
+    # Write .scheduler_output/ file instead of touching master data directly
+    if _ref:
+        write_output_file(
+            source_ref=_ref,
+            result_id=media_id or "",
+            permalink="",
+            caption=caption,
+            urls=urls,
+            action="publish",
+        )
+        process_scheduler_results(account=config.ACCOUNT_NAME)
+    else:
+        print(f"⚠️  Gak bisa resolve ref buat {latest_prefix} — fallback ke direct update")
+        _update_curriculum_content(latest_prefix, result_id=media_id, status="live", caption=caption)
+        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        _add_schedule_entry(latest_prefix, "carousel", urls, caption, now_str,
+                            done=True, result_id=media_id or "")
+        update_bio(account=config.ACCOUNT_NAME)
 
 
 _UPLOAD_MAP = Path("resource") / ".uploaded.json"

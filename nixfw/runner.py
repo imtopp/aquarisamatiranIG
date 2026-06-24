@@ -49,26 +49,19 @@ def _num_from_ref(cc, ref):
 
 
 def _write_output_file(source_ref: str, result_id: str, permalink: str, caption: str = "", urls: list = None):
-    """Write a .scheduler_output/{safe_ref}.json file for VPS to process."""
-    SCHEDULER_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    safe_name = source_ref.replace("#", "_").replace(".", "_")
-    output = {
-        "source_ref": source_ref,
-        "result_id": result_id,
-        "permalink": permalink,
-        "caption": caption,
-        "urls": urls or [],
-        "timestamp": datetime.now(WIB).strftime("%Y-%m-%d %H:%M WIB"),
-    }
-    out_path = SCHEDULER_OUTPUT_DIR / f"{safe_name}.json"
-    out_path.write_text(json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"   📝 .scheduler_output/{safe_name}.json ditulis")
+    """Write a .scheduler_output/{safe_ref}_{uuid}.json file using the shared function."""
+    from nixfw.curriculum.manager import write_output_file as _w
+    _w(source_ref=source_ref, result_id=result_id, permalink=permalink,
+       caption=caption, urls=urls, action="publish")
 
 
 def _output_file_exists(source_ref: str) -> bool:
-    """Check if an output file already exists for this ref (skip guard)."""
+    """Check if an output file already exists for this ref (skip guard).
+    Uses glob to match UUID-pattern filenames."""
     safe_name = source_ref.replace("#", "_").replace(".", "_")
-    return (SCHEDULER_OUTPUT_DIR / f"{safe_name}.json").exists()
+    if not SCHEDULER_OUTPUT_DIR.is_dir():
+        return False
+    return len(list(SCHEDULER_OUTPUT_DIR.glob(f"{safe_name}_*.json"))) > 0
 
 
 def run(account: str = "aquarisamatiran"):

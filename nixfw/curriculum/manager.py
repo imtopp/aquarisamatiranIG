@@ -19,11 +19,15 @@ Usage:
 import json
 import re
 import sys
+import uuid
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from nixfw import config
 from nixfw.bio.generator import update_bio
 from nixfw.config import SCHEDULER_OUTPUT_DIR
+
+WIB = timezone(timedelta(hours=7))
 
 ACCOUNT_BASE = config.PROJECT_ROOT / "accounts" / config.ACCOUNT_NAME
 SRC = ACCOUNT_BASE / "source_of_truth.json"
@@ -575,10 +579,55 @@ def _sync_schedule_json(data):
 # ──── scheduler output processing ────
 
 
+def write_output_file(source_ref: str, result_id: str = "", permalink: str = "",
+                       caption: str = "", urls: list = None,
+                       action: str = "publish", schedule_time: str = "") -> Path | None:
+    """Write a .scheduler_output/{safe_ref}_{uuid}.json file.
+    Shared by runner.py, commands.py, and bot.py.
+    action: 'publish' — post result (result_id, permalink)
+            'schedule' — schedule entry (time)
+    Returns the output file Path, or None on error."""
+    output_dir = SCHEDULER_OUTPUT_DIR
+    if not output_dir:
+        from nixfw.config import SCHEDULER_OUTPUT_DIR as _dir
+        output_dir = _dir
+    try:
+        output_dir.mkdir(parents=True, exist_ok=True)
+    except Exception:
+        return None
+    safe_name = source_ref.replace("#", "_").replace(".", "_")
+    uid = uuid.uuid4().hex[:8]
+    output = {
+        "source_ref": source_ref,
+        "action": action,
+        "caption": caption,
+        "urls": urls or [],
+        "timestamp": datetime.now(WIB).strftime("%Y-%m-%d %H:%M WIB"),
+    }
+    if action == "publish":
+        output["result_id"] = result_id
+        output["permalink"] = permalink
+    elif action == "schedule":
+        output["time"] = schedule_time
+    out_path = output_dir / f"{safe_name}_{uid}.json"
+    try:
+        out_path.write_text(json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"   📝 .scheduler_output/{safe_name}_{uid}.json ditulis")
+        return out_path
+    except Exception as e:
+        print(f"   ❌ Gagal nulis output file: {e}")
+        return None
+
+
 def process_scheduler_results(account: str = "aquarisamatiran") -> int:
-    """Process .scheduler_output/*.json files from GH Actions scheduler.
+    """Process .scheduler_output/*.json files from any source (GH Actions, bot, CLI).
     Reads each file, updates schedule.json + source_of_truth.json,
     then deletes the output file. Idempotent — safe to call multiple times.
+
+    Action types:
+      'publish' (default) — mark topic as live, schedule entry as done
+      'schedule' — mark topic as scheduled, create schedule entry with done=false
+
     Returns number of processed files."""
     output_dir = SCHEDULER_OUTPUT_DIR
     if not output_dir.is_dir():
@@ -599,13 +648,17 @@ def process_scheduler_results(account: str = "aquarisamatiran") -> int:
         try:
             result = json.loads(f.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError):
+            print(f"  ⚠️  skip corrupt output file: {f.name}")
+            f.unlink(missing_ok=True)
             continue
 
         source_ref = result.get("source_ref", "")
+        action = result.get("action", "publish")
         result_id = result.get("result_id", "")
         permalink = result.get("permalink", "")
         caption = result.get("caption", "")
         urls = result.get("urls", [])
+        schedule_time = result.get("time", "")
 
         if not source_ref:
             f.unlink(missing_ok=True)
@@ -615,20 +668,29 @@ def process_scheduler_results(account: str = "aquarisamatiran") -> int:
         resolved = resolve_ref(source_ref, data)
         if not resolved:
             print(f"  ⚠️  scheduler output {f.name}: {source_ref} gak dikenal, skip")
+            f.unlink(missing_ok=True)
             continue
         cid, num_key = resolved
 
         # 1. Update source_of_truth.json
         topic = data.get("topics", {}).get(cid, {}).get(num_key)
         if topic:
-            topic["status"] = "live"
-            if result_id:
-                topic["result_id"] = result_id
-            if permalink:
-                topic["permalink"] = permalink
-            if caption:
-                topic["caption"] = caption
-            print(f"  ✅ source_of_truth: {source_ref} → live")
+            if action == "publish":
+                topic["status"] = "live"
+                if result_id:
+                    topic["result_id"] = result_id
+                if permalink:
+                    topic["permalink"] = permalink
+                if caption:
+                    topic["caption"] = caption
+                print(f"  ✅ source_of_truth: {source_ref} → live")
+            elif action == "schedule":
+                topic["status"] = "scheduled"
+                if caption:
+                    topic["caption"] = caption
+                if schedule_time:
+                    topic["scheduled_time"] = schedule_time
+                print(f"  ✅ source_of_truth: {source_ref} → scheduled")
 
         # 2. Update schedule.json
         entry = None
@@ -640,23 +702,36 @@ def process_scheduler_results(account: str = "aquarisamatiran") -> int:
             entry = {
                 "source_ref": source_ref,
                 "category": int(cid),
-                "time": topic.get("scheduled_time", ""),
+                "time": schedule_time or topic.get("scheduled_time", ""),
                 "type": "carousel",
-                "done": True,
+                "done": action == "publish",
                 "topic_uuid": topic.get("id", ""),
             }
             schedule.append(entry)
+            if action == "schedule":
+                print(f"  ✅ schedule.json: {source_ref} → scheduled")
+            else:
+                print(f"  ✅ schedule.json: {source_ref} → new entry")
         if entry:
-            entry["done"] = True
-            if result_id:
-                entry["result_id"] = result_id
-            if permalink:
-                entry["permalink"] = permalink
-            if caption:
-                entry["caption"] = caption
-            if urls:
-                entry["urls"] = urls
-            print(f"  ✅ schedule.json: {source_ref} → done")
+            if action == "publish":
+                entry["done"] = True
+                if result_id:
+                    entry["result_id"] = result_id
+                if permalink:
+                    entry["permalink"] = permalink
+                if caption:
+                    entry["caption"] = caption
+                if urls:
+                    entry["urls"] = urls
+                print(f"  ✅ schedule.json: {source_ref} → done")
+            elif action == "schedule" and not entry.get("done"):
+                entry["time"] = schedule_time or entry.get("time", "")
+                if caption:
+                    entry["caption"] = caption
+                if urls:
+                    entry["urls"] = urls
+                entry["done"] = False
+                print(f"  ✅ schedule.json: {source_ref} → scheduled")
 
         # 3. Delete output file
         f.unlink(missing_ok=True)

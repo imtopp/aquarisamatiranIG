@@ -10,17 +10,7 @@ from pathlib import Path
 import requests
 from moviepy import AudioFileClip
 
-from nixfw import config
-
-RESOURCE_DIR = config.RESOURCE_DIR
-VIDEO_DIR = config.RESOURCE_DIR / "videos"
-MUSIC_DIR = config.RESOURCE_DIR / "music"
-PHOTO_DIR = config.PHOTO_DIR
-PUBLISHED_DIR = config.RESOURCE_DIR / "published"
-OUTPUT_DIR = config.RESOURCE_DIR / "output"
-
-for d in [VIDEO_DIR, MUSIC_DIR, PHOTO_DIR, PUBLISHED_DIR, OUTPUT_DIR]:
-    d.mkdir(parents=True, exist_ok=True)
+from nixfw.account import get_account
 
 MAX_UPLOAD_MB = 200
 
@@ -115,8 +105,11 @@ def replace_audio(
     vid = Path(video_path)
     aud = Path(audio_path)
 
+    output_dir = get_account().resource_dir / "output"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     if output_path is None:
-        output_path = OUTPUT_DIR / f"{vid.stem}_edited.mp4"
+        output_path = output_dir / f"{vid.stem}_edited.mp4"
 
     total = _get_frame_count(vid)
     ffmpeg = _ffmpeg_exe()
@@ -141,7 +134,8 @@ def replace_audio(
         audio_clip = audio_clip.subclipped(0, video_dur)
 
     audio_clip = audio_clip.with_volume_scaled(music_volume)
-    temp_audio = OUTPUT_DIR / f"_audio_{aud.stem}.aac"
+    output_dir = get_account().resource_dir / "output"
+    temp_audio = output_dir / f"_audio_{aud.stem}.aac"
     audio_clip.write_audiofile(str(temp_audio), codec="aac", logger=None)
     audio_clip.close()
 
@@ -173,10 +167,13 @@ def compress_video(
     """Kompres video (keep original audio). quality: 'high' atau 'medium'."""
     vid = Path(video_path)
 
+    output_dir = get_account().resource_dir / "output"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     if output_path is None:
         stem = vid.stem
         suffix = "_compressed.mp4" if quality == "high" else "_compressed_medium.mp4"
-        output_path = OUTPUT_DIR / f"{stem}{suffix}"
+        output_path = output_dir / f"{stem}{suffix}"
 
     total = _get_frame_count(vid)
     ffmpeg = _ffmpeg_exe()
@@ -214,11 +211,14 @@ def upload_file(file_path: str | Path) -> str:
     return r.text.strip()
 
 
-def copy_to_published(file_path: Path, label: str = "") -> Path:
+def copy_to_published(file_path: Path, label: str = "", account=None) -> Path:
     """Simpan file ke folder published sebagai referensi."""
+    ctx = get_account(account)
+    published_dir = ctx.resource_dir / "published"
+    published_dir.mkdir(parents=True, exist_ok=True)
     stem = file_path.stem
     suffix = file_path.suffix
     label_part = f"_{label}" if label else ""
-    dest = PUBLISHED_DIR / f"{stem}{label_part}{suffix}"
+    dest = published_dir / f"{stem}{label_part}{suffix}"
     shutil.copy2(file_path, dest)
     return dest

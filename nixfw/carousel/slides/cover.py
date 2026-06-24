@@ -1,15 +1,18 @@
 from PIL import Image, ImageDraw
 
-from nixfw import config
+from nixfw import config as nixfw_config
 from nixfw.carousel.composer import (
     _hex_to_rgb, _get_font, draw_gradient_bg, wrap_text,
     draw_text_fallback, _get_emoji_font,
 )
 
 
-def build_cover(facts: dict, subject_img: Image.Image | None, bg_image: Image.Image | None = None) -> Image.Image:
-    W, H = config.SLIDE_SIZE
-    palette = config.PALETTE
+def build_cover(facts: dict, subject_img: Image.Image | None, bg_image: Image.Image | None = None,
+                handle: str | None = None) -> Image.Image:
+    W, H = nixfw_config.SLIDE_SIZE
+    palette = nixfw_config.PALETTE
+    if handle is None:
+        handle = nixfw_config.IG_HANDLE
 
     if bg_image:
         bg = bg_image.copy()
@@ -30,7 +33,7 @@ def build_cover(facts: dict, subject_img: Image.Image | None, bg_image: Image.Im
     font_emoji_sub = _get_emoji_font(30)
 
     # Handle
-    draw.text((40, 60), config.IG_HANDLE, fill=accent + (255,), font=font_handle)
+    draw.text((40, 60), handle, fill=accent + (255,), font=font_handle)
 
     # Subject image
     img_y = 160

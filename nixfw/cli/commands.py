@@ -10,6 +10,7 @@ import tempfile
 from pathlib import Path
 
 from nixfw import config
+from nixfw.account import get_account
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -34,7 +35,7 @@ def _notify_telegram(msg: str):
         pass
 
 from nixfw.ig_client import InstagramClient, parse_schedule
-from nixfw.editor import replace_audio, compress_video, upload_file, copy_to_published, VIDEO_DIR, MUSIC_DIR, PHOTO_DIR, OUTPUT_DIR, PUBLISHED_DIR, MAX_UPLOAD_MB
+from nixfw.editor import replace_audio, compress_video, upload_file, copy_to_published, MAX_UPLOAD_MB
 from nixfw.curriculum.manager import cmd_curriculum, format_ref
 from nixfw.bio.generator import update_bio
 from nixfw.cli.refresh_token import main as _refresh_token_main
@@ -136,7 +137,7 @@ def cmd_post_photo(client, args):
 
 def _find_curriculum_key_by_slug(slug: str) -> str | None:
     """Cari source_ref dari curriculum_content.json berdasarkan slug (new format C{cid}.{sc}#{seq})."""
-    cpath = config.CONTENT_PATH
+    cpath = get_account().source_of_truth
     if not cpath.exists():
         return None
     try:
@@ -152,7 +153,7 @@ def _find_curriculum_key_by_slug(slug: str) -> str | None:
 
 def _find_topic_title_by_slug(slug: str) -> str | None:
     """Cari title dari curriculum berdasarkan slug."""
-    cpath = config.CONTENT_PATH
+    cpath = get_account().source_of_truth
     if not cpath.exists():
         return None
     try:
@@ -172,7 +173,7 @@ def _add_schedule_entry(slug: str, ptype: str, urls_or_url: str | list[str],
                          result_id: str = "", permalink: str = ""):
     """Tambah entry ke schedule.json."""
     import json, re
-    spath = config.SCHEDULE_PATH
+    spath = get_account().schedule_json
     schedule = json.loads(spath.read_text(encoding="utf-8")) if spath.exists() else []
     curriculum_key = _find_curriculum_key_by_slug(slug)
     topic_uuid = ""
@@ -181,7 +182,7 @@ def _add_schedule_entry(slug: str, ptype: str, urls_or_url: str | list[str],
         if m:
             s_num, sc, seq = m.group(1), m.group(2), m.group(3).zfill(2)
             try:
-                cc = json.loads(config.CONTENT_PATH.read_text(encoding="utf-8"))
+                cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
                 st = cc.get("topics", {}).get(s_num, {})
                 items = sorted([(int(k), k) for k, v in st.items() if v.get("subcategory", "1") == sc])
                 idx = int(seq) - 1
@@ -194,7 +195,7 @@ def _add_schedule_entry(slug: str, ptype: str, urls_or_url: str | list[str],
             m = re.match(r"[CS](\d+)#(\d+)", curriculum_key)
             if m:
                 try:
-                    cc = json.loads(config.CONTENT_PATH.read_text(encoding="utf-8"))
+                    cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
                     t = cc.get("topics", {}).get(m.group(1), {}).get(m.group(2).zfill(2), {})
                     topic_uuid = t.get("id", "")
                 except Exception:
@@ -254,7 +255,7 @@ def cmd_post_carousel(client, args):
     caption = " ".join(filtered) if filtered else ""
 
     # Auto-detect slide terbaru
-    slides = sorted(PHOTO_DIR.glob("*_slide_??.png")) + sorted(PHOTO_DIR.glob("edu_*_??.jpg")) + sorted(PHOTO_DIR.glob("*_sd_*.png")) + sorted(PHOTO_DIR.glob("*_sd_*.jpg"))
+    slides = sorted(get_account().photo_dir.glob("*_slide_??.png")) + sorted(get_account().photo_dir.glob("edu_*_??.jpg")) + sorted(get_account().photo_dir.glob("*_sd_*.png")) + sorted(get_account().photo_dir.glob("*_sd_*.jpg"))
     if not slides:
         print("❌ Ngga ada slide carousel di resource/photos/")
         print()
@@ -390,7 +391,7 @@ def cmd_post_carousel(client, args):
 
     # Load facts from cache for curriculum update
     from nixfw.content.providers.facts_generator import facts_cache_path
-    _facts_path = facts_cache_path(latest_prefix)
+    _facts_path = facts_cache_path(latest_prefix, account=get_account())
     _facts_for_cc = None
     if _facts_path.exists():
         try:
@@ -398,9 +399,9 @@ def cmd_post_carousel(client, args):
         except Exception:
             pass
 
-    # Resolve source_ref from slug
-    from nixfw.curriculum.manager import write_output_file, process_scheduler_results, resolve_ref
-    _data = json.loads(config.CONTENT_PATH.read_text(encoding="utf-8"))
+    # Resolve source_ref from slug (curriculum topics first, then adhoc)
+    from nixfw.curriculum.manager import write_output_file, process_scheduler_results, resolve_ref as _resolve_ref
+    _data = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
     _ref = None
     for _sid, _st in _data.get("topics", {}).items():
         for _num, _t in _st.items():
@@ -409,12 +410,19 @@ def cmd_post_carousel(client, args):
                 break
         if _ref:
             break
+    if not _ref:
+        for _t in _data.get("adhoc_topics", []):
+            if _t.get("slug") == latest_prefix:
+                _ref = f"adhoc:{_t['slug']}"
+                break
+    if not _ref:
+        print(f"❌ Gak bisa resolve ref buat slug `{latest_prefix}` — gak ada di curriculum atau adhoc")
+        return
 
     if upload_only:
         print()
         print(f"📌 Upload-only mode — ngga dipublish ke IG")
         print(f"   URLs siap: {urls[0]} ... ({len(urls)} file)")
-        _update_curriculum_content(latest_prefix, facts=_facts_for_cc)
         return
 
     if schedule_mode in ("cron", "ig"):
@@ -425,21 +433,15 @@ def cmd_post_carousel(client, args):
         if schedule_mode == "ig":
             print(f"   ⚠️  Carousel scheduling via IG butuh whitelist — fallback ke cron mode")
 
-        if _ref:
-            write_output_file(
-                source_ref=_ref,
-                caption=caption,
-                urls=urls,
-                action="schedule",
-                schedule_time=time_str,
-            )
-            process_scheduler_results(account=config.ACCOUNT_NAME)
-            print(f"\n📅 Carousel masuk antrian schedule: {time_str}")
-        else:
-            print(f"⚠️  Gak bisa resolve ref buat {latest_prefix} — fallback ke direct add")
-            _add_schedule_entry(latest_prefix, "carousel", urls, caption, time_str)
-            _update_curriculum_content(latest_prefix, facts=_facts_for_cc, status="scheduled", caption=caption)
-            print(f"\n📅 Carousel masuk antrian schedule.json: {time_str}")
+        write_output_file(
+            source_ref=_ref,
+            caption=caption,
+            urls=urls,
+            action="schedule",
+            schedule_time=time_str,
+        )
+        process_scheduler_results(account=get_account().name)
+        print(f"\n📅 Carousel masuk antrian schedule: {time_str}")
         return
 
     # IG caption limit: 2200 chars — potong di batas kalimat
@@ -461,24 +463,16 @@ def cmd_post_carousel(client, args):
     for p in latest:
         _save_to_published(p, media_id, group_slug=latest_prefix)
 
-    # Write .scheduler_output/ file instead of touching master data directly
-    if _ref:
-        write_output_file(
-            source_ref=_ref,
-            result_id=media_id or "",
-            permalink="",
-            caption=caption,
-            urls=urls,
-            action="publish",
-        )
-        process_scheduler_results(account=config.ACCOUNT_NAME)
-    else:
-        print(f"⚠️  Gak bisa resolve ref buat {latest_prefix} — fallback ke direct update")
-        _update_curriculum_content(latest_prefix, result_id=media_id, status="live", caption=caption)
-        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        _add_schedule_entry(latest_prefix, "carousel", urls, caption, now_str,
-                            done=True, result_id=media_id or "")
-        update_bio(account=config.ACCOUNT_NAME)
+    # Write .scheduler_output/ file — unified path, no fallback
+    write_output_file(
+        source_ref=_ref,
+        result_id=media_id or "",
+        permalink="",
+        caption=caption,
+        urls=urls,
+        action="publish",
+    )
+    process_scheduler_results(account=get_account().name)
 
 
 _UPLOAD_MAP = Path("resource") / ".uploaded.json"
@@ -635,13 +629,13 @@ def cmd_prepare_reel(_client, args):
         print()
         print("  Video di resource/videos/, music di resource/music/")
         print("  Hasil di resource/output/, referensi di resource/published/")
-        _list_files("video", VIDEO_DIR)
-        _list_files("music", MUSIC_DIR)
+        _list_files("video", get_account().resource_dir / "videos")
+        _list_files("music", get_account().resource_dir / "music")
         return
     video_name = args[0]
     music_name = args[1]
-    video_path = VIDEO_DIR / video_name
-    music_path = MUSIC_DIR / music_name
+    video_path = get_account().resource_dir / "videos" / video_name
+    music_path = get_account().resource_dir / "music" / music_name
     if not video_path.exists():
         print(f"❌ Video '{video_name}' ngga ditemukan di resource/videos/")
         return
@@ -657,7 +651,7 @@ def cmd_prepare_reel(_client, args):
 
 
 def _find_video(name):
-    for base_dir in [VIDEO_DIR, OUTPUT_DIR]:
+    for base_dir in [get_account().resource_dir / "videos", get_account().resource_dir / "output"]:
         p = base_dir / name
         if p.exists():
             return p
@@ -709,8 +703,8 @@ def cmd_stage_reel(_client, args):
     if not args:
         print("Gunakan: python main.py stage-reel <nama_file_video>")
         print()
-        _list_files("video", VIDEO_DIR)
-        _list_files("output", OUTPUT_DIR)
+        _list_files("video", get_account().resource_dir / "videos")
+        _list_files("output", get_account().resource_dir / "output")
         return
 
     name = args[0]
@@ -788,7 +782,7 @@ def cmd_stage_photo(_client, args):
     if not args:
         print("Gunakan: python main.py stage-photo <nama_file_foto> [--crop / --no-crop]")
         print()
-        _list_files("foto", PHOTO_DIR)
+        _list_files("foto", get_account().photo_dir)
         return
 
     crop_flag = None
@@ -804,11 +798,11 @@ def cmd_stage_photo(_client, args):
     if not filtered:
         print("Gunakan: python main.py stage-photo <nama_file_foto> [--crop / --no-crop]")
         print()
-        _list_files("foto", PHOTO_DIR)
+        _list_files("foto", get_account().photo_dir)
         return
 
     name = filtered[0]
-    photo_path = PHOTO_DIR / name
+    photo_path = get_account().photo_dir / name
     if not photo_path.exists():
         print(f"❌ Foto '{name}' ngga ditemukan di resource/photos/")
         return
@@ -865,8 +859,8 @@ def cmd_generate_caption(_client, args):
     if not args:
         print("Gunakan: python main.py generate-caption <nama_file_video>")
         print()
-        _list_files("video", VIDEO_DIR)
-        _list_files("output", OUTPUT_DIR)
+        _list_files("video", get_account().resource_dir / "videos")
+        _list_files("output", get_account().resource_dir / "output")
         return
 
     name = args[0]
@@ -1199,6 +1193,8 @@ def cmd_generate_carousel_sd(_client, args):
         print("  python main.py generate-carousel-sd 'Ikan Cupang'")
         return
 
+    ctx = get_account()
+    handle = f"@{ctx.name}"
     topic = parsed.topic
     slug = re.sub(r'[^\w\-]', '', topic.lower().replace(" ", "_").replace("-", "_"))[:30].rstrip("_")
 
@@ -1206,7 +1202,7 @@ def cmd_generate_carousel_sd(_client, args):
     topic_name = topic
     season_tag = ""
     try:
-        cc_path = config.CONTENT_PATH
+        cc_path = get_account().source_of_truth
         if cc_path.exists():
             cc = json.loads(cc_path.read_text(encoding="utf-8"))
             m = re.match(r"[CS](\d+)(?:\.(\d+))?#(\d+)", topic)
@@ -1239,7 +1235,7 @@ def cmd_generate_carousel_sd(_client, args):
         pass
 
     # Cleanup old slides for this slug
-    for f in list(PHOTO_DIR.glob(f"{slug}_sd_*")) + list(PHOTO_DIR.glob(f"{slug}_slide_*")):
+    for f in list(get_account().photo_dir.glob(f"{slug}_sd_*")) + list(get_account().photo_dir.glob(f"{slug}_slide_*")):
         f.unlink(missing_ok=True)
         print(f"   🗑️  Hapus slide lama: {f.name}")
 
@@ -1252,7 +1248,7 @@ def cmd_generate_carousel_sd(_client, args):
 
     print(f"📝 Generate facts untuk \"{topic_name}\"...")
     try:
-        facts = generate_facts(topic_name, parsed.num_facts, slug=slug)
+        facts = generate_facts(topic_name, parsed.num_facts, slug=slug, account=ctx)
     except Exception as e:
         print(f"❌ Gagal generate facts: {e}")
         return
@@ -1267,7 +1263,7 @@ def cmd_generate_carousel_sd(_client, args):
     # Fallback: cari season_tag dari topic asli (kalau pake #XX)
     if not season_tag:
         try:
-            cc_path = config.CONTENT_PATH
+            cc_path = get_account().source_of_truth
             if cc_path.exists():
                 cc = json.loads(cc_path.read_text(encoding="utf-8"))
                 t_num = topic.lstrip("#").zfill(2)
@@ -1283,7 +1279,7 @@ def cmd_generate_carousel_sd(_client, args):
     for f in facts["facts"]:
         print(f"   {f['number']}. {f['title']}")
 
-    os.makedirs(PHOTO_DIR, exist_ok=True)
+    os.makedirs(get_account().photo_dir, exist_ok=True)
     saved = []
     topic_tag = f"[{season_tag}{display}]"
 
@@ -1316,9 +1312,9 @@ def cmd_generate_carousel_sd(_client, args):
         raw = _sd_generate(_bg_prompt("cover"))
         if raw:
             bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
-            slide = build_cover(facts, None, bg_image=bg)
+            slide = build_cover(facts, None, bg_image=bg, handle=handle)
             fname = f"{slug}_sd_01_cover.png"
-            slide.save(PHOTO_DIR / fname)
+            slide.save(get_account().photo_dir / fname)
             saved.append(fname)
             print(f"   ✅ {fname}")
             _notify_done("cover", "Cover")
@@ -1333,9 +1329,9 @@ def cmd_generate_carousel_sd(_client, args):
             raw = _sd_generate(_bg_prompt("fact", f))
             if raw:
                 bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
-                slide = build_fact_slide(f, None, bg_image=bg)
+                slide = build_fact_slide(f, None, bg_image=bg, handle=handle)
                 fname = f"{slug}_sd_{i+2:02d}_fact_{f['number']}.png"
-                slide.save(PHOTO_DIR / fname)
+                slide.save(get_account().photo_dir / fname)
                 saved.append(fname)
                 print(f"   ✅ {fname}")
                 _notify_done("fact", title)
@@ -1351,9 +1347,9 @@ def cmd_generate_carousel_sd(_client, args):
         raw = _sd_generate(_bg_prompt("cta"))
         if raw:
             bg = _darken_bg(raw.resize((1080, 1080), PIL.Image.LANCZOS))
-            slide = build_cta_slide(facts, None, bg_image=bg)
+            slide = build_cta_slide(facts, None, bg_image=bg, handle=handle, resource_dir=ctx.resource_dir)
             fname = f"{slug}_sd_{n_facts+2:02d}_cta.png"
-            slide.save(PHOTO_DIR / fname)
+            slide.save(get_account().photo_dir / fname)
             saved.append(fname)
             _notify_done("cta", "CTA")
             print(f"   ✅ {fname}")
@@ -1369,7 +1365,7 @@ def cmd_generate_carousel_sd(_client, args):
 
         print(f"\n{'='*40}")
         if saved:
-            print(f"✅ {len(saved)} slide saved di {PHOTO_DIR}:")
+            print(f"✅ {len(saved)} slide saved di {get_account().photo_dir}:")
             for f in saved:
                 print(f"   - {f}")
             print()
@@ -1387,7 +1383,7 @@ def cmd_generate_carousel_sd(_client, args):
 def cmd_compress_slides(_client, args):
     from pathlib import Path
     from PIL import Image
-    for f in sorted(Path(PHOTO_DIR).glob("*_sd_*.png")):
+    for f in sorted(Path(get_account().photo_dir).glob("*_sd_*.png")):
         sz = f.stat().st_size
         if sz > 500 * 1024:
             jpg = f.with_suffix(".jpg")
@@ -1452,6 +1448,9 @@ def cmd_generate_carousel(_client, args):
         print("  python main.py generate-carousel 'Perjalanan tank pertamaku' --type story")
         return
 
+    ctx = get_account()
+    handle = f"@{ctx.name}"
+
     from nixfw.content.providers.facts_generator import facts_cache_path, generate_facts
     from nixfw.content.providers.image_utils import prepare_subject_image
     from nixfw.carousel.slides.cover import build_cover
@@ -1464,7 +1463,7 @@ def cmd_generate_carousel(_client, args):
 
     # --- Facts ---
     if parsed.facts:
-        facts_path = PHOTO_DIR / parsed.facts
+        facts_path = get_account().photo_dir / parsed.facts
         if not facts_path.exists():
             print(f"❌ File facts ngga ditemukan: {parsed.facts}")
             return
@@ -1473,13 +1472,13 @@ def cmd_generate_carousel(_client, args):
         print(f"✅ Loaded facts dari {parsed.facts}")
     else:
         if parsed.force:
-            cache_path = facts_cache_path(slug)
+            cache_path = facts_cache_path(slug, account=ctx)
             if cache_path.exists():
                 cache_path.unlink()
                 print(f"   🗑️  Hapus cache facts: {cache_path.name}")
         print(f"📝 Generate facts untuk \"{topic}\"...")
         try:
-            facts = generate_facts(topic, parsed.num_facts, slug=slug)
+            facts = generate_facts(topic, parsed.num_facts, slug=slug, account=ctx)
         except Exception as e:
             print(f"❌ Gagal generate facts: {e}")
             return
@@ -1494,7 +1493,7 @@ def cmd_generate_carousel(_client, args):
     subject_img = None
 
     if parsed.force_image:
-        local_path = PHOTO_DIR / parsed.force_image
+        local_path = get_account().photo_dir / parsed.force_image
         if local_path.exists():
             img = PIL.Image.open(local_path).convert("RGBA")
             from nixfw.content.providers.image_utils import apply_cartoon_effect
@@ -1580,25 +1579,25 @@ def cmd_generate_carousel(_client, args):
 
     # Cover — general topic image
     cover_img = subject_img or _get_pexels_subject(topic, 400)
-    slide_fns_imgs.append((build_cover, (facts, cover_img)))
+    slide_fns_imgs.append((build_cover, (facts, cover_img, None, handle)))
 
     # Per fact — search Pexels based on fact title
     for fact in facts["facts"]:
         query = fact["title"]
         fact_img = _get_pexels_subject(query, 300) or subject_img
-        slide_fns_imgs.append((build_fact_slide, (fact, fact_img)))
+        slide_fns_imgs.append((build_fact_slide, (fact, fact_img, None, None, handle)))
 
     # CTA — logo aja
-    slide_fns_imgs.append((build_cta_slide, (facts, None)))
+    slide_fns_imgs.append((build_cta_slide, (facts, None, None, None, handle, ctx.resource_dir)))
 
     for i, (fn, args_tuple) in enumerate(slide_fns_imgs, 1):
         print(f"🎨 Slide {i}/{len(slide_fns_imgs)}...")
         try:
             img = fn(*args_tuple)
             filename = f"{slug}_slide_{i:02d}.png"
-            img.save(str(PHOTO_DIR / filename))
+            img.save(str(get_account().photo_dir / filename))
             saved.append(filename)
-            sz = PHOTO_DIR.joinpath(filename).stat().st_size // 1024
+            sz = get_account().photo_dir.joinpath(filename).stat().st_size // 1024
             print(f"   ✅ {filename} ({sz}KB)")
         except Exception as e:
             print(f"   ❌ Gagal: {e}")
@@ -1622,7 +1621,7 @@ def _update_curriculum_content(slug: str, facts: dict | None = None,
                                 status: str | None = None, caption: str | None = None):
     """Update curriculum_content.json with generated facts or post result (v4 nested)."""
     import json
-    cpath = config.CONTENT_PATH
+    cpath = get_account().source_of_truth
     if not cpath.exists():
         return
     try:
@@ -1694,12 +1693,12 @@ def _save_to_published(file_paths, media_id: str, group_slug: str | None = None)
         for i, fp in enumerate(file_paths):
             stem = group_slug or Path(fp).stem
             suffix = Path(fp).suffix
-            dest = PUBLISHED_DIR / f"{today}_{media_id}_{stem}{suffix}"
+            dest = get_account().resource_dir / "published" / f"{today}_{media_id}_{stem}{suffix}"
             shutil.copy2(fp, dest)
             print(f"📁 Referensi tersimpan: {dest}")
     else:
         stem = Path(file_paths).stem
-        dest = PUBLISHED_DIR / f"{today}_{media_id}_{stem}{Path(file_paths).suffix}"
+        dest = get_account().resource_dir / "published" / f"{today}_{media_id}_{stem}{Path(file_paths).suffix}"
         shutil.copy2(file_paths, dest)
         print(f"📁 Referensi tersimpan: {dest}")
 
@@ -1711,7 +1710,7 @@ def cmd_delete_post(client, args):
         print("Gunakan: python main.py delete-post <media_id>")
         print()
         print("  Cari media_id di folder resource/published/ dari nama file:")
-        for f in sorted(PUBLISHED_DIR.glob("*.mp4")):
+        for f in sorted(get_account().resource_dir / "published".glob("*.mp4")):
             print(f"    {f.stem}")
         return
     mid = args[0]
@@ -1719,7 +1718,7 @@ def cmd_delete_post(client, args):
     print(f"✅ Post {mid} berhasil dihapus!")
 
     # hapus juga referensi di published/ kalo ada
-    for f in PUBLISHED_DIR.glob(f"*{mid}*"):
+    for f in get_account().resource_dir / "published".glob(f"*{mid}*"):
         f.unlink()
         print(f"🗑️  Referensi dihapus: {f.name}")
 
@@ -1739,7 +1738,7 @@ def cmd_file_map(_client, _args=None):
 def _cleanup_output():
     """Sapu SEMUA file temp di output/ (udah di-copy ke published/)."""
     cleaned = 0
-    for f in list(OUTPUT_DIR.iterdir()):
+    for f in list(get_account().resource_dir / "output".iterdir()):
         if f.is_file() and f.suffix in (".mp4", ".aac"):
             f.unlink()
             cleaned += 1
@@ -1773,7 +1772,7 @@ def cmd_clean(_client, args):
 
     if sub == 'resolve':
         slug = arg
-        cpath = config.CONTENT_PATH
+        cpath = get_account().source_of_truth
         if not cpath.exists():
             print('tag=')
             print('status=')
@@ -1800,7 +1799,7 @@ def cmd_clean(_client, args):
         slug = arg
         from pathlib import Path
         from nixfw.content.providers.facts_generator import facts_cache_path
-        photos = Path(config.PHOTO_DIR)
+        photos = Path(get_account().photo_dir)
         patterns = [f'{slug}_sd_*', f'{slug}_slide_*']
         # Catch both curriculum-slug and topic-name-derived edu cache files
         patterns.append(f'edu_{slug[:20]}*')
@@ -1822,7 +1821,7 @@ def cmd_clean(_client, args):
         tag = arg
         if not tag:
             return
-        spath = config.SCHEDULE_PATH
+        spath = get_account().schedule_json
         if not spath.exists():
             return
         s = json.loads(spath.read_text(encoding='utf-8'))
@@ -1837,7 +1836,7 @@ def cmd_clean(_client, args):
         if not tag:
             return
         import re
-        cpath = config.CONTENT_PATH
+        cpath = get_account().source_of_truth
         if not cpath.exists():
             return
         d = json.loads(cpath.read_text(encoding='utf-8'))
@@ -1863,7 +1862,7 @@ def cmd_clean(_client, args):
 
     elif sub == 'clean-uploaded':
         slug = arg
-        fpath = config.RESOURCE_DIR / '.uploaded.json'
+        fpath = get_account().resource_dir / '.uploaded.json'
         if not fpath.exists():
             return
         u = json.loads(fpath.read_text(encoding='utf-8'))
@@ -1881,8 +1880,84 @@ def cmd_clean(_client, args):
 
 def cmd_process_scheduler_results(client=None, args=None):
     from nixfw.curriculum.manager import process_scheduler_results
-    count = process_scheduler_results(account=config.ACCOUNT_NAME)
+    count = process_scheduler_results(account=get_account().name)
     print(f"  ✅ Processed {count} scheduler output file(s)")
+
+
+def cmd_account(_client=None, args=None):
+    """Manage multi-account — init, list, enable, disable, remove."""
+    import argparse
+    from nixfw.account import (
+        add_account, enable_account, disable_account,
+        remove_account, list_accounts,
+    )
+
+    parser = argparse.ArgumentParser(prog="account", add_help=False)
+    parser.add_argument("sub", nargs="?", help="init|list|enable|disable|remove")
+    parser.add_argument("name", nargs="?", help="account name")
+    parser.add_argument("--niche", default="aquascape", help="niche (default: aquascape)")
+    parser.add_argument("--from", dest="from_account", default=None, help="copy config from existing account")
+    parser.add_argument("--force", action="store_true", help="skip confirmation")
+    parsed, _ = parser.parse_known_args(args)
+
+    if not parsed.sub:
+        print("Gunakan: python main.py account <sub> [args]")
+        print()
+        print("  account list                          — daftar semua akun")
+        print("  account init <nama> [--niche N]       — buat akun baru")
+        print("                [--from AKUN]            — copy config dari akun lain")
+        print("  account enable <nama>                 — aktifkan akun")
+        print("  account disable <nama>                — nonaktifkan akun")
+        print("  account remove <nama> [--force]       — hapus akun")
+        return
+
+    sub = parsed.sub
+    name = parsed.name
+
+    try:
+        if sub == "list":
+            accs = list_accounts()
+            if not accs:
+                print("Belum ada akun.")
+                return
+            print(f"{'Nama':<20} {'Niche':<15} {'Status':<10} Handle")
+            print("-" * 60)
+            for a in accs:
+                status = "✅" if a["enabled"] else "❌"
+                print(f"{a['name']:<20} {a['niche']:<15} {status:<10} {a['handle']}")
+
+        elif sub == "init":
+            if not name:
+                print("Nama akun diperlukan. Contoh: account init akun-baru")
+                return
+            ctx = add_account(name, parsed.niche, from_account=parsed.from_account)
+            print(f"  ✅ Akun '{name}' dibuat (niche: {parsed.niche})")
+
+        elif sub == "enable":
+            if not name:
+                print("Nama akun diperlukan.")
+                return
+            enable_account(name)
+            print(f"  ✅ Akun '{name}' diaktifkan")
+
+        elif sub == "disable":
+            if not name:
+                print("Nama akun diperlukan.")
+                return
+            disable_account(name)
+            print(f"  ✅ Akun '{name}' dinonaktifkan")
+
+        elif sub == "remove":
+            if not name:
+                print("Nama akun diperlukan.")
+                return
+            remove_account(name, force=parsed.force)
+            print(f"  ✅ Akun '{name}' dihapus")
+
+        else:
+            print(f"Subcommand tidak dikenal: {sub}")
+    except Exception as e:
+        print(f"  ❌ {e}")
 
 
 def main():
@@ -1893,6 +1968,13 @@ def main():
             niche_name = sys.argv.pop(idx + 1)
             sys.argv.pop(idx)
             config.set_niche(niche_name)
+    if "--account" in sys.argv:
+        idx = sys.argv.index("--account")
+        if idx + 1 < len(sys.argv):
+            name = sys.argv.pop(idx + 1)
+            sys.argv.pop(idx)
+            from nixfw.account import set_active_account
+            set_active_account(name)
 
     if len(sys.argv) < 2:
         niche_list = ", ".join(config._NICHE_REGISTRY)
@@ -1931,9 +2013,11 @@ def main():
         print("    clean clean-uploaded <slug> bersihin .uploaded.json")
         print("  sync-slots                 — sync slot jadwal ke cron-job.org")
         print("  process-scheduler-results  — proses .scheduler_output/ files (safety net)")
+        print("  account                    — kelola multi-akun (init, list, enable, disable, remove)")
         print()
         print("Opsi global:")
         print(f"  --niche NAMA               pilih niche. Tersedia: {niche_list}")
+        print("  --account NAMA             pilih akun (dari accounts/)")
         return
 
     cmd = sys.argv[1]
@@ -1966,6 +2050,7 @@ def main():
         "refresh-token": cmd_refresh_token,
         "process-scheduler-results": cmd_process_scheduler_results,
         "clean": cmd_clean,
+        "account": cmd_account,
     }
 
     fn = cmds.get(cmd)

@@ -17,12 +17,10 @@ from telegram.request import HTTPXRequest
 
 from nixfw.config import (
     AGENTS_MD,
-    CONTENT_PATH as CURRICULUM_PATH,
     DB_PATH,
-    PHOTO_DIR,
     PROJECT_ROOT,
-    SCHEDULE_PATH,
 )
+from nixfw.account import get_account
 from nixfw.slot_manager import SlotManager, DAYS_ID
 from nixfw.content.providers.facts_generator import facts_cache_path, generate_facts
 from nixfw.curriculum.manager import (
@@ -153,9 +151,9 @@ if AGENTS_MD.exists():
     system_prompt += "\n\nKamu adalah aku yang asli — personality, suara, gaya bicara, semuanya sama persis."
 
 # Inject terminology from source_of_truth.json (v5: categories → subcategories)
-if CURRICULUM_PATH.exists():
+if get_account().source_of_truth.exists():
     try:
-        cur_data = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        cur_data = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
         topics = cur_data.get("topics", {})
         categories = cur_data.get("categories", {})
         if topics:
@@ -297,7 +295,7 @@ def _reset_topic_status(topic_ref: str, new_status: str = "generated"):
     if not m:
         return
     try:
-        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
         sid, sc, seq = m.group(1), m.group(2) or "1", m.group(3).zfill(2)
         num_key = _seq_to_key(cc, sid, sc, seq) if m.group(2) else seq
         if not num_key:
@@ -305,7 +303,7 @@ def _reset_topic_status(topic_ref: str, new_status: str = "generated"):
         t = cc.get("topics", {}).get(sid, {}).get(num_key)
         if t:
             t["status"] = new_status
-            CURRICULUM_PATH.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
+            get_account().source_of_truth.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
     except Exception:
         pass
 
@@ -313,13 +311,13 @@ def _reset_topic_status(topic_ref: str, new_status: str = "generated"):
 def _read_schedule() -> str:
     """Read schedule.json and return a formatted summary."""
     try:
-        data = json.loads(SCHEDULE_PATH.read_text(encoding="utf-8"))
+        data = json.loads(get_account().schedule_json.read_text(encoding="utf-8"))
     except Exception:
         return ""
     now = datetime.date.today()
     cc = {}
     try:
-        cc_raw = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        cc_raw = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
         for cid, ts in cc_raw.get("topics", {}).items():
             for t_num, t in ts.items():
                 cc[format_ref(cc_raw, cid, t_num)] = t.get("title", "")
@@ -373,7 +371,7 @@ def _read_schedule() -> str:
 def _load_curriculum() -> dict:
     """Load and flatten curriculum topics to {C1.1#01: {...}} format."""
     try:
-        data = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        data = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
         topics = data.get("topics", {})
         flat = {}
         for sid in sorted(topics, key=int):
@@ -390,7 +388,7 @@ def _topic_title_from_ref(topic_ref):
     if not m:
         return None
     try:
-        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
         sid, sc, seq = m.group(1), m.group(2) or "1", m.group(3).zfill(2)
         num_key = _seq_to_key(cc, sid, sc, seq) if m.group(2) else seq
         if num_key:
@@ -456,7 +454,7 @@ def _format_curriculum_context(num: str, topic: dict) -> str:
 async def topics_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show all curriculum topics with their C#XX codes."""
     try:
-        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
     except Exception:
         await update.message.reply_text("❌ Gagal baca source_of_truth.json")
         return
@@ -491,7 +489,7 @@ async def topics_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def catlist_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show all categories with their subcategories."""
     try:
-        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
     except Exception:
         await update.message.reply_text("❌ Gagal baca source_of_truth.json")
         return
@@ -511,7 +509,7 @@ async def catlist_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def slides_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """List available slide groups in resource/photos/, split curriculum vs adhoc."""
-    slides_dir = PHOTO_DIR
+    slides_dir = get_account().photo_dir
     if not slides_dir.is_dir():
         await update.message.reply_text("❌ Folder resource/photos/ gak ada.")
         return
@@ -520,7 +518,7 @@ async def slides_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     slug_to_tag = {}
     cur_order = []  # (slug, tag) in curriculum order
     try:
-        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
         for sid in sorted(cc.get("topics", {}), key=int):
             for tnum in sorted(cc["topics"][sid], key=int):
                 t = cc["topics"][sid][tnum]
@@ -610,10 +608,10 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if display_name and slug:
         await update.message.reply_text(f"📋 Bikin fakta untuk \"{display_name}\" ({num_facts} fakta)...")
         try:
-            facts_path = facts_cache_path(slug)
+            facts_path = facts_cache_path(slug, account=get_account())
             if facts_path.exists():
                 facts_path.unlink()
-            facts = await asyncio.to_thread(generate_facts, display_name, int(num_facts), slug=slug)
+            facts = await asyncio.to_thread(generate_facts, display_name, int(num_facts), slug=slug, account=get_account())
             preview = _format_facts_preview(facts)
             await update.message.reply_text(
                 f"📋 **Fakta untuk \"{display_name}\":**\n\n{preview}\n\nSetuju sama faktanya?",
@@ -634,14 +632,14 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def _latest_slides(topic_ref: str = "") -> tuple[str | None, list[Path]]:
-    """Detect carousel slides in PHOTO_DIR. 
+    """Detect carousel slides in get_account().photo_dir. 
     If topic_ref given (e.g. C1.1#07 or C1#07), filter by topic slug.
     If it doesn't match tag format, treat as direct slug (e.g. puntius_denisonii)."""
-    slides_dir = PHOTO_DIR
+    slides_dir = get_account().photo_dir
     if topic_ref:
         m = re.match(r'[CS](\d+)(?:\.(\d+))?#(\d+)', topic_ref)
         if m:
-            cur_data = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+            cur_data = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
             s_num, sc, t_num = m.group(1), m.group(2) or "1", m.group(3).zfill(2)
             # If ref used per-subcategory seq (C1.1#03), resolve seq→dict_key
             if m.group(2):
@@ -697,7 +695,7 @@ def _resolve_topic(input_str: str) -> tuple[str | None, str | None, str | None]:
     """Resolve topic input to (display_name, slug, topic_ref).
     Returns (None, None, None) if unresolvable."""
     try:
-        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
     except Exception:
         return None, None, None
     topics = cc.get("topics", {})
@@ -773,7 +771,7 @@ def _fact_keyboard() -> InlineKeyboardMarkup:
 def _get_caption_from_curriculum(slug: str) -> str | None:
     """Cari caption existing di source_of_truth.json berdasarkan slug."""
     try:
-        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
         for s_num, ts in cc.get("topics", {}).items():
             for t_num, t in ts.items():
                 if t.get("slug", "").replace("-", "_") == slug:
@@ -786,19 +784,21 @@ def _get_caption_from_curriculum(slug: str) -> str | None:
 def _save_caption_to_curriculum(slug: str, caption: str):
     """Simpan caption ke source_of_truth.json."""
     try:
-        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
         for s_num, ts in cc.get("topics", {}).items():
             for t_num, t in ts.items():
                 if t.get("slug", "").replace("-", "_") == slug:
                     t["caption"] = caption
-                    CURRICULUM_PATH.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
+                    get_account().source_of_truth.write_text(json.dumps(cc, indent=2, ensure_ascii=False), encoding="utf-8")
                     return
     except Exception:
         pass
 
 
-def _build_caption_from_facts(topic: str, facts_json: dict | None = None, handle: str = "@aquarisamatiran") -> str:
+def _build_caption_from_facts(topic: str, facts_json: dict | None = None, handle: str | None = None) -> str:
     """Build a caption locally from facts data (Gemini fallback)."""
+    if handle is None:
+        handle = f"@{get_account().name}"
     lines = [f"{topic} — Yuk belajar! 🐟"]
     if facts_json and "facts" in facts_json:
         for f in facts_json["facts"]:
@@ -818,16 +818,17 @@ async def _generate_caption(facts_json: dict | None, topic: str) -> str:
     keys = [k for k in GEMINI_API_KEYS if k]
 
     # Load account config for dynamic persona
+    ctx = get_account()
     config = {}
     try:
-        config_path = PROJECT_ROOT / "accounts" / "aquarisamatiran" / "config.json"
+        config_path = ctx.base / "config.json"
         config = json.loads(config_path.read_text(encoding="utf-8"))
     except Exception:
         pass
 
     niche = config.get("niche", "aquascape")
-    handle = config.get("handle", "@aquarisamatiran")
-    name = config.get("name", "Aquarisamatiran")
+    handle = config.get("handle", ctx.name)
+    name = config.get("name", ctx.name)
     tone = config.get("tone", "santai, edukatif, engaging, akrab — pake bahasa Indonesia sehari-hari")
     mission = config.get("mission", "ngajarin follower aquarium dari nol dengan cara yang asyik")
 
@@ -989,7 +990,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if not topic_ref:
-        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
         for s_num, ts in cc.get("topics", {}).items():
             for t_num, t in ts.items():
                 if t.get("slug", "").replace("-", "_") == slug:
@@ -999,7 +1000,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 break
     # Cek kalo udah live atau scheduled
     if topic_ref:
-        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
         m = re.match(r"[CS](\d+)(?:\.(\d+))?#(\d+)", topic_ref)
         if m:
             s_num, sc, t_num_seq = m.group(1), m.group(2) or "1", m.group(3).zfill(2)
@@ -1021,7 +1022,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not schedule_time:
         occupied = set()
         try:
-            existing = json.loads(SCHEDULE_PATH.read_text(encoding="utf-8"))
+            existing = json.loads(get_account().schedule_json.read_text(encoding="utf-8"))
             for e in existing:
                 if e.get("done") is False and e.get("time"):
                     occupied.add(e["time"])
@@ -1091,7 +1092,7 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"💡 Caption udah ada, pake yang lama~")
         caption = existing_caption
     else:
-        facts_path = facts_cache_path(slug)
+        facts_path = facts_cache_path(slug, account=get_account())
         if facts_path.exists():
             try:
                 facts_json = json.loads(facts_path.read_text(encoding="utf-8"))
@@ -1103,13 +1104,14 @@ async def post_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             caption = await asyncio.wait_for(_generate_caption(facts_json, topic_display), timeout=120)
         except asyncio.TimeoutError:
+            _fb_ctx = get_account()
             _cfg = {}
             try:
-                _cfg = json.loads((PROJECT_ROOT / "accounts" / "aquarisamatiran" / "config.json").read_text(encoding="utf-8"))
+                _cfg = json.loads((_fb_ctx.base / "config.json").read_text(encoding="utf-8"))
             except Exception:
                 pass
-            _name = _cfg.get("name", "Aquarisamatiran")
-            _handle = _cfg.get("handle", "@aquarisamatiran")
+            _name = _cfg.get("name", _fb_ctx.name)
+            _handle = _cfg.get("handle", _fb_ctx.name)
             caption = f"{topic_display} — Yuk belajar bareng {_handle}! 🌱 #{_name} #AquascapeIndonesia"
             _is_fallback = True
             await update.message.reply_text("⚠️ Caption generation timeout, pakai fallback~")
@@ -1227,7 +1229,7 @@ async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"💬 Edit caption buat {topic_ref}: \"{instruction}\"...")
 
     existing_caption = _get_caption_from_curriculum(slug)
-    facts_path = facts_cache_path(slug)
+    facts_path = facts_cache_path(slug, account=get_account())
     facts_json = None
     if facts_path.exists():
         try:
@@ -1235,15 +1237,16 @@ async def editcaption_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             pass
 
+    _ctx = get_account()
     config = {}
     try:
-        config_path = PROJECT_ROOT / "accounts" / "aquarisamatiran" / "config.json"
+        config_path = _ctx.base / "config.json"
         config = json.loads(config_path.read_text(encoding="utf-8"))
     except Exception:
         pass
     niche = config.get("niche", "aquascape")
-    handle = config.get("handle", "@aquarisamatiran")
-    name = config.get("name", "Aquarisamatiran")
+    handle = config.get("handle", _ctx.name)
+    name = config.get("name", _ctx.name)
 
     caption_system = (
         f"Kamu adalah alat pembuat caption Instagram untuk akun {niche} {handle}. "
@@ -1308,7 +1311,7 @@ async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     slug = pending["slug"]
     if not topic_ref:
         try:
-            cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+            cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
             for s_num, ts in cc.get("topics", {}).items():
                 for t_num, t in ts.items():
                     if t.get("slug", "").replace("-", "_") == slug:
@@ -1323,10 +1326,10 @@ async def regenerate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if force and topic_ref:
         await update.message.reply_text(f"📋 Bikin fakta baru untuk \"{topic_display}\"...")
         try:
-            facts_path = facts_cache_path(slug)
+            facts_path = facts_cache_path(slug, account=get_account())
             if facts_path.exists():
                 facts_path.unlink()
-            facts = await asyncio.to_thread(generate_facts, topic_display, 8, slug=slug)
+            facts = await asyncio.to_thread(generate_facts, topic_display, 8, slug=slug, account=get_account())
             preview = _format_facts_preview(facts)
             await update.message.reply_text(
                 f"📋 **Fakta baru untuk \"{topic_display}\":**\n\n{preview}\n\nSetuju sama faktanya?",
@@ -1402,7 +1405,7 @@ async def slot_pick_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await context.bot.send_message(chat_id=update.effective_chat.id, text="💡 Caption udah ada, pake yang lama~")
         caption = existing_caption
     else:
-        facts_path = facts_cache_path(slug)
+        facts_path = facts_cache_path(slug, account=get_account())
         if facts_path.exists():
             try:
                 facts_json = json.loads(facts_path.read_text(encoding="utf-8"))
@@ -1412,13 +1415,14 @@ async def slot_pick_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         try:
             caption = await asyncio.wait_for(_generate_caption(facts_json, topic_display), timeout=60)
         except asyncio.TimeoutError:
+            _fb_ctx = get_account()
             _cfg = {}
             try:
-                _cfg = json.loads((PROJECT_ROOT / "accounts" / "aquarisamatiran" / "config.json").read_text(encoding="utf-8"))
+                _cfg = json.loads((_fb_ctx.base / "config.json").read_text(encoding="utf-8"))
             except Exception:
                 pass
-            _name = _cfg.get("name", "Aquarisamatiran")
-            _handle = _cfg.get("handle", "@aquarisamatiran")
+            _name = _cfg.get("name", _fb_ctx.name)
+            _handle = _cfg.get("handle", _fb_ctx.name)
             caption = f"{topic_display} — Yuk belajar bareng {_handle}! 🌱 #{_name} #AquascapeIndonesia"
             await context.bot.send_message(chat_id=update.effective_chat.id, text="⚠️ Caption generation timeout, pakai fallback~")
         _save_caption_to_curriculum(slug, caption)
@@ -1508,7 +1512,7 @@ async def clean_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     m = re.match(r'[CS](\d+)(?:\.(\d+))?#(\d+)', raw)
     if m:
         try:
-            cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+            cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
             sid, sc, seq = m.group(1), m.group(2) or "1", m.group(3).zfill(2)
             num_key = _seq_to_key(cc, sid, sc, seq) if m.group(2) else seq
             if not num_key:
@@ -1531,7 +1535,7 @@ async def clean_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         slug = raw.replace("-", "_")
         try:
-            cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+            cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
             for sid, ts in cc.get("topics", {}).items():
                 for num, t in ts.items():
                     if t.get("slug", "").replace("-", "_") == slug and t.get("status") == "live":
@@ -1540,7 +1544,7 @@ async def clean_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             pass
 
-    slides_dir = PHOTO_DIR
+    slides_dir = get_account().photo_dir
     slide_files = list(slides_dir.glob(f"{slug}_sd_*"))
     slide_files += list(slides_dir.glob(f"{slug}_slide_*"))
     edu_files = []
@@ -1549,7 +1553,7 @@ async def clean_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
         edu_files.extend(slides_dir.glob(pattern))
     # Also check topic-name-derived path if we have a curriculum ref
     try:
-        cc = json.loads(CURRICULUM_PATH.read_text(encoding="utf-8"))
+        cc = json.loads(get_account().source_of_truth.read_text(encoding="utf-8"))
         for sid, ts in cc.get("topics", {}).items():
             for num, t in ts.items():
                 if t.get("slug", "").replace("-", "_") == slug:
@@ -1736,7 +1740,7 @@ async def delete_schedule_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE
         return
 
     try:
-        schedule = json.loads(SCHEDULE_PATH.read_text(encoding="utf-8"))
+        schedule = json.loads(get_account().schedule_json.read_text(encoding="utf-8"))
     except Exception:
         await update.message.reply_text("❌ Gagal baca schedule.json")
         return
@@ -1758,7 +1762,7 @@ async def delete_schedule_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE
         return
 
     del schedule[found]
-    SCHEDULE_PATH.write_text(json.dumps(schedule, indent=2, ensure_ascii=False), encoding="utf-8")
+    get_account().schedule_json.write_text(json.dumps(schedule, indent=2, ensure_ascii=False), encoding="utf-8")
     # Reset status di curriculum biar bisa /post lagi
     _reset_topic_status(topic_ref, "generated")
     await update.message.reply_text(f"✅ Jadwal {topic_ref} dihapus dari antrian. Status di-reset ke 'generated'. Bisa `/post {topic_ref}` lagi~")
@@ -1871,10 +1875,10 @@ async def fact_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "fact:retry":
         await query.edit_message_text("🔄 Bikin ulang fakta...")
         try:
-            facts_path = facts_cache_path(pending["slug"])
+            facts_path = facts_cache_path(pending["slug"], account=get_account())
             if facts_path.exists():
                 facts_path.unlink()
-            new_facts = await asyncio.to_thread(generate_facts, pending["topic_display"], pending["num_facts"], slug=pending["slug"])
+            new_facts = await asyncio.to_thread(generate_facts, pending["topic_display"], pending["num_facts"], slug=pending["slug"], account=get_account())
             pending["facts_data"] = new_facts
             preview = _format_facts_preview(new_facts)
             await query.edit_message_text(
@@ -1889,7 +1893,7 @@ async def fact_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("💾 Nyimpen fakta & trigger generate slide...")
         try:
             facts_data = pending["facts_data"]
-            facts_path = facts_cache_path(pending["slug"])
+            facts_path = facts_cache_path(pending["slug"], account=get_account())
             facts_path.write_text(json.dumps(facts_data, indent=2, ensure_ascii=False), encoding="utf-8")
 
             asyncio.create_task(_git_sync_after(f"auto: facts {pending['slug']}"))
@@ -2053,7 +2057,8 @@ async def sync_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Sync VPS with remote repo — commit lokal, curriculum sync, push, pages push, restart."""
     msg = await update.message.reply_text("⏳ Sync on progress...")
     chat_id = update.effective_chat.id
-    BIO_PATH = "accounts/aquarisamatiran/bio/index.html"
+    ctx = get_account()
+    BIO_PATH = str(ctx.bio_html.relative_to(PROJECT_ROOT)).replace("\\", "/")
 
     def _sh(cmd, timeout=30, check=False):
         r = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=timeout)
@@ -2120,7 +2125,7 @@ async def sync_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 'else\n'
                 '  cd /tmp/pages-repo && git pull origin main && cd "$1"\n'
                 'fi\n'
-                'cp accounts/aquarisamatiran/bio/index.html /tmp/pages-repo/index.html\n'
+                f'cp "{BIO_PATH}" /tmp/pages-repo/index.html\n'
                 'cd /tmp/pages-repo\n'
                 'git config user.name "Nix Bot"\n'
                 'git config user.email "nix@aquarisamatiran.dev"\n'

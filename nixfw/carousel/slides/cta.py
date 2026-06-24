@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw
 from pathlib import Path
 
-from nixfw import config
+from nixfw import config as nixfw_config
 from nixfw.carousel.composer import (
     _hex_to_rgb, _get_font, _get_symbol_font, draw_gradient_bg, wrap_text,
     draw_text_fallback, _get_emoji_font,
@@ -15,10 +15,16 @@ _ICON_CHARS = {
 }
 
 
-def build_cta_slide(facts: dict, subject_img: Image.Image | None, palette: dict | None = None, bg_image: Image.Image | None = None) -> Image.Image:
-    W, H = config.SLIDE_SIZE
+def build_cta_slide(facts: dict, subject_img: Image.Image | None, palette: dict | None = None,
+                    bg_image: Image.Image | None = None,
+                    handle: str | None = None, resource_dir: Path | None = None) -> Image.Image:
+    W, H = nixfw_config.SLIDE_SIZE
     if palette is None:
-        palette = config.PALETTE
+        palette = nixfw_config.PALETTE
+    if handle is None:
+        handle = nixfw_config.IG_HANDLE
+    if resource_dir is None:
+        resource_dir = nixfw_config.RESOURCE_DIR
 
     if bg_image:
         bg = bg_image.copy()
@@ -40,7 +46,7 @@ def build_cta_slide(facts: dict, subject_img: Image.Image | None, palette: dict 
     # Subject image (smaller, center) — fallback ke logo kalo ga ada gambar
     img_to_show = subject_img
     if img_to_show is None:
-        logo_path = config.RESOURCE_DIR / "logo" / "logo-cta-square.png"
+        logo_path = resource_dir / "logo" / "logo-cta-square.png"
         if logo_path.exists():
             try:
                 img_to_show = Image.open(logo_path).convert("RGBA")
@@ -88,7 +94,6 @@ def build_cta_slide(facts: dict, subject_img: Image.Image | None, palette: dict 
     # Handle highlight
     handle_gap = 80
     handle_y = label_y + (lb[3] - lb[1]) + handle_gap
-    handle = config.IG_HANDLE
     bbox = draw.textbbox((0, 0), handle, font=font_handle)
     hw = bbox[2] - bbox[0]
     hh = bbox[3] - bbox[1]
@@ -97,7 +102,7 @@ def build_cta_slide(facts: dict, subject_img: Image.Image | None, palette: dict 
     # CTA text
     cta_gap = 80
     cta_y = handle_y + hh + cta_gap
-    cta = facts.get("cta_text", f"Follow {config.IG_HANDLE}")
+    cta = facts.get("cta_text", f"Follow {handle}")
     cta_lines = cta.replace("\\n", "\n").split("\n")
     for line in cta_lines:
         bb = draw.textbbox((0, 0), line, font=font_cta)

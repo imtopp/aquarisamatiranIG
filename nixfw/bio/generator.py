@@ -9,6 +9,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from jinja2 import Environment, FileSystemLoader
 
+from nixfw.account import AccountContext, get_account
+
 
 
 WIB = timezone(timedelta(hours=7))
@@ -74,16 +76,16 @@ def _merge_permalinks(statuses, topics):
                 statuses[num]["permalink"] = topic_pl
 
 
-def update_bio(schedule=None, account: str = "aquarisamatiran"):
+def update_bio(schedule=None, account: str | AccountContext | None = None):
     """Update bio page for a given account using Jinja2 template."""
-    base = Path(__file__).resolve().parent.parent.parent / "accounts" / account
-    truth_path = base / "source_of_truth.json"
-    sched_path = base / "schedule.json"
-    config_path = base / "config.json"
-    bio_path = base / "bio" / "index.html"
+    ctx = account if isinstance(account, AccountContext) else get_account(account)
+    truth_path = ctx.source_of_truth
+    sched_path = ctx.schedule_json
+    config_path = ctx.base / "config.json"
+    bio_path = ctx.bio_html
 
     if not truth_path.exists():
-        print(f"  📭 source_of_truth.json not found for {account}")
+        print(f"  📭 source_of_truth.json not found for {ctx.name}")
         return False
 
     truth = json.loads(truth_path.read_text(encoding="utf-8"))
@@ -91,12 +93,12 @@ def update_bio(schedule=None, account: str = "aquarisamatiran"):
     topics = truth.get("topics", {})
 
     if not categories or not topics:
-        print(f"  📭 No categories or topics in source_of_truth for {account}")
+        print(f"  📭 No categories or topics in source_of_truth for {ctx.name}")
         return False
 
     if schedule is None:
         if not sched_path.exists():
-            print(f"  📭 schedule.json not found for {account} — all topics shown as planned")
+            print(f"  📭 schedule.json not found for {ctx.name} — all topics shown as planned")
             schedule = []
         else:
             schedule = json.loads(sched_path.read_text(encoding="utf-8"))
@@ -121,7 +123,7 @@ def update_bio(schedule=None, account: str = "aquarisamatiran"):
         "tag_bg": "#2A3A5A",
     })
 
-    handle = config.get("ig_handle", f"@{account}")
+    handle = config.get("ig_handle", f"@{ctx.name}")
     handle_clean = handle.lstrip("@")
 
     template_dir = Path(__file__).resolve().parent / "templates"
@@ -151,4 +153,6 @@ def update_bio(schedule=None, account: str = "aquarisamatiran"):
 
 
 if __name__ == "__main__":
-    update_bio(account="aquarisamatiran")
+    import sys
+    account_arg = sys.argv[1] if len(sys.argv) > 1 else None
+    update_bio(account=account_arg)

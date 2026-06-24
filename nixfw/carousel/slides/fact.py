@@ -1,16 +1,20 @@
 from PIL import Image, ImageDraw
 
-from nixfw import config
+from nixfw import config as nixfw_config
 from nixfw.carousel.composer import (
     _hex_to_rgb, _get_font, draw_gradient_bg, draw_tag_pills, wrap_text,
     draw_text_fallback, _get_emoji_font,
 )
 
 
-def build_fact_slide(fact: dict, subject_img: Image.Image | None, palette: dict | None = None, bg_image: Image.Image | None = None) -> Image.Image:
-    W, H = config.SLIDE_SIZE
+def build_fact_slide(fact: dict, subject_img: Image.Image | None, palette: dict | None = None,
+                     bg_image: Image.Image | None = None,
+                     handle: str | None = None) -> Image.Image:
+    W, H = nixfw_config.SLIDE_SIZE
     if palette is None:
-        palette = config.PALETTE
+        palette = nixfw_config.PALETTE
+    if handle is None:
+        handle = nixfw_config.IG_HANDLE
 
     if bg_image:
         bg = bg_image.copy()
@@ -73,8 +77,8 @@ def build_fact_slide(fact: dict, subject_img: Image.Image | None, palette: dict 
         draw_tag_pills(draw, tags, text_x, H - 100, font_tags, palette)
 
     # Watermark
-    hb = draw.textbbox((0, 0), config.IG_HANDLE, font=font_watermark)
+    hb = draw.textbbox((0, 0), handle, font=font_watermark)
     hw = hb[2] - hb[0]
-    draw.text((W - 40 - hw, H - 30), config.IG_HANDLE, fill=accent + (100,), font=font_watermark)
+    draw.text((W - 40 - hw, H - 30), handle, fill=accent + (100,), font=font_watermark)
 
     return bg.convert("RGB")

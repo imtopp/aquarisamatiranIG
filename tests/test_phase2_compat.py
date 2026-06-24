@@ -102,44 +102,22 @@ class TestKeepIntegration:
 
 
 class TestSyncScheduleJson:
-    def test_sync_with_v4(self, v4_content, monkeypatch, tmp_path):
+    def _sync_data(self, v_content, tmp_path):
+        from nixfw.account import AccountContext
+        ctx = AccountContext(name="test", base=tmp_path, enabled=True, config_data={})
+        ctx.source_of_truth.write_text(json.dumps(v_content, indent=2), encoding="utf-8")
+        ctx.schedule_json.write_text("[]", encoding="utf-8")
         import nixfw.curriculum.manager as cm
+        data = cm.load(account=ctx)
+        cm._sync_schedule_json(data, account=ctx)
+        return json.loads(ctx.schedule_json.read_text(encoding="utf-8"))
 
-        content_path = tmp_path / "curriculum_content.json"
-        content_path.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
-
-        sched_path = tmp_path / "schedule.json"
-        sched_path.write_text("[]", encoding="utf-8")
-
-        monkeypatch.setattr(cm, "SRC", content_path)
-        monkeypatch.setattr(cm, "SCHEDULE_JSON", sched_path)
-        monkeypatch.setattr(cm, "CUR_MD", tmp_path / "curriculum.md")
-        monkeypatch.setattr(cm, "BIO_HTML", tmp_path / "bio" / "index.html")
-
-        data = cm.load()
-        cm._sync_schedule_json(data)
-
-        schedule = json.loads(sched_path.read_text(encoding="utf-8"))
+    def test_sync_with_v4(self, v4_content, tmp_path):
+        schedule = self._sync_data(v4_content, tmp_path)
         assert len(schedule) == 2
 
-    def test_sync_with_v4_writes_source_ref(self, v4_content, monkeypatch, tmp_path):
-        import nixfw.curriculum.manager as cm
-
-        content_path = tmp_path / "curriculum_content.json"
-        content_path.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
-
-        sched_path = tmp_path / "schedule.json"
-        sched_path.write_text("[]", encoding="utf-8")
-
-        monkeypatch.setattr(cm, "SRC", content_path)
-        monkeypatch.setattr(cm, "SCHEDULE_JSON", sched_path)
-        monkeypatch.setattr(cm, "CUR_MD", tmp_path / "curriculum.md")
-        monkeypatch.setattr(cm, "BIO_HTML", tmp_path / "bio" / "index.html")
-
-        data = cm.load()
-        cm._sync_schedule_json(data)
-
-        schedule = json.loads(sched_path.read_text(encoding="utf-8"))
+    def test_sync_with_v4_writes_source_ref(self, v4_content, tmp_path):
+        schedule = self._sync_data(v4_content, tmp_path)
         for entry in schedule:
             if "source_ref" in entry:
                 assert re.match(r"C1\.\d+#\d{2}", entry["source_ref"])
@@ -147,66 +125,25 @@ class TestSyncScheduleJson:
                 assert re.match(r"C1\.\d+#\d{2}", entry["curriculum"])
 
     def test_sync_with_v4_preserves_existing(self, v4_content, monkeypatch, tmp_path):
-        import nixfw.curriculum.manager as cm
-
-        content_path = tmp_path / "curriculum_content.json"
-        content_path.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
-
-        sched_path = tmp_path / "schedule.json"
-        sched_path.write_text(json.dumps([
+        from nixfw.account import AccountContext
+        ctx = AccountContext(name="test", base=tmp_path, enabled=True, config_data={})
+        ctx.source_of_truth.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
+        ctx.schedule_json.write_text(json.dumps([
             {"source_ref": "C1#01", "time": "2026-06-07 19:00", "type": "carousel",
              "done": True, "category": 1, "result_id": "post_01"}
         ]), encoding="utf-8")
-
-        monkeypatch.setattr(cm, "SRC", content_path)
-        monkeypatch.setattr(cm, "SCHEDULE_JSON", sched_path)
-        monkeypatch.setattr(cm, "CUR_MD", tmp_path / "curriculum.md")
-        monkeypatch.setattr(cm, "BIO_HTML", tmp_path / "bio" / "index.html")
-
-        data = cm.load()
-        cm._sync_schedule_json(data)
-
-        schedule = json.loads(sched_path.read_text(encoding="utf-8"))
+        import nixfw.curriculum.manager as cm
+        data = cm.load(account=ctx)
+        cm._sync_schedule_json(data, account=ctx)
+        schedule = json.loads(ctx.schedule_json.read_text(encoding="utf-8"))
         assert len(schedule) == 2
 
-    def test_sync_with_v5(self, v5_content, monkeypatch, tmp_path):
-        import nixfw.curriculum.manager as cm
-
-        content_path = tmp_path / "curriculum_content.json"
-        content_path.write_text(json.dumps(v5_content, indent=2), encoding="utf-8")
-
-        sched_path = tmp_path / "schedule.json"
-        sched_path.write_text("[]", encoding="utf-8")
-
-        monkeypatch.setattr(cm, "SRC", content_path)
-        monkeypatch.setattr(cm, "SCHEDULE_JSON", sched_path)
-        monkeypatch.setattr(cm, "CUR_MD", tmp_path / "curriculum.md")
-        monkeypatch.setattr(cm, "BIO_HTML", tmp_path / "bio" / "index.html")
-
-        data = cm.load()
-        cm._sync_schedule_json(data)
-
-        schedule = json.loads(sched_path.read_text(encoding="utf-8"))
+    def test_sync_with_v5(self, v5_content, tmp_path):
+        schedule = self._sync_data(v5_content, tmp_path)
         assert len(schedule) == 2
 
-    def test_sync_with_v5_writes_source_ref(self, v5_content, monkeypatch, tmp_path):
-        import nixfw.curriculum.manager as cm
-
-        content_path = tmp_path / "curriculum_content.json"
-        content_path.write_text(json.dumps(v5_content, indent=2), encoding="utf-8")
-
-        sched_path = tmp_path / "schedule.json"
-        sched_path.write_text("[]", encoding="utf-8")
-
-        monkeypatch.setattr(cm, "SRC", content_path)
-        monkeypatch.setattr(cm, "SCHEDULE_JSON", sched_path)
-        monkeypatch.setattr(cm, "CUR_MD", tmp_path / "curriculum.md")
-        monkeypatch.setattr(cm, "BIO_HTML", tmp_path / "bio" / "index.html")
-
-        data = cm.load()
-        cm._sync_schedule_json(data)
-
-        schedule = json.loads(sched_path.read_text(encoding="utf-8"))
+    def test_sync_with_v5_writes_source_ref(self, v5_content, tmp_path):
+        schedule = self._sync_data(v5_content, tmp_path)
         for entry in schedule:
             if "source_ref" in entry:
                 assert re.match(r"C1\.\d+#\d{2}", entry["source_ref"])
@@ -215,55 +152,54 @@ class TestSyncScheduleJson:
 
 
 class TestUpdateCurriculumContent:
+    def _init_ctx(self, monkeypatch, tmp_path):
+        from nixfw.account import AccountContext
+        from nixfw.cli import commands as cmds
+        ctx = AccountContext(name="test", base=tmp_path, enabled=True, config_data={})
+        monkeypatch.setattr(cmds, "get_account", lambda account=None: ctx)
+        return ctx
+
     def test_update_with_v4(self, v4_content, monkeypatch, tmp_path):
-        import nixfw.config as cfg
-        monkeypatch.chdir(tmp_path)
-        content_path = tmp_path / "curriculum_content.json"
-        content_path.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
-        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
+        from nixfw.cli import commands as cmds
+        ctx = self._init_ctx(monkeypatch, tmp_path)
+        ctx.source_of_truth.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
 
         import main as main_mod
         main_mod._update_curriculum_content("aquarium-itu-apa", result_id="new_res_id", permalink="https://ig.example/p/new")
 
-        updated = json.loads(content_path.read_text(encoding="utf-8"))
+        updated = json.loads(ctx.source_of_truth.read_text(encoding="utf-8"))
         assert updated["topics"]["1"]["01"]["result_id"] == "new_res_id"
         assert updated["topics"]["1"]["01"]["permalink"] == "https://ig.example/p/new"
 
     def test_update_with_v4_status(self, v4_content, monkeypatch, tmp_path):
-        import nixfw.config as cfg
-        monkeypatch.chdir(tmp_path)
-        content_path = tmp_path / "curriculum_content.json"
-        content_path.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
-        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
+        from nixfw.cli import commands as cmds
+        ctx = self._init_ctx(monkeypatch, tmp_path)
+        ctx.source_of_truth.write_text(json.dumps(v4_content, indent=2), encoding="utf-8")
 
         import main as main_mod
         main_mod._update_curriculum_content("alga-musuh-atau-guru", status="live")
 
-        updated = json.loads(content_path.read_text(encoding="utf-8"))
+        updated = json.loads(ctx.source_of_truth.read_text(encoding="utf-8"))
         assert updated["topics"]["1"]["06"]["status"] == "live"
 
     def test_update_with_v5(self, v5_content, monkeypatch, tmp_path):
-        import nixfw.config as cfg
-        monkeypatch.chdir(tmp_path)
-        content_path = tmp_path / "curriculum_content.json"
-        content_path.write_text(json.dumps(v5_content, indent=2), encoding="utf-8")
-        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
+        from nixfw.cli import commands as cmds
+        ctx = self._init_ctx(monkeypatch, tmp_path)
+        ctx.source_of_truth.write_text(json.dumps(v5_content, indent=2), encoding="utf-8")
 
         import main as main_mod
         main_mod._update_curriculum_content("aquarium-itu-apa", result_id="new_res_id")
 
-        updated = json.loads(content_path.read_text(encoding="utf-8"))
+        updated = json.loads(ctx.source_of_truth.read_text(encoding="utf-8"))
         assert updated["topics"]["1"]["01"]["result_id"] == "new_res_id"
 
     def test_update_with_v5_status(self, v5_content, monkeypatch, tmp_path):
-        import nixfw.config as cfg
-        monkeypatch.chdir(tmp_path)
-        content_path = tmp_path / "curriculum_content.json"
-        content_path.write_text(json.dumps(v5_content, indent=2), encoding="utf-8")
-        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
+        from nixfw.cli import commands as cmds
+        ctx = self._init_ctx(monkeypatch, tmp_path)
+        ctx.source_of_truth.write_text(json.dumps(v5_content, indent=2), encoding="utf-8")
 
         import main as main_mod
         main_mod._update_curriculum_content("alga-musuh-atau-guru", status="live")
 
-        updated = json.loads(content_path.read_text(encoding="utf-8"))
+        updated = json.loads(ctx.source_of_truth.read_text(encoding="utf-8"))
         assert updated["topics"]["1"]["06"]["status"] == "live"

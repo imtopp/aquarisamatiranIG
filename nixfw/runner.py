@@ -11,14 +11,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from nixfw.account import get_account
 from nixfw.ig_client import InstagramClient
 
 WIB = timezone(timedelta(hours=7))
-
-ACCOUNT_BASE = Path(__file__).resolve().parent.parent / "accounts" / "aquarisamatiran"
-CONTENT_PATH = ACCOUNT_BASE / "source_of_truth.json"
-SCHED_PATH = ACCOUNT_BASE / "schedule.json"
-SCHEDULER_OUTPUT_DIR = ACCOUNT_BASE / "resource" / ".scheduler_output"
 
 
 def _find_topic_by_num(cc, num):
@@ -48,29 +44,30 @@ def _num_from_ref(cc, ref):
     return num_str.zfill(2)
 
 
-def _write_output_file(source_ref: str, result_id: str, permalink: str, caption: str = "", urls: list = None):
+def _write_output_file(source_ref: str, result_id: str, permalink: str,
+                        caption: str = "", urls: list = None, account=None):
     """Write a .scheduler_output/{safe_ref}_{uuid}.json file using the shared function."""
     from nixfw.curriculum.manager import write_output_file as _w
     _w(source_ref=source_ref, result_id=result_id, permalink=permalink,
-       caption=caption, urls=urls, action="publish")
+       caption=caption, urls=urls, action="publish", account=account)
 
 
-def _output_file_exists(source_ref: str) -> bool:
+def _output_file_exists(source_ref: str, account=None) -> bool:
     """Check if an output file already exists for this ref (skip guard).
     Uses glob to match UUID-pattern filenames."""
+    ctx = get_account(account)
+    output_dir = ctx.scheduler_output_dir
     safe_name = source_ref.replace("#", "_").replace(".", "_")
-    if not SCHEDULER_OUTPUT_DIR.is_dir():
+    if not output_dir.is_dir():
         return False
-    return len(list(SCHEDULER_OUTPUT_DIR.glob(f"{safe_name}_*.json"))) > 0
+    return len(list(output_dir.glob(f"{safe_name}_*.json"))) > 0
 
 
-def run(account: str = "aquarisamatiran"):
-    base = Path(__file__).resolve().parent.parent / "accounts" / account
-    content_path = base / "source_of_truth.json"
-    sched_path = base / "schedule.json"
-    output_dir = base / "resource" / ".scheduler_output"
-    global SCHEDULER_OUTPUT_DIR
-    SCHEDULER_OUTPUT_DIR = output_dir
+def run(account: str | None = None):
+    ctx = get_account(account)
+    content_path = ctx.source_of_truth
+    sched_path = ctx.schedule_json
+    output_dir = ctx.scheduler_output_dir
 
     def load_schedule():
         if not sched_path.exists():
@@ -79,7 +76,7 @@ def run(account: str = "aquarisamatiran"):
 
     now = datetime.now(WIB)
     now_str = now.strftime("%Y-%m-%d %H:%M")
-    print(f"🕐 Runner jalan [{account}]: {now_str} WIB")
+    print(f"🕐 Runner jalan [{ctx.name}]: {now_str} WIB")
 
     schedule = load_schedule()
     if not schedule:
@@ -99,7 +96,7 @@ def run(account: str = "aquarisamatiran"):
     for post in schedule:
         if post.get("result_id") and not post.get("permalink"):
             ref = post.get("source_ref") or post.get("curriculum", "")
-            if ref and _output_file_exists(ref):
+            if ref and _output_file_exists(ref, account=ctx):
                 continue
             print(f"   🔄 Backfill permalink buat {post.get('result_id')}...")
             try:
@@ -114,6 +111,7 @@ def run(account: str = "aquarisamatiran"):
                         permalink=permalink,
                         caption=post.get("caption", ""),
                         urls=post.get("urls"),
+                        account=ctx,
                     )
             except Exception as e:
                 print(f"      ⚠️  Gagal: {e}")
@@ -134,7 +132,7 @@ def run(account: str = "aquarisamatiran"):
             print(f"   ⏭️  url kosong — skip"); continue
 
         # Guard: skip if output file already exists (partial run completed post)
-        if ref and _output_file_exists(ref):
+        if ref and _output_file_exists(ref, account=ctx):
             print(f"   ⏭️  output file udah ada — skip (VPS akan process)")
             continue
 
@@ -170,6 +168,7 @@ def run(account: str = "aquarisamatiran"):
                 permalink=permalink,
                 caption=caption,
                 urls=post.get("urls"),
+                account=ctx,
             )
             print(f"   ✅ ID: {result_id}")
             if permalink:

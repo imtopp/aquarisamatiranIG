@@ -3,6 +3,7 @@
   "niche": "niche_name",
   "name": "Account Name",
   "tagline": "Tagline akun",
+  "enabled": true,
   "curriculum_version": 4,
   "bio_template": "default.html"
 }

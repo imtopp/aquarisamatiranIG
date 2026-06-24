@@ -36,9 +36,12 @@ def _build_json_schema(niche: config.NicheProfile, ct: config.ContentType, num_f
     return '\n'.join(schema_parts)
 
 
-def facts_cache_path(slug: str) -> Path:
+def facts_cache_path(slug: str, account=None) -> Path:
     key = slug.lower().replace("-", "_").replace(" ", "_")
     key = re.sub(r'[^\w_]', '', key)[:20]
+    if account:
+        from nixfw.account import get_account
+        return get_account(account).photo_dir / f"edu_{key}_facts.json"
     return config.PHOTO_DIR / f"edu_{key}_facts.json"
 
 
@@ -54,7 +57,7 @@ def _gather_keys() -> list[str]:
     return keys
 
 
-def generate_facts(topic: str, num_facts: int = 4, slug: str | None = None) -> dict:
+def generate_facts(topic: str, num_facts: int = 4, slug: str | None = None, account=None) -> dict:
     keys = _gather_keys()
     if not keys:
         raise ValueError("GEMINI_API_KEY ngga ditemukan di .env")
@@ -62,7 +65,7 @@ def generate_facts(topic: str, num_facts: int = 4, slug: str | None = None) -> d
     niche = config.current_niche
     ct = config.current_content_type
 
-    cache_path = facts_cache_path(slug or topic)
+    cache_path = facts_cache_path(slug or topic, account=account)
 
     if cache_path.exists():
         print(f"📦 Facts cache ditemukan: {cache_path.name}")

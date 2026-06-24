@@ -12,12 +12,6 @@ GEMINI_MODEL = "gemini-2.5-flash"
 
 # Project root
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-SCHEDULE_PATH = PROJECT_ROOT / "accounts" / "aquarisamatiran" / "schedule.json"
-CONTENT_PATH = PROJECT_ROOT / "accounts" / "aquarisamatiran" / "source_of_truth.json"
-BIO_HTML_PATH = PROJECT_ROOT / "accounts" / "aquarisamatiran" / "bio" / "index.html"
-RESOURCE_DIR = PROJECT_ROOT / "accounts" / "aquarisamatiran" / "resource"
-PHOTO_DIR = RESOURCE_DIR / "photos"
-SCHEDULER_OUTPUT_DIR = RESOURCE_DIR / ".scheduler_output"
 AGENTS_MD = PROJECT_ROOT / "AGENTS.md"
 DB_PATH = PROJECT_ROOT / "bot" / "chat_history.db"
 
@@ -25,6 +19,10 @@ IG_HANDLE = "@aquarisamatiran"
 ACCOUNT_NAME = "aquarisamatiran"
 GH_REPO = "imtopp/aquarisamatiranIG"
 SLIDE_SIZE = (1080, 1080)
+
+# Fallback paths (used when account context is unavailable)
+RESOURCE_DIR = PROJECT_ROOT / "accounts" / "aquarisamatiran" / "resource"
+PHOTO_DIR = RESOURCE_DIR / "photos"
 
 PALETTE = {
     "bg_dark": "#0D1B2A",

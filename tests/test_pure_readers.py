@@ -32,34 +32,36 @@ class TestRunnerReaders:
 class TestMainReaders:
     """Tests for main.py _find_curriculum_key_by_slug reader."""
 
+    def _init_ctx(self, monkeypatch, tmp_path):
+        from nixfw.account import AccountContext
+        from nixfw.cli import commands as cmds
+        ctx = AccountContext(name="test", base=tmp_path, enabled=True, config_data={})
+        monkeypatch.setattr(cmds, "get_account", lambda account=None: ctx)
+        return ctx
+
     def test_find_key_by_slug(self, monkeypatch, tmp_path):
-        import nixfw.config as cfg
-        monkeypatch.chdir(tmp_path)
-        content_path = tmp_path / "curriculum_content.json"
+        from nixfw.cli import commands as cmds
+        ctx = self._init_ctx(monkeypatch, tmp_path)
         v4 = {"topics": {"1": {"04": {"slug": "test-slug"}}}}
-        content_path.write_text(json.dumps(v4, indent=2), encoding="utf-8")
-        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
+        ctx.source_of_truth.write_text(json.dumps(v4, indent=2), encoding="utf-8")
 
         import main as main_mod
         result = main_mod._find_curriculum_key_by_slug("test-slug")
         assert result == "C1.1#01"
 
     def test_find_key_by_slug_not_found(self, monkeypatch, tmp_path):
-        import nixfw.config as cfg
-        monkeypatch.chdir(tmp_path)
-        content_path = tmp_path / "curriculum_content.json"
+        from nixfw.cli import commands as cmds
+        ctx = self._init_ctx(monkeypatch, tmp_path)
         v4 = {"topics": {"1": {"04": {"slug": "other"}}}}
-        content_path.write_text(json.dumps(v4, indent=2), encoding="utf-8")
-        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
+        ctx.source_of_truth.write_text(json.dumps(v4, indent=2), encoding="utf-8")
 
         import main as main_mod
         result = main_mod._find_curriculum_key_by_slug("nonexistent")
         assert result is None
 
     def test_find_key_by_slug_file_missing(self, monkeypatch, tmp_path):
-        import nixfw.config as cfg
-        monkeypatch.chdir(tmp_path)
-        monkeypatch.setattr(cfg, "CONTENT_PATH", tmp_path / "nonexistent.json")
+        from nixfw.cli import commands as cmds
+        ctx = self._init_ctx(monkeypatch, tmp_path)
         import main as main_mod
         result = main_mod._find_curriculum_key_by_slug("test")
         assert result is None
@@ -67,19 +69,16 @@ class TestMainReaders:
     def test_add_schedule_entry_writes_curriculum_ref(self, monkeypatch, tmp_path):
         """Before Phase 1: writes 'curriculum' field. After Phase 1: writes 'source_ref'.
         This test validates both cases."""
-        import nixfw.config as cfg
-        monkeypatch.setattr(cfg, "SCHEDULE_PATH", tmp_path / "schedule.json")
-        monkeypatch.chdir(tmp_path)
-        content_path = tmp_path / "curriculum_content.json"
+        from nixfw.cli import commands as cmds
+        ctx = self._init_ctx(monkeypatch, tmp_path)
         v4 = {"topics": {"1": {"04": {"slug": "test-slug"}}}}
-        content_path.write_text(json.dumps(v4, indent=2), encoding="utf-8")
-        monkeypatch.setattr(cfg, "CONTENT_PATH", content_path)
+        ctx.source_of_truth.write_text(json.dumps(v4, indent=2), encoding="utf-8")
+        ctx.schedule_json.write_text("[]", encoding="utf-8")
 
         import main as main_mod
         main_mod._add_schedule_entry("test-slug", "carousel", ["url1"], "Test caption", "2026-06-20 19:00")
 
-        schedule_path = tmp_path / "schedule.json"
-        schedule = json.loads(schedule_path.read_text(encoding="utf-8"))
+        schedule = json.loads(ctx.schedule_json.read_text(encoding="utf-8"))
         assert len(schedule) == 1
         entry = schedule[0]
         if "source_ref" in entry:

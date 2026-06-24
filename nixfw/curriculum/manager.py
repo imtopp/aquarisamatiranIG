@@ -24,28 +24,32 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from nixfw import config
+from nixfw.account import AccountContext, get_account
 from nixfw.bio.generator import update_bio
-from nixfw.config import SCHEDULER_OUTPUT_DIR
 
 WIB = timezone(timedelta(hours=7))
 
-ACCOUNT_BASE = config.PROJECT_ROOT / "accounts" / config.ACCOUNT_NAME
-SRC = ACCOUNT_BASE / "source_of_truth.json"
-CUR_MD = ACCOUNT_BASE / "curriculum.md"
-BIO_HTML = ACCOUNT_BASE / "bio" / "index.html"
-SCHEDULE_JSON = ACCOUNT_BASE / "schedule.json"
+
+def _resolve_account(account=None):
+    if isinstance(account, AccountContext):
+        return account
+    return get_account(account)
 
 
 # ──── helpers ────
 
 
-def load():
-    data = json.loads(SRC.read_text(encoding="utf-8"))
-    _migrate_v4_to_v5(data)
+def load(account=None):
+    ctx = _resolve_account(account)
+    data = json.loads(ctx.source_of_truth.read_text(encoding="utf-8"))
+    _migrate_v4_to_v5(data, account=ctx)
+    changed = _backfill_uuids(data)
+    if changed:
+        save(data, account=ctx)
     return data
 
 
-def _migrate_v4_to_v5(data):
+def _migrate_v4_to_v5(data, account=None):
     """Auto-migrate v4 (seasons/level_labels/level) → v5 (categories/subcategories/subcategory)."""
     if data.get("version", 5) >= 5:
         return
@@ -69,12 +73,21 @@ def _migrate_v4_to_v5(data):
                 topic["subcategory"] = str(lv)
     data["categories"] = categories
     data["version"] = 5
-    save(data)
+    save(data, account=account)
 
 
-def save(data):
-    SRC.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"  ✅ source_of_truth.json saved (v{data.get('version', '?')})")
+def _safe_print(msg):
+    """Print with ASCII-safe encoding fallback for cp1252 environments."""
+    try:
+        print(msg)
+    except UnicodeEncodeError:
+        print(msg.encode('ascii', errors='replace').decode('ascii'))
+
+
+def save(data, account=None):
+    ctx = _resolve_account(account)
+    ctx.source_of_truth.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    _safe_print(f"  [OK] source_of_truth.json saved (v{data.get('version', '?')})")
 
 
 def _get_category_topics(data, category):
@@ -113,7 +126,10 @@ def _format_src_ref(cid, sc, seq):
 
 
 def format_ref(data, cid, num_key):
-    """Public helper: format a topic reference using its subcategory and sequence."""
+    """Public helper: format a topic reference using its subcategory and sequence.
+    For adhoc topics, cid=\"adhoc\", num_key=slug."""
+    if cid == "adhoc":
+        return f"adhoc:{num_key}"
     sc = data.get("topics", {}).get(cid, {}).get(num_key, {}).get("subcategory", "1")
     seq_map = _subcat_seq_map(data)
     seq = seq_map.get((cid, sc), {}).get(num_key.zfill(2))
@@ -140,11 +156,23 @@ def build_ref_map(data):
 
 
 def resolve_ref(ref: str, data) -> tuple | None:
-    """Resolve a user-provided ref (old C1#01 or new C1.1#01) to (cid, num_key) or None."""
+    """Resolve a user-provided ref to (category, num_key) or (\"adhoc\", slug) or None.
+    Handles: C1#01, C1.1#01, #01, adhoc:{slug}, raw slug."""
+    # Adhoc format: "adhoc:{slug}"
+    m = re.match(r'adhoc:(.+)', ref)
+    if m:
+        slug = m.group(1)
+        for t in data.get("adhoc_topics", []):
+            if t.get("slug") == slug:
+                return ("adhoc", slug)
+        return None
+
+    # Curriculum mapping
     mapping = build_ref_map(data)
     normalized = ref.replace("S", "C")  # S1#01 → C1#01
     if normalized in mapping:
         return mapping[normalized]
+
     # Try partial match: #01 only
     m = re.search(r"#(\d+)", ref)
     if m:
@@ -155,9 +183,8 @@ def resolve_ref(ref: str, data) -> tuple | None:
     return None
 
 
-def _all_topics(data):
-    """Yield (category_id, topic_num_str, topic_dict) across all categories.
-    Backfills UUID for topics that don't have one."""
+def _backfill_uuids(data) -> bool:
+    """Backfill UUIDs for topics that lack one. Returns True if any were added."""
     import uuid
     changed = False
     for cid in sorted(data.get("topics", {}), key=int):
@@ -166,9 +193,15 @@ def _all_topics(data):
             if "id" not in v or not v["id"]:
                 v["id"] = str(uuid.uuid4())
                 changed = True
-            yield str(cid), k, v
-    if changed:
-        save(data)
+    return changed
+
+
+def _all_topics(data):
+    """Yield (category_id, topic_num_str, topic_dict) across all categories."""
+    _backfill_uuids(data)
+    for cid in sorted(data.get("topics", {}), key=int):
+        for k in sorted(data["topics"][cid], key=int):
+            yield str(cid), k, data["topics"][cid][k]
 
 
 def _subcategory_topics(data, cid, sc):
@@ -399,19 +432,35 @@ def cmd_list(args):
                 ref = format_ref(data, str(cid), k)
                 print(f"    {status_icon} {ref:14s} {v['title']:30s} [{v.get('status','planned')}]")
 
+    # ── Adhoc section ──
+    adhoc = data.get("adhoc_topics", [])
+    if adhoc:
+        print(f"\n{'='*50}")
+        print("  📌 Adhoc Topics")
+        print(f"{'='*50}")
+        icons = {"live": "✅", "scheduled": "📅", "planned": "⬜", "generated": "🟡", "failed": "❌"}
+        for t in adhoc:
+            icon = icons.get(t.get("status", ""), "⬜")
+            slug = t.get("slug", "?")
+            title = t.get("title", slug)
+            ref = format_ref(data, "adhoc", slug)
+            print(f"    {icon} {ref:14s} {title:30s} [{t.get('status','planned')}]")
+
 
 # ──── sync ────
 
 
 def cmd_sync(args):
-    data = load()
-    _sync_curriculum_md(data)
-    _sync_schedule_json(data)
-    update_bio(account=config.ACCOUNT_NAME)
+    ctx = get_account()
+    data = load(account=ctx)
+    _sync_curriculum_md(data, account=ctx)
+    _sync_schedule_json(data, account=ctx)
+    update_bio(account=ctx.name)
     print("\n  ✅ All files synced!")
 
 
-def _sync_curriculum_md(data):
+def _sync_curriculum_md(data, account=None):
+    ctx = _resolve_account(account)
     categories = data.get("categories", {})
 
     lines = ["# 📚 Kurikulum Aquarisamatiran\n"]
@@ -446,17 +495,18 @@ def _sync_curriculum_md(data):
                 num = f"{seq:02d}" if seq else k
                 lines.append(f"| {num} | {title}{tgl_str} | {icon} |\n")
 
-    CUR_MD.write_text("".join(lines), encoding="utf-8")
+    ctx.curriculum_md.write_text("".join(lines), encoding="utf-8")
     print("  ✅ curriculum.md regenerated")
 
 
-def _sync_schedule_json(data):
+def _sync_schedule_json(data, account=None):
     """Ensure schedule.json matches source_of_truth.json — handles renumbering, time updates, cross-category."""
-    if not SCHEDULE_JSON.exists():
+    ctx = _resolve_account(account)
+    if not ctx.schedule_json.exists():
         print("  ⚠️  schedule.json not found — skip")
         return
 
-    schedule = json.loads(SCHEDULE_JSON.read_text(encoding="utf-8"))
+    schedule = json.loads(ctx.schedule_json.read_text(encoding="utf-8"))
 
     # Build identity maps from existing schedule entries
     uuid_map = {}
@@ -474,6 +524,46 @@ def _sync_schedule_json(data):
             permalink_map[pl.strip().rstrip("/")] = i
 
     seq_map = _subcat_seq_map(data)
+
+    # ── Adhoc topics ──
+    adhoc_map = {}  # slug → entry index
+    for i, e in enumerate(schedule):
+        if e.get("source_ref", "").startswith("adhoc:"):
+            adhoc_map[e["source_ref"]] = i
+    for t in data.get("adhoc_topics", []):
+        slug = t.get("slug", "")
+        if not slug:
+            continue
+        ref = f"adhoc:{slug}"
+        if ref in adhoc_map:
+            idx = adhoc_map[ref]
+            schedule[idx].setdefault("topic_uuid", slug)
+            if t.get("status") == "live":
+                schedule[idx]["done"] = True
+            elif t.get("status") == "scheduled" and not schedule[idx].get("result_id"):
+                schedule[idx]["done"] = False
+            if t.get("permalink"):
+                schedule[idx]["permalink"] = t["permalink"]
+            if t.get("result_id"):
+                schedule[idx]["result_id"] = t["result_id"]
+            if t.get("scheduled_time"):
+                schedule[idx]["time"] = t["scheduled_time"]
+        elif t.get("status") in ("live", "scheduled"):
+            entry = {
+                "source_ref": ref,
+                "time": t.get("scheduled_time", ""),
+                "type": "carousel",
+                "done": t.get("status") == "live",
+                "topic_uuid": slug,
+            }
+            if t.get("permalink"):
+                entry["permalink"] = t["permalink"]
+            if t.get("result_id"):
+                entry["result_id"] = t["result_id"]
+            if t.get("caption"):
+                entry["caption"] = t["caption"]
+            schedule.append(entry)
+            print(f"  📋 schedule.json: added adhoc:{slug}")
 
     # Iterate all topics across all categories
     for cid, num, v in _all_topics(data):
@@ -544,9 +634,10 @@ def _sync_schedule_json(data):
             schedule.append(entry)
             print(f"  📋 schedule.json: added {target_label}")
 
-    # Build set of valid UUIDs + curriculum+category combos
+    # Build set of valid UUIDs + curriculum+category combos + adhoc slugs
     valid_uuids = set()
     valid_keys = set()
+    valid_adhoc = set()
     for cid, num, v in _all_topics(data):
         valid_uuids.add(v.get("id", ""))
         sc = v.get("subcategory", "1")
@@ -554,6 +645,10 @@ def _sync_schedule_json(data):
         valid_keys.add((num, int(cid)))  # dict key (for legacy format matching)
         if seq is not None:
             valid_keys.add((f"{seq:02d}", int(cid)))  # seq (for new format matching)
+    for t in data.get("adhoc_topics", []):
+        s = t.get("slug", "")
+        if s:
+            valid_adhoc.add(s)
 
     def keep(entry):
         tu = entry.get("topic_uuid", "")
@@ -563,6 +658,10 @@ def _sync_schedule_json(data):
         s = entry.get("category") or entry.get("season")
         if not c:
             return True
+        # Check adhoc entries
+        if c.startswith("adhoc:"):
+            slug = c[6:]
+            return slug in valid_adhoc
         m = re.search(r"#(\d+)", c)
         n = m.group(1) if m else c.lstrip("#")
         if s and (n, int(s)) in valid_keys:
@@ -573,24 +672,23 @@ def _sync_schedule_json(data):
 
     schedule = [e for e in schedule if keep(e)]
 
-    SCHEDULE_JSON.write_text(json.dumps(schedule, indent=2, ensure_ascii=False), encoding="utf-8")
-    print("  ✅ schedule.json synced")
+    ctx.schedule_json.write_text(json.dumps(schedule, indent=2, ensure_ascii=False), encoding="utf-8")
+    _safe_print("  [OK] schedule.json synced")
 
 # ──── scheduler output processing ────
 
 
 def write_output_file(source_ref: str, result_id: str = "", permalink: str = "",
                        caption: str = "", urls: list = None,
-                       action: str = "publish", schedule_time: str = "") -> Path | None:
+                       action: str = "publish", schedule_time: str = "",
+                       account=None) -> Path | None:
     """Write a .scheduler_output/{safe_ref}_{uuid}.json file.
     Shared by runner.py, commands.py, and bot.py.
     action: 'publish' — post result (result_id, permalink)
             'schedule' — schedule entry (time)
     Returns the output file Path, or None on error."""
-    output_dir = SCHEDULER_OUTPUT_DIR
-    if not output_dir:
-        from nixfw.config import SCHEDULER_OUTPUT_DIR as _dir
-        output_dir = _dir
+    ctx = _resolve_account(account)
+    output_dir = ctx.scheduler_output_dir
     try:
         output_dir.mkdir(parents=True, exist_ok=True)
     except Exception:
@@ -619,7 +717,7 @@ def write_output_file(source_ref: str, result_id: str = "", permalink: str = "",
         return None
 
 
-def process_scheduler_results(account: str = "aquarisamatiran") -> int:
+def process_scheduler_results(account: str | AccountContext | None = None) -> int:
     """Process .scheduler_output/*.json files from any source (GH Actions, bot, CLI).
     Reads each file, updates schedule.json + source_of_truth.json,
     then deletes the output file. Idempotent — safe to call multiple times.
@@ -629,7 +727,8 @@ def process_scheduler_results(account: str = "aquarisamatiran") -> int:
       'schedule' — mark topic as scheduled, create schedule entry with done=false
 
     Returns number of processed files."""
-    output_dir = SCHEDULER_OUTPUT_DIR
+    ctx = _resolve_account(account)
+    output_dir = ctx.scheduler_output_dir
     if not output_dir.is_dir():
         return 0
 
@@ -637,11 +736,11 @@ def process_scheduler_results(account: str = "aquarisamatiran") -> int:
     if not files:
         return 0
 
-    data = load()
+    data = load(account=ctx)
 
     schedule = []
-    if SCHEDULE_JSON.exists():
-        schedule = json.loads(SCHEDULE_JSON.read_text(encoding="utf-8"))
+    if ctx.schedule_json.exists():
+        schedule = json.loads(ctx.schedule_json.read_text(encoding="utf-8"))
 
     processed = 0
     for f in files:
@@ -664,16 +763,26 @@ def process_scheduler_results(account: str = "aquarisamatiran") -> int:
             f.unlink(missing_ok=True)
             continue
 
-        # Resolve ref to category + num_key
+        # Resolve ref to category + num_key (or "adhoc" + slug)
         resolved = resolve_ref(source_ref, data)
         if not resolved:
             print(f"  ⚠️  scheduler output {f.name}: {source_ref} gak dikenal, skip")
             f.unlink(missing_ok=True)
             continue
         cid, num_key = resolved
+        is_adhoc = cid == "adhoc"
 
         # 1. Update source_of_truth.json
-        topic = data.get("topics", {}).get(cid, {}).get(num_key)
+        topic = None
+        if is_adhoc:
+            adhoc_list = data.setdefault("adhoc_topics", [])
+            for t in adhoc_list:
+                if t.get("slug") == num_key:
+                    topic = t
+                    break
+        else:
+            topic = data.get("topics", {}).get(cid, {}).get(num_key)
+
         if topic:
             if action == "publish":
                 topic["status"] = "live"
@@ -701,12 +810,13 @@ def process_scheduler_results(account: str = "aquarisamatiran") -> int:
         if not entry and topic:
             entry = {
                 "source_ref": source_ref,
-                "category": int(cid),
                 "time": schedule_time or topic.get("scheduled_time", ""),
                 "type": "carousel",
                 "done": action == "publish",
-                "topic_uuid": topic.get("id", ""),
+                "topic_uuid": num_key if is_adhoc else topic.get("id", ""),
             }
+            if not is_adhoc:
+                entry["category"] = int(cid)
             schedule.append(entry)
             if action == "schedule":
                 print(f"  ✅ schedule.json: {source_ref} → scheduled")
@@ -738,9 +848,9 @@ def process_scheduler_results(account: str = "aquarisamatiran") -> int:
         processed += 1
 
     if processed:
-        save(data)
-        SCHEDULE_JSON.write_text(json.dumps(schedule, indent=2, ensure_ascii=False), encoding="utf-8")
-        update_bio(account=account)
+        save(data, account=ctx)
+        ctx.schedule_json.write_text(json.dumps(schedule, indent=2, ensure_ascii=False), encoding="utf-8")
+        update_bio(account=ctx.name)
         print(f"  ✅ Bio page updated after {processed} scheduler result(s)")
 
     return processed
@@ -925,6 +1035,80 @@ def telegram_remove_subcategory(cat_id: str, sub_id: str) -> str:
     return f"✅ Subcategory {sub_id} di Category {cat_id} dihapus"
 
 
+# ──── adhoc topic CRUD ────
+
+
+def telegram_add_adhoc(title: str, slug: str | None = None, keywords: list | None = None) -> str:
+    """Add an adhoc topic (independent, no category/subcategory)."""
+    if not title:
+        return "❌ --title wajib diisi"
+    data = load()
+    adhoc = data.setdefault("adhoc_topics", [])
+    slug = slug or title.lower().replace(" ", "-").replace(":", "").replace("?", "")[:30]
+    # Check slug uniqueness
+    if any(t.get("slug") == slug for t in adhoc):
+        return f"❌ Slug `{slug}` udah dipake"
+    topic = {
+        "slug": slug,
+        "title": title,
+        "status": "planned",
+        "keywords": keywords or [],
+    }
+    adhoc.append(topic)
+    save(data)
+    return f"✅ Adhoc `{slug}`: {title} ditambahkan"
+
+
+def telegram_delete_adhoc(adhoc_slug: str) -> str:
+    """Delete an adhoc topic by slug."""
+    if not adhoc_slug:
+        return "❌ Slug adhoc wajib diisi"
+    data = load()
+    adhoc = data.get("adhoc_topics", [])
+    for i, t in enumerate(adhoc):
+        if t.get("slug") == adhoc_slug:
+            title = t.get("title", adhoc_slug)
+            del adhoc[i]
+            save(data)
+            return f"✅ Adhoc `{adhoc_slug}` ({title}) dihapus"
+    return f"❌ Adhoc `{adhoc_slug}` gak ditemukan"
+
+
+def telegram_edit_adhoc(adhoc_slug: str, **fields) -> str:
+    """Edit adhoc topic fields. Supported: title, slug, status, keywords, display_name, subtitle."""
+    if not adhoc_slug:
+        return "❌ Slug adhoc wajib diisi"
+    data = load()
+    adhoc = data.get("adhoc_topics", [])
+    for t in adhoc:
+        if t.get("slug") == adhoc_slug:
+            for field in ("title", "slug", "status", "display_name", "subtitle", "scheduled_time", "caption"):
+                if field in fields and fields[field] is not None:
+                    t[field] = fields[field]
+            if "keywords" in fields and fields["keywords"] is not None:
+                t["keywords"] = fields["keywords"]
+            save(data)
+            return f"✅ Adhoc `{adhoc_slug}` diupdate"
+    return f"❌ Adhoc `{adhoc_slug}` gak ditemukan"
+
+
+def telegram_list_adhoc() -> str:
+    """List all adhoc topics with their status."""
+    data = load()
+    adhoc = data.get("adhoc_topics", [])
+    if not adhoc:
+        return "Belum ada adhoc topic."
+    lines = ["📋 **Adhoc Topics:**\n"]
+    icons = {"live": "✅", "scheduled": "📅", "planned": "⬜", "generated": "🟡", "failed": "❌"}
+    for t in adhoc:
+        icon = icons.get(t.get("status", ""), "⬜")
+        slug = t.get("slug", "?")
+        title = t.get("title", slug)
+        sched = f" — {t.get('scheduled_time', '')}" if t.get("scheduled_time") else ""
+        lines.append(f"  {icon} `{slug}` — {title}{sched}")
+    return "\n".join(lines)
+
+
 # ──── arg helpers ────
 
 
@@ -949,10 +1133,14 @@ def cmd_curriculum(client, args):
         print("  edit topic        --category C --num N [--title T] [--status live|scheduled|planned] [--subcategory S] [--slug SL] [--keywords K] [--scheduled-time T]")
         print("  delete category   --category C")
         print("  delete topic      --category C --num N")
+        print("  add adhoc         --title T [--slug SL] [--keywords K]")
+        print("  delete adhoc      --slug SL")
+        print("  edit adhoc        --slug SL [--title T] [--status live|scheduled|planned]")
         print("  list              [--category C]")
         print("  sync")
         print()
         print("Catatan: --category WAJIB untuk semua operasi topic. Nomor topic per-category (reset tiap category).")
+        print("Adhoc topic: konten independent tanpa category/subcategory. Slug sebagai ID.")
         return
 
     cmd = args[0]
@@ -973,9 +1161,44 @@ def cmd_curriculum(client, args):
         print(f"Subcommand tidak dikenal: {cmd}")
 
 
+def cmd_add_adhoc(args):
+    title = _get_arg(args, "--title")
+    slug = _get_arg(args, "--slug")
+    keywords_raw = _get_arg(args, "--keywords", "")
+    keywords = [k.strip() for k in keywords_raw.split(",") if k.strip()]
+    if not title:
+        print("❌ --title wajib diisi")
+        return
+    print(telegram_add_adhoc(title, slug, keywords))
+
+
+def cmd_delete_adhoc(args):
+    slug = _get_arg(args, "--slug")
+    if not slug:
+        print("❌ --slug wajib diisi")
+        return
+    print(telegram_delete_adhoc(slug))
+
+
+def cmd_edit_adhoc(args):
+    slug = _get_arg(args, "--slug")
+    if not slug:
+        print("❌ --slug wajib diisi")
+        return
+    fields = {}
+    for f in ("title", "slug", "status", "display_name", "subtitle", "scheduled_time"):
+        v = _get_arg(args, f"--{f}")
+        if v:
+            fields[f] = v
+    keywords_raw = _get_arg(args, "--keywords", "")
+    if keywords_raw:
+        fields["keywords"] = [k.strip() for k in keywords_raw.split(",") if k.strip()]
+    print(telegram_edit_adhoc(slug, **fields))
+
+
 def _cmd_add(args):
     if not args:
-        print("Tentukan: python main.py curriculum add category|subcategory|topic")
+        print("Tentukan: python main.py curriculum add category|subcategory|topic|adhoc")
         return
     sub = args[0]
     subargs = args[1:]
@@ -983,12 +1206,13 @@ def _cmd_add(args):
         "category": cmd_add_category,
         "subcategory": cmd_add_subcategory,
         "topic": cmd_add_topic,
+        "adhoc": cmd_add_adhoc,
     }.get(sub, lambda _: print(f"❌ add {sub} tidak dikenal"))(subargs)
 
 
 def _cmd_edit(args):
     if not args:
-        print("Tentukan: python main.py curriculum edit category|subcategory|topic")
+        print("Tentukan: python main.py curriculum edit category|subcategory|topic|adhoc")
         return
     sub = args[0]
     subargs = args[1:]
@@ -996,18 +1220,20 @@ def _cmd_edit(args):
         "category": cmd_edit_category,
         "subcategory": cmd_edit_subcategory,
         "topic": cmd_edit_topic,
+        "adhoc": cmd_edit_adhoc,
     }.get(sub, lambda _: print(f"❌ edit {sub} tidak dikenal"))(subargs)
 
 
 def _cmd_delete(args):
     if not args:
-        print("Tentukan: python main.py curriculum delete category|topic")
+        print("Tentukan: python main.py curriculum delete category|topic|adhoc")
         return
     sub = args[0]
     subargs = args[1:]
     {
         "category": cmd_delete_category,
         "topic": cmd_delete_topic,
+        "adhoc": cmd_delete_adhoc,
     }.get(sub, lambda _: print(f"❌ delete {sub} tidak dikenal"))(subargs)
 
 

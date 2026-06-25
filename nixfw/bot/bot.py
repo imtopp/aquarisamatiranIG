@@ -606,6 +606,17 @@ async def generate_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     display_name, slug, topic_ref = _resolve_topic(topic)
     if display_name and slug:
+        # Guard: refuse if content already exists
+        fp = facts_cache_path(slug, account=get_account())
+        _, slides = _latest_slides(topic_ref or slug)
+        if fp.exists() or slides:
+            ref = topic_ref or slug
+            await update.message.reply_text(
+                f"⚠️ Udah ada konten buat `{display_name}`.\n"
+                f"Hapus dulu pake `/post clean {ref}` kalo mau regenerate dari awal, "
+                f"atau `/generate --force {ref}` kalo cuma mau regenerate slide-nya aja."
+            )
+            return
         await update.message.reply_text(f"📋 Bikin fakta untuk \"{display_name}\" ({num_facts} fakta)...")
         try:
             facts_path = facts_cache_path(slug, account=get_account())
@@ -2216,10 +2227,9 @@ _POST_HELP = """\
   `help`                    → liat ini"""
 
 _GENERATE_HELP = """\
-📁 `/generate <ref> [count]` — Generate slide
-  `<ref> [count]`           → generate facts baru + slide
-  `--cache <ref> [count]`   → pake facts lama, slide baru aja
-  `--force <ref> [count]`   → generate facts ulang + slide
+📁 `/generate <ref> [count]` — Generate carousel
+  `<ref> [count]`           → generate facts baru + slide (hanya kalo blm ada konten)
+  `--force <ref> [count]`   → regenerate slide aja (pake facts yg udah ada)
   (kalo ada pending post, <ref> gak perlu)
   `help`                    → liat ini"""
 
@@ -2363,8 +2373,7 @@ async def generate_dispatch(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args or []
     if not args:
         return await update.message.reply_text(_GENERATE_HELP)
-    force = "--force" in args
-    cache = "--cache" in args
+    force = "--force" in args or "--cache" in args
     filtered = [a for a in args if a not in ("--force", "--cache")]
     pending = _pending_posts.get(update.effective_user.id)
 
@@ -2386,21 +2395,30 @@ async def generate_dispatch(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if pending and not filtered:
             context.args = []
             return await regenerate_cmd(update, context)
-        slug, count = _pick_slug(filtered, pending)
-        if not slug:
+        raw, count = _pick_slug(filtered, pending)
+        if not raw:
             return await update.message.reply_text(f"❌ Gak ada ref dan gak ada pending post.\n\n{_GENERATE_HELP}")
-        await _dispatch_workflow(slug, count, True, update)
+
+        # Check facts cache exists
+        display_name, resolved_slug, topic_ref = _resolve_topic(raw)
+        actual_slug = resolved_slug or raw.replace("-", "_")
+        fp = facts_cache_path(actual_slug, account=get_account())
+        if not fp.exists():
+            name = display_name or raw
+            return await update.message.reply_text(
+                f"❌ Gak ada facts cache buat `{name}`.\n"
+                f"Jalanin `/generate {raw}` dulu buat bikin facts."
+            )
+
+        # Trigger slide-only generation
+        topic_input = topic_ref or actual_slug.replace("_", "-")
+        await update.message.reply_text(
+            f"⚙️ Regenerate slide \"{display_name or raw}\" di GH Actions..."
+        )
+        await _dispatch_workflow(topic_input, count, False, update)
         return
 
-    if cache:
-        await update.message.reply_text("⏳ Generate slide (pake facts lama)...")
-        slug, count = _pick_slug(filtered, pending)
-        if not slug:
-            return await update.message.reply_text(f"❌ Gak ada ref dan gak ada pending post.\n\n{_GENERATE_HELP}")
-        await _dispatch_workflow(slug, count, False, update)
-        return
-
-    # Normal generate
+    # Normal generate (no flags)
     context.args = filtered
     return await generate_cmd(update, context)
 

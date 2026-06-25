@@ -658,7 +658,7 @@ def _find_video(name):
     return None
 
 
-def _generate_captions(video_path):
+def _generate_captions(video_path, niche_name: str | None = None):
     print("🎞️  Extract frames...")
     with tempfile.TemporaryDirectory() as tmpdir:
         frames = _extract_frames(video_path, Path(tmpdir))
@@ -673,7 +673,7 @@ def _generate_captions(video_path):
         return None
 
     print("🤖 Generate caption pake Gemini...")
-    niche = config.current_niche
+    niche = config.get_niche_profile(niche_name)
     client = genai.Client(api_key=api_key)
     prompt = (
         f"Kamu adalah social media manager Instagram {niche.handle} ({niche.niche_name}). "
@@ -732,7 +732,7 @@ def cmd_stage_reel(_client, args):
     _save_map(url, str(video_path))
     print(f"✅ URL: {url}")
 
-    captions = _generate_captions(video_path)
+    captions = _generate_captions(video_path, get_account().config_data.get("niche"))
     if captions:
         print("\n" + "=" * 60)
         print(captions)
@@ -743,7 +743,7 @@ def cmd_stage_reel(_client, args):
     print(f"   python main.py post-reel {url} \"<caption>\"")
 
 
-def _generate_photo_captions(photo_path: Path):
+def _generate_photo_captions(photo_path: Path, niche_name: str | None = None):
     """Generate caption dari foto pake Gemini."""
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
@@ -751,7 +751,7 @@ def _generate_photo_captions(photo_path: Path):
         return None
 
     print("🤖 Generate caption dari gambar pake Gemini...")
-    niche = config.current_niche
+    niche = config.get_niche_profile(niche_name)
     client = genai.Client(api_key=api_key)
     img = PIL.Image.open(photo_path)
     prompt = (
@@ -844,7 +844,7 @@ def cmd_stage_photo(_client, args):
     _save_map(url, str(photo_path))
     print(f"✅ URL: {url}")
 
-    captions = _generate_photo_captions(photo_path)
+    captions = _generate_photo_captions(photo_path, get_account().config_data.get("niche"))
     if captions:
         print("\n" + "=" * 60)
         print(captions)
@@ -869,7 +869,7 @@ def cmd_generate_caption(_client, args):
         print(f"❌ Video '{name}' ngga ditemukan")
         return
 
-    captions = _generate_captions(video_path)
+    captions = _generate_captions(video_path, get_account().config_data.get("niche"))
     if captions:
         print("\n" + "=" * 60)
         print(captions)
@@ -885,8 +885,8 @@ def _generate_slide_plan(topic: str, n_slides: int = 4):
         print("❌ GEMINI_API_KEY ngga ditemukan di .env")
         return None
 
-    niche = config.current_niche
-    ct = config.current_content_type
+    niche = config.get_niche_profile(get_account().config_data.get("niche"))
+    ct = niche.content_types.get(get_account().config_data.get("content_type", "edu"))
     client = genai.Client(api_key=api_key)
     slide_structure = "\n".join(
         f"{i+1}. {s}" for i, s in enumerate(ct.slide_structure[:n_slides])
@@ -1421,14 +1421,15 @@ def cmd_generate_carousel(_client, args):
     parsed, _ = parser.parse_known_args(args)
 
     # Set content type
-    if parsed.type:
-        ok = config.set_content_type(parsed.type)
-        if not ok:
-            return
-    ct = config.current_content_type
+    content_type = get_account().config_data.get("content_type", "edu") if not parsed.type else parsed.type
+    niche = config.get_niche_profile(get_account().config_data.get("niche"))
+    if parsed.type and parsed.type not in niche.content_types:
+        tersedia = ", ".join(niche.content_types)
+        print(f"  ⚠️  Tipe '{parsed.type}' ngga ada di niche ini. Tersedia: {tersedia}")
+        return
+    ct = niche.content_types.get(content_type)
 
     if not parsed.topic:
-        niche = config.current_niche
         niche_list = ", ".join(config._NICHE_REGISTRY)
         type_list = ", ".join(niche.content_types)
         print("Gunakan: python main.py generate-carousel <topik> [--type TIPE] [--facts file.json] [--num-facts N] [--force-image foto.jpg] [--niche NAMA]")
@@ -1519,7 +1520,7 @@ def cmd_generate_carousel(_client, args):
                 return _pexels_subject_url(facts.get("topic", ""))
             return None
 
-        for name in config.current_niche.image_providers:
+        for name in niche.image_providers:
             url = _try_provider(name)
             if url:
                 subject_img = prepare_subject_image(url)
@@ -1532,7 +1533,7 @@ def cmd_generate_carousel(_client, args):
                 print(f"   ⏩ {name}: kosong")
 
         if subject_img is None:
-            providers = ", ".join(config.current_niche.image_providers)
+            providers = ", ".join(niche.image_providers)
             print(f"   ⚠️  Ngga dapet gambar dari {providers}")
 
     if subject_img:
@@ -1549,7 +1550,7 @@ def cmd_generate_carousel(_client, args):
         from io import BytesIO
         import re as _re
         clean = _re.sub(r'[^\w\s]', '', query).strip()
-        suffix = config.current_niche.pexels_query_suffix
+        suffix = niche.pexels_query_suffix
         search_queries = [f"{clean} {suffix}", clean] if suffix else [clean]
         for sq in search_queries:
             if not sq:
@@ -1967,7 +1968,7 @@ def main():
         if idx + 1 < len(sys.argv):
             niche_name = sys.argv.pop(idx + 1)
             sys.argv.pop(idx)
-            config.set_niche(niche_name)
+            config._CLI_NICHE_OVERRIDE = niche_name
     if "--account" in sys.argv:
         idx = sys.argv.index("--account")
         if idx + 1 < len(sys.argv):

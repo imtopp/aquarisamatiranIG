@@ -1,87 +1,87 @@
 {
   "topic": "Ikan Guppy",
   "display_name": "Ikan Guppy",
-  "subtitle": "Si Mungil Penuh Warna",
+  "subtitle": "Permata Kolam Kecilmu 🌈",
   "scientific_name": "Poecilia reticulata",
   "facts": [
     {
       "number": "01",
-      "title": "Pesona Ikan Seribu Warna 🌈",
-      "description": "Ikan Guppy dikenal sebagai 'ikan seribu warna' karena variasi corak dan bentuk siripnya yang sangat beragam. Setiap Guppy punya keunikan tersendiri, menjadikannya bintang di akuariummu!",
+      "title": "Si Pemula Terbaik! ✨",
+      "description": "Ikan guppy adalah pilihan populer bagi pemula karena perawatannya yang relatif mudah dan daya tahannya yang baik. Mereka toleran terhadap berbagai kondisi air, menjadikannya 'pelatih' yang hebat sebelum kamu mencoba ikan yang lebih sensitif.",
       "tags": [
-        "Ikan Hias",
-        "Warnawarni",
-        "Sirip Indah"
+        "Ikan Pemula",
+        "Tahan Banting",
+        "Perawatan Mudah"
       ]
     },
     {
       "number": "02",
-      "title": "Asal-Usul Tropis 🌎",
-      "description": "Berhabitat asli di perairan tawar Amerika Selatan dan Karibia, seperti Venezuela dan Trinidad. Di alam liar, mereka hidup di sungai dan aliran air yang tenang, mencari makan serangga kecil.",
+      "title": "Variasi Warna Memukau 🎨",
+      "description": "Salah satu daya tarik utama guppy adalah keindahan warnanya yang tak terbatas! Dari merah menyala, biru elektrik, hingga kombinasi mozaik yang unik, sirip dan ekor guppy jantan menampilkan spektrum warna dan pola yang luar biasa.",
       "tags": [
-        "Amerika Selatan",
-        "Air Tawar",
-        "Habitat Alami"
+        "Strain Guppy",
+        "Warna-warni",
+        "Sirip Cantik"
       ]
     },
     {
       "number": "03",
-      "title": "Cocok Untuk Pemula 🤗",
-      "description": "Guppy adalah pilihan tepat untuk aquarist pemula berkat perawatannya yang relatif mudah dan sifatnya yang damai. Mereka bisa hidup berdampingan dengan ikan kecil non-agresif lainnya dalam satu akuarium.",
+      "title": "Jantan vs Betina ♂️♀️",
+      "description": "Mudah membedakan guppy jantan dan betina! Jantan biasanya lebih kecil, lebih berwarna-warni, dan memiliki sirip anal yang termodifikasi menjadi gonopodium. Betina cenderung lebih besar, warnanya lebih kalem, dan perutnya membulat.",
       "tags": [
-        "Damai",
-        "Community Tank",
-        "Mudah Dipelihara"
+        "Dimorfisme Seksual",
+        "Identifikasi Jantan Betina",
+        "Gonopodium"
       ]
     },
     {
       "number": "04",
-      "title": "Lahir Tanpa Telur 🐟👶",
-      "description": "Uniknya, Guppy adalah ikan vivipar atau 'livebearer', yang artinya mereka melahirkan anakan yang sudah terbentuk, bukan bertelur. Jangan heran jika populasi Guppy-mu cepat bertambah!",
+      "title": "Miniatur yang Gesit 💨",
+      "description": "Guppy adalah ikan berukuran kecil, umumnya hanya mencapai 3-6 cm. Meskipun mungil, mereka sangat aktif dan gesit berenang di seluruh bagian akuarium, menambah keceriaan dan dinamika di dalam tangki.",
       "tags": [
-        "Vivipar",
-        "Livebearer",
-        "Berkembang Biak Cepat"
+        "Ukuran Kecil",
+        "Ikan Aktif",
+        "Ukuran Dewasa"
       ]
     },
     {
       "number": "05",
-      "title": "Parameter Air Ideal 🌡️💧",
-      "description": "Untuk Guppy yang sehat, jaga suhu air di 22-28°C dan pH antara 6.5-8.0. Kualitas air yang stabil dan bersih sangat krusial, jadi rutinlah ganti air sebagian agar Guppy tetap bahagia.",
+      "title": "Parameter Air Ideal 🌡️",
+      "description": "Untuk guppy yang sehat dan bahagia, jaga suhu air antara 22-28°C. pH ideal mereka sedikit basa, sekitar 7.0-8.0, dan kekerasan air (GH) 8-18 dGH. Stabilitas parameter lebih penting dari angka persisnya, lho!",
       "tags": [
-        "Suhu Air",
-        "pH Netral",
-        "Kualitas Air"
+        "Suhu Akuarium",
+        "pH Ideal",
+        "Kekerasan Air"
       ]
     },
     {
       "number": "06",
-      "title": "Menu Makanan Favorit 🍽️🦐",
-      "description": "Guppy adalah omnivora dan tidak pilih-pilih soal makanan. Beri mereka pelet atau flake berkualitas tinggi, serta sesekali selingi dengan pakan hidup atau beku seperti artemia dan cacing darah untuk nutrisi lengkap.",
+      "title": "Hidup Berkelompok 🏘️",
+      "description": "Guppy adalah ikan sosial yang suka hidup berkelompok (schooling fish). Memelihara mereka setidaknya 3-5 ekor akan mengurangi stres dan membuat mereka lebih nyaman. Hindari hanya memelihara satu ekor saja, ya!",
       "tags": [
-        "Omnivora",
-        "Pelet Flake",
-        "Pakan Hidup"
+        "Ikan Sosial",
+        "Schooling Fish",
+        "Komunitas"
       ]
     },
     {
       "number": "07",
-      "title": "Usia Harapan Hidup ⏳",
-      "description": "Dengan perawatan yang baik dan lingkungan akuarium yang stabil, ikan Guppy umumnya dapat hidup selama 1 hingga 3 tahun. Perhatikan kualitas air dan pola makan untuk memaksimalkan usia mereka.",
+      "title": "Guppy Beranak! 👶",
+      "description": "Berbeda dengan kebanyakan ikan yang bertelur, guppy adalah ikan vivipar atau 'livebearer'. Artinya, betina melahirkan anakan guppy hidup yang sudah berenang bebas! Persiapkan tempat berlindung untuk burayak jika kamu ingin membesarkannya.",
       "tags": [
-        "1-3 Tahun",
-        "Perawatan Baik",
-        "Lingkungan Stabil"
+        "Ikan Vivipar",
+        "Livebearer",
+        "Breeding Guppy"
       ]
     },
     {
       "number": "08",
-      "title": "Kunci Kesehatan: Air Bersih ✨",
-      "description": "Meski tahan banting, Guppy sensitif terhadap perubahan kualitas air yang drastis. Pastikan ada filter yang berfungsi baik dan lakukan penggantian air parsial secara rutin untuk mencegah penumpukan amonia dan nitrit.",
+      "title": "Pakan Terbaik untuk Guppy 🍔",
+      "description": "Guppy adalah omnivora dan menyukai berbagai jenis makanan. Beri mereka pakan pelet atau flake berkualitas tinggi khusus guppy, lengkapi dengan pakan hidup/beku seperti daphnia, artemia, atau cacing darah untuk nutrisi optimal dan warna yang lebih cerah.",
       "tags": [
-        "Filter Akuarium",
-        "Ganti Air",
-        "Ammonia Nitrit"
+        "Pakan Guppy",
+        "Makanan Ikan",
+        "Nutrisi Seimbang"
       ]
     }
   ],

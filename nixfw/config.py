@@ -238,27 +238,9 @@ _NICHE_REGISTRY: dict[str, NicheProfile] = {
     ),
 }
 
-current_niche: NicheProfile = _NICHE_REGISTRY["aquascape"]
-current_content_type: ContentType = current_niche.content_types["edu"]
+_CLI_NICHE_OVERRIDE: str | None = None
 
 
-def set_niche(name: str):
-    global current_niche, current_content_type
-    if name in _NICHE_REGISTRY:
-        current_niche = _NICHE_REGISTRY[name]
-        current_content_type = list(current_niche.content_types.values())[0]
-        print(f"  🎯 Niche: {current_niche.niche_name}")
-    else:
-        print(f"  ⚠️  Niche '{name}' ngga dikenal. Pilihan: {', '.join(_NICHE_REGISTRY)}")
-
-
-def set_content_type(type_name: str):
-    global current_content_type
-    if type_name in current_niche.content_types:
-        current_content_type = current_niche.content_types[type_name]
-        print(f"  📋 Tipe konten: {current_content_type.label}")
-    else:
-        tersedia = ", ".join(current_niche.content_types)
-        print(f"  ⚠️  Tipe '{type_name}' ngga ada di niche ini. Tersedia: {tersedia}")
-        return False
-    return True
+def get_niche_profile(name: str | None = None) -> NicheProfile:
+    key = name or _CLI_NICHE_OVERRIDE or "aquascape"
+    return _NICHE_REGISTRY.get(key, _NICHE_REGISTRY["aquascape"])

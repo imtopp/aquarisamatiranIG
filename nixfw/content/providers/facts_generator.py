@@ -57,13 +57,18 @@ def _gather_keys() -> list[str]:
     return keys
 
 
-def generate_facts(topic: str, num_facts: int = 4, slug: str | None = None, account=None) -> dict:
+def generate_facts(topic: str, num_facts: int = 4, slug: str | None = None, account=None,
+                   niche_name: str | None = None, content_type: str | None = None) -> dict:
     keys = _gather_keys()
     if not keys:
         raise ValueError("GEMINI_API_KEY ngga ditemukan di .env")
 
-    niche = config.current_niche
-    ct = config.current_content_type
+    if account and not niche_name:
+        from nixfw.account import get_account
+        ctx = get_account(account)
+        niche_name = ctx.config_data.get("niche") or "aquascape"
+    niche = config.get_niche_profile(niche_name)
+    ct = niche.content_types.get(content_type or "edu")
 
     cache_path = facts_cache_path(slug or topic, account=account)
 

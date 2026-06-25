@@ -19,7 +19,7 @@ def _build_json_schema(niche: config.NicheProfile, ct: config.ContentType, num_f
         '  "subtitle": "<tagline menarik max 5 kata>",',
     ]
     if ct.has_scientific_name or (not ct.has_scientific_name and niche.has_scientific_name and ct == niche.content_types.get("edu", ct)):
-        schema_parts.append('  "scientific_name": "...",')
+        schema_parts.append('  "scientific_name": "<Nama ilmiah Latin binomial jika topik spesies makhluk hidup, kosongkan \'\' jika bukan>",')
     if ct.json_schema_extra:
         schema_parts.append(f'  {ct.json_schema_extra},')
     schema_parts.append('  "facts": [')
@@ -98,6 +98,10 @@ def generate_facts(topic: str, num_facts: int = 4, slug: str | None = None, acco
         "Hasilkan JSON dengan format PERSIS ini:\n"
         f"{schema}\n\n"
         "Pastikan:\n"
+        "- scientific_name: isi nama ilmiah Latin (binomial) jika topik spesies ikan/tanaman/hewan. "
+          "Contoh: 'Poecilia reticulata' untuk Ikan Guppy. "
+          "Kosongkan '' jika topik konsep umum (Siklus Air, Peralatan Dasar). "
+          "JANGAN mengada-ada — kosongkan jika tidak yakin.\n"
         f"- {ct.label}: informatif dan engaging\n"
         f"- Tags berisi info singkat tapi bermakna ({tags})\n"
         "- Bahasa Indonesia yang natural dan engaging\n"

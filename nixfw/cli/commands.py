@@ -1287,13 +1287,19 @@ def cmd_generate_carousel_sd(_client, args):
     try:
         # Prompt builder per slide type
         def _bg_prompt(slide_type: str, fact: dict | None = None) -> str:
-            base = "aquascape aquarium, underwater planted tank, aquatic plant, "
+            sci = facts.get("scientific_name", "")
+            subj = f"{sci} ({display})" if sci else display
             if slide_type == "cover":
-                return base + f"beautiful {topic} as main subject, vibrant colors, professional aquarium photography, soft lighting, high detail, photorealistic"
+                return (f"beautiful {subj}, sharp focus, vibrant natural colors, "
+                        f"aquarium photography, soft lighting, high detail, photorealistic, "
+                        f"aquascape aquarium, underwater planted tank, aquatic plant")
             elif slide_type == "fact":
-                return base + f"{fact.get('title', topic)}, {fact.get('description', '')[:80] if fact else topic}, detailed macro shot, natural aquascape environment, tranquil underwater scene"
-            else:  # cta
-                return base + "peaceful aquascape with lush greenery, gentle water flow, morning light, serene underwater garden, high quality"
+                return (f"{fact.get('title', display)} of {subj}, "
+                        f"{fact.get('description', '')[:80] if fact else ''}, "
+                        f"detailed macro shot, natural aquatic environment, tranquil underwater scene")
+            else:
+                return ("peaceful aquascape with lush greenery, gentle water flow, "
+                        "morning light, serene underwater garden, high quality")
 
         total_slides = n_facts + 2  # cover + facts + cta
         slide_idx = 0

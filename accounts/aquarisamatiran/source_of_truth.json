@@ -904,7 +904,7 @@
       "11": {
         "slug": "parameter-air",
         "title": "Parameter Air",
-        "status": "scheduled",
+        "status": "live",
         "keywords": [
           "pH",
           "GH",
@@ -1012,7 +1012,9 @@
               "MencegahPenyakit"
             ]
           }
-        ]
+        ],
+        "result_id": "18093809441022455",
+        "permalink": "https://www.instagram.com/p/DaAhRbsFirZ/"
       },
       "12": {
         "slug": "substrate",

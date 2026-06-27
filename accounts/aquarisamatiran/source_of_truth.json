@@ -1133,7 +1133,7 @@
       "13": {
         "slug": "co2-dan-pupuk",
         "title": "CO2 & Pupuk",
-        "status": "planned",
+        "status": "scheduled",
         "keywords": [
           "difusi",
           "drop checker",
@@ -1144,7 +1144,8 @@
         "display_name": "CO2 Difusi & Dosis Pupuk",
         "subcategory": "3",
         "id": "3272de38-bbfe-4cf1-8556-e1481b0c34a1",
-        "caption": "Pernah mikir kenapa tanaman aquascape-mu kok gitu-gitu aja? Bisa jadi kuncinya ada di CO2 dan pupuk, guys!\n\nCO2 itu ibarat napasnya tanaman. Tanpa CO2 yang cukup, mau secantik apa pun tanamanmu, fotosintesisnya nggak akan maksimal. Hasilnya? Susah deh tumbuh subur dan hijau royo-royo. Kita bisa pakai CO2 dari tabung atau sistem DIY buat nge-boost pertumbuhannya, terutama kalau tanamannya padat.\n\nTapi CO2 aja nggak cukup! Tanaman juga butuh \"vitamin\" alias nutrisi dari pupuk. Ini yang bikin mereka sehat, akarnya kuat, dan daunnya lebat. Ada pupuk cair buat yang diserap lewat daun, dan ada root tabs (pupuk dasar) buat tanaman yang akarnya makan di substrat.\n\nIntinya, CO2 dan pupuk ini duet maut buat bikin aquascape-mu jadi hutan bawah air yang impian banget! Udah coba cara ini di akuariummu? Share yuk pengalamannya!\n\n#Aquarisamatiran #AquascapeIndonesia #CO2Aquascape #PupukAquascape #TanamanAir"
+        "caption": "Pernah mikir kenapa tanaman aquascape-mu kok gitu-gitu aja? Bisa jadi kuncinya ada di CO2 dan pupuk, guys!\n\nCO2 itu ibarat napasnya tanaman. Tanpa CO2 yang cukup, mau secantik apa pun tanamanmu, fotosintesisnya nggak akan maksimal. Hasilnya? Susah deh tumbuh subur dan hijau royo-royo. Kita bisa pakai CO2 dari tabung atau sistem DIY buat nge-boost pertumbuhannya, terutama kalau tanamannya padat.\n\nTapi CO2 aja nggak cukup! Tanaman juga butuh \"vitamin\" alias nutrisi dari pupuk. Ini yang bikin mereka sehat, akarnya kuat, dan daunnya lebat. Ada pupuk cair buat yang diserap lewat daun, dan ada root tabs (pupuk dasar) buat tanaman yang akarnya makan di substrat.\n\nIntinya, CO2 dan pupuk ini duet maut buat bikin aquascape-mu jadi hutan bawah air yang impian banget! Udah coba cara ini di akuariummu? Share yuk pengalamannya!\n\n#Aquarisamatiran #AquascapeIndonesia #CO2Aquascape #PupukAquascape #TanamanAir",
+        "scheduled_time": "2026-06-28 09:00"
       },
       "14": {
         "slug": "hardscape",

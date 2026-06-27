@@ -1,0 +1,97 @@
+{
+  "topic": "CO2 & Pupuk untuk Aquascape",
+  "display_name": "CO2 & Pupuk: Nutrisi Super untuk Tanamanmu 🌱",
+  "subtitle": "Nutrisi Esensial Tanaman Aquascape",
+  "scientific_name": "",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Pentingnya CO2 🌬️",
+      "description": "Karbon dioksida (CO2) adalah bahan bakar utama bagi tanaman untuk berfotosintesis, sama seperti kita butuh makan! Tanpa CO2 yang cukup, tanaman airmu akan kesulitan tumbuh subur, bahkan bisa layu atau mati. Ini kunci vital untuk aquascape hijau!",
+      "tags": [
+        "Fotosintesis",
+        "Karbon",
+        "Tanaman Air",
+        "Pertumbuhan"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Sumber CO2 💨",
+      "description": "Ada dua cara utama suplai CO2: secara alami dari respirasi ikan dan dekomposisi organik, atau injeksi CO2 dari tabung khusus/DIY. Untuk aquascape low-tech, CO2 alami mungkin cukup, tapi high-tech biasanya butuh injeksi untuk pertumbuhan optimal.",
+      "tags": [
+        "CO2 Alami",
+        "CO2 Injeksi",
+        "DIY CO2",
+        "High-Tech Aquascape"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Kapan CO2 Dibutuhkan? ⏰",
+      "description": "Umumnya, CO2 tambahan sangat penting untuk aquascape dengan tanaman padat, terutama jenis karpet atau tanaman high-tech yang membutuhkan cahaya dan nutrisi tinggi. Tanaman low-tech yang tidak rewel mungkin bisa bertahan tanpa suplai CO2 eksternal.",
+      "tags": [
+        "Low-Tech",
+        "High-Tech",
+        "Tanaman Karpet",
+        "Kebutuhan Tanaman"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Fungsi Pupuk 💧",
+      "description": "Selain CO2, tanaman juga butuh pupuk sebagai \"vitamin\" agar bisa tumbuh prima. Pupuk menyediakan berbagai nutrisi penting yang tidak selalu tersedia di air atau substratmu, memastikan daun hijau cerah dan akar kuat.",
+      "tags": [
+        "Nutrisi Tanaman",
+        "Vitamin Tanaman",
+        "Kesehatan Tanaman",
+        "Substrat"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Jenis-jenis Pupuk 🌱",
+      "description": "Ada pupuk cair yang diserap melalui daun dan kolom air, serta pupuk dasar/root tabs yang diletakkan di bawah akar. Kombinasi keduanya seringkali paling efektif, tergantung kebutuhan spesifik jenis tanamanmu.",
+      "tags": [
+        "Pupuk Cair",
+        "Root Tabs",
+        "Pupuk Dasar",
+        "Penyerapan Nutrisi"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Makro vs. Mikro Nutrisi 🧪",
+      "description": "Pupuk mengandung makro nutrisi (N, P, K) yang dibutuhkan dalam jumlah besar, dan mikro nutrisi (Fe, Mn, B, dll.) yang meski sedikit, perannya krusial. Keseimbangan keduanya penting agar tanaman tidak \"kelaparan\" atau malah keracunan.",
+      "tags": [
+        "NPK",
+        "Besi (Fe)",
+        "Keseimbangan Nutrisi",
+        "Defisiensi"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Tanda Kekurangan Nutrisi 🚨",
+      "description": "Perhatikan daun yang menguning, bolong, layu, atau pertumbuhan yang sangat lambat. Itu adalah sinyal bahwa tanamanmu kekurangan nutrisi. Kekurangan CO2 sering ditandai dengan tanaman yang tidak bergelembung (pearling) atau layu.",
+      "tags": [
+        "Daun Menguning",
+        "Pertumbuhan Lambat",
+        "Pearling",
+        "Sinyal Bahaya"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Dosis & Penggunaan Aman ✅",
+      "description": "Jangan asal tuang! Dosis pupuk dan CO2 yang tepat sangat krusial. Terlalu banyak bisa menyebabkan alga bloom atau meracuni fauna, terlalu sedikit tidak efektif. Selalu ikuti petunjuk dan pantau kondisi akuariummu. Keseimbangan adalah kuncinya!",
+      "tags": [
+        "Dosis Tepat",
+        "Alga Bloom",
+        "Keseimbangan",
+        "Pantau Kondisi"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

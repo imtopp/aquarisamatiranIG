@@ -28,7 +28,7 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 ### Subcategory 3: Naik Kelas
 | # | Topik | Status |
 |---|-------|--------|
-| 01 | CO2 & Pupuk (2026-06-28 09:00) | 📅 |
+| 01 | CO2 & Pupuk (2026-06-28 09:00) | ✅ |
 | 02 | Hardscape & Layout | ⬜ |
 | 03 | Gaya Aquascape | ⬜ |
 | 04 | Udang & Keong | ⬜ |

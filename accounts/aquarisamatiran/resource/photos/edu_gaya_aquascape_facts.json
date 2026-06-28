@@ -1,0 +1,89 @@
+{
+  "topic": "Gaya Aquascape",
+  "display_name": "Gaya Aquascape",
+  "subtitle": "Seni Menata Keindahan Bawah Air",
+  "scientific_name": "",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Apa Itu Aquascape? 🤔",
+      "description": "Aquascape adalah seni menata elemen alam seperti tanaman air, kayu, dan bebatuan di dalam akuarium untuk menciptakan pemandangan bawah air yang indah dan natural. Lebih dari sekadar memelihara ikan, ini adalah miniatur ekosistem yang artistik.",
+      "tags": [
+        "Seni Air",
+        "Ekosistem Mini",
+        "Estetika"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Iwagumi Style 🪨",
+      "description": "Gaya aquascape asal Jepang yang minimalis dan menenangkan, fokus pada penataan formasi bebatuan (hardscape) sebagai elemen utama. Biasanya menggunakan 3 atau 5 batu (sansui dan fukuseki) dengan tanaman karpet rendah di sekitarnya.",
+      "tags": [
+        "Bebatuan",
+        "Minimalis",
+        "Jepang"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Nature Aquarium 🌳",
+      "description": "Dipopulerkan oleh Takashi Amano, gaya ini meniru pemandangan alam darat (seperti hutan, pegunungan, atau lembah) ke dalam akuarium. Menggunakan kombinasi kayu, batu, dan beragam tanaman air untuk menciptakan nuansa alami dan rimbun.",
+      "tags": [
+        "Takashi Amano",
+        "Naturalistik",
+        "Hutan"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Dutch Style 🌷",
+      "description": "Gaya klasik dari Belanda yang menonjolkan keindahan berbagai jenis tanaman air dengan warna, bentuk, dan tekstur daun yang kontras. Ditata rapi seperti kebun bunga bawah air, tanpa terlalu fokus pada hardscape (batu/kayu).",
+      "tags": [
+        "Tanaman Rimbun",
+        "Kontras Warna",
+        "Klasik"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Taiwan / Diorama 🏞️",
+      "description": "Gaya ini menciptakan ilusi kedalaman yang kuat dengan menata hardscape dan tanaman secara berlapis-lapis, seringkali menggunakan latar belakang 3D. Mirip Nature Aquarium, namun lebih fokus pada detail dan perspektif agar terlihat sangat dalam.",
+      "tags": [
+        "Ilusi Kedalaman",
+        "Hardscape Detail",
+        "Perspektif"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Jungle Style 🌿",
+      "description": "Gaya ini menciptakan kesan hutan belantara bawah air yang lebat, rimbun, dan terkesan liar tanpa penataan yang terlalu formal. Penuh dengan berbagai jenis tanaman air yang tumbuh subur dan memenuhi ruang akuarium, memberikan kesan alami yang padat.",
+      "tags": [
+        "Liar",
+        "Tanaman Rimbun",
+        "Perawatan Mudah"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Wabi-Kusa 🌎",
+      "description": "Meskipun bukan aquascape penuh air, Wabi-Kusa adalah bola tanah yang ditanami tanaman air dalam bentuk emersed (tumbuh sebagian di atas air). Minimalis, unik, dan cocok untuk pemula yang ingin belajar menata tanaman air di luar air penuh.",
+      "tags": [
+        "Emersed",
+        "Minimalis",
+        "Tanaman Darat"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Tips Memulai Aquascape 💪",
+      "description": "Pilih gaya yang kamu suka, riset tanaman dan hardscape yang cocok, lalu pastikan pencahayaan serta filtrasi memadai. Jangan takut mencoba, aquascape adalah proses belajar yang menyenangkan dan terus berkembang seiring waktu!",
+      "tags": [
+        "Perencanaan",
+        "Riset",
+        "Trial & Error"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

@@ -29,7 +29,7 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 | # | Topik | Status |
 |---|-------|--------|
 | 01 | CO2 & Pupuk (2026-06-28 09:00) | ✅ |
-| 02 | Hardscape & Layout | ⬜ |
+| 02 | Hardscape & Layout (2026-06-29 19:00) | 📅 |
 | 03 | Gaya Aquascape | ⬜ |
 | 04 | Udang & Keong | ⬜ |
 | 05 | Aklimatisasi & Karantina | ⬜ |

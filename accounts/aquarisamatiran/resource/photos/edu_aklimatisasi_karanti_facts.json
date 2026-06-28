@@ -1,0 +1,89 @@
+{
+  "topic": "Aklimatisasi & Karantina",
+  "display_name": "Aklimatisasi & Karantina",
+  "subtitle": "Adaptasi Aman, Aquarium Nyaman!",
+  "scientific_name": "",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Aklimatisasi Itu Apa? 🤔",
+      "description": "Aklimatisasi adalah proses adaptasi perlahan-lahan makhluk hidup baru (ikan, udang, tanaman) ke kondisi air di aquarium kita. Ini penting agar mereka tidak kaget dengan perubahan suhu, pH, dan parameter air lainnya.",
+      "tags": [
+        "Adaptasi",
+        "Air",
+        "Parameter"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Kenapa Aklimatisasi Penting? ✨",
+      "description": "Perubahan lingkungan yang mendadak bisa menyebabkan syok, stres berat, bahkan kematian pada ikan atau udang. Dengan aklimatisasi, mereka punya waktu untuk menyesuaikan diri dan mengurangi risiko sakit.",
+      "tags": [
+        "Stres",
+        "Penyakit",
+        "Survival"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Metode Aklimatisasi: Mengapung ⬆️",
+      "description": "Cara paling dasar, biarkan kantung berisi hewan baru mengapung di permukaan aquarium selama 15-30 menit. Ini menyamakan suhu air di kantung dengan air di tank utama, mencegah syok termal.",
+      "tags": [
+        "Suhu",
+        "Floating",
+        "Mudah"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Metode Aklimatisasi: Drip 💧",
+      "description": "Untuk ikan atau udang yang lebih sensitif, gunakan metode tetes (drip). Air dari aquarium utama diteteskan perlahan ke wadah berisi hewan baru selama 1-2 jam untuk menyamakan parameter air secara bertahap.",
+      "tags": [
+        "Sensitif",
+        "Parameter",
+        "Bertahap"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Apa Itu Karantina? 🛡️",
+      "description": "Karantina adalah menempatkan penghuni baru (ikan, udang, tanaman) di aquarium terpisah sebelum dimasukkan ke tank utama. Tujuannya untuk memastikan mereka sehat dan bebas penyakit menular.",
+      "tags": [
+        "Isolasi",
+        "Pencegahan",
+        "Tank Terpisah"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Kenapa Karantina Sangat Penting? 🚫🦠",
+      "description": "Ikan baru sering membawa parasit atau bakteri tanpa menunjukkan gejala. Karantina mencegah penyebaran penyakit ini ke seluruh penghuni aquarium utama yang sudah stabil dan sehat.",
+      "tags": [
+        "Penyakit",
+        "Parasit",
+        "Bakteri"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Setup Tank Karantina Sederhana 🛠️",
+      "description": "Cukup gunakan tank kosong kecil dengan filter sederhana (sponge filter), heater, dan aerator. Hindari substrat atau dekorasi berlebihan agar mudah dibersihkan dan dipantau.",
+      "tags": [
+        "Sponge Filter",
+        "Heater",
+        "Observasi"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Berapa Lama Karantina? 🗓️",
+      "description": "Idealnya, karantina dilakukan selama 2-4 minggu. Selama periode ini, amati perilaku, nafsu makan, dan tanda-tanda penyakit seperti bintik putih, luka, atau sirip kuncup.",
+      "tags": [
+        "Durasi",
+        "Pengamatan",
+        "Gejala Penyakit"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

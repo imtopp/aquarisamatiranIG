@@ -1,0 +1,89 @@
+{
+  "topic": "Flake, Pellet, Frozen",
+  "display_name": "Jenis Pakan Ikan: Flake, Pellet, Frozen",
+  "subtitle": "Pilih Pakan Tepat, Ikan Sehat!",
+  "scientific_name": "",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Pakan Flake: Klasik & Praktis 🐠",
+      "description": "Pakan flake adalah jenis pakan paling umum, berupa serpihan tipis yang mudah dimakan ikan kecil hingga sedang. Harganya terjangkau dan cocok untuk mayoritas ikan akuarium, terutama ikan yang makan di permukaan air.",
+      "tags": [
+        "Pakan Permukaan",
+        "Mudah Dicerna",
+        "Ekonomis"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Kelebihan Flake ✨",
+      "description": "Flake mengandung nutrisi esensial yang seimbang untuk pertumbuhan dan kesehatan ikan. Bentuknya yang ringan memungkinkan ikan yang lambat makan untuk kebagian, serta mudah dipantau jumlahnya agar tidak overfeeding.",
+      "tags": [
+        "Nutrisi Lengkap",
+        "Ringan",
+        "Untuk Pemula"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Kekurangan Flake 📉",
+      "description": "Flake cenderung cepat larut dalam air, bisa mencemari akuarium jika terlalu banyak. Nutrisinya juga bisa berkurang seiring waktu setelah kemasan dibuka karena terpapar udara, mengurangi kualitas pakan.",
+      "tags": [
+        "Cepat Larut",
+        "Cemari Air",
+        "Nutrisi Berkurang"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Pakan Pellet: Padat Gizi 🐟",
+      "description": "Pellet adalah pakan berbentuk butiran kecil hingga besar, cocok untuk berbagai ukuran ikan. Ada pellet tenggelam (sinking) dan mengambang (floating), bisa disesuaikan dengan kebiasaan makan ikan Anda.",
+      "tags": [
+        "Pakan Butiran",
+        "Padat Nutrisi",
+        "Berbagai Ukuran"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Kelebihan Pellet 💪",
+      "description": "Pellet tidak cepat larut, sehingga minim risiko mencemari air dan lebih baik untuk kesehatan akuarium. Kandungan nutrisinya juga lebih stabil dan umumnya lebih tinggi dibanding flake, cocok untuk ikan yang butuh energi lebih.",
+      "tags": [
+        "Minim Polusi",
+        "Nutrisi Stabil",
+        "Tenggelam/Mengambang"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Kekurangan Pellet ⚠️",
+      "description": "Beberapa ikan mungkin kesulitan memakan pellet karena ukurannya atau teksturnya yang lebih padat. Harga pellet premium bisa lebih mahal dibandingkan flake, dan pastikan ukurannya sesuai dengan mulut ikan.",
+      "tags": [
+        "Sulit Dimakan",
+        "Harga Premium",
+        "Pilih Ukuran"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Pakan Frozen: Kelezatan Premium 🦐",
+      "description": "Pakan beku seperti bloodworm, daphnia, atau brine shrimp sangat disukai ikan karena tekstur dan rasanya alami. Ini adalah sumber protein dan nutrisi yang sangat baik, mirip dengan diet mereka di alam liar.",
+      "tags": [
+        "Protein Tinggi",
+        "Alami",
+        "Menstimulasi Nafsu"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Plus Minus Pakan Beku ✅❌",
+      "description": "Kelebihannya, pakan beku meningkatkan warna dan nafsu makan ikan secara signifikan. Kekurangannya, harus dicairkan dulu dan lebih rentan mencemari air jika tidak bersih. Harganya juga relatif lebih mahal dan butuh penyimpanan khusus.",
+      "tags": [
+        "Peningkat Warna",
+        "Butuh Cairkan",
+        "Penyimpanan Dingin"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

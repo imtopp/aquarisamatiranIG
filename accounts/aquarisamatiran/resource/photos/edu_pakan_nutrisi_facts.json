@@ -1,0 +1,91 @@
+{
+  "topic": "Pakan & Nutrisi",
+  "display_name": "Pakan & Nutrisi Ikan: Apa, Kapan, Berapa?",
+  "subtitle": "Kunci Ikan Sehat, Ceria!",
+  "scientific_name": "",
+  "facts": [
+    {
+      "number": "01",
+      "title": "Nutrisi Seimbang Kunci Utama! ✨",
+      "description": "Pakan bukan cuma pengisi perut, tapi sumber energi vital bagi ikanmu. Nutrisi yang seimbang mendukung pertumbuhan optimal, warna cerah, dan sistem kekebalan tubuh yang kuat, lho!",
+      "tags": [
+        "NutrisiIkan",
+        "KesehatanIkan",
+        "DasarAquarium"
+      ]
+    },
+    {
+      "number": "02",
+      "title": "Kenali Jenis Pakanmu! 🐠",
+      "description": "Ada banyak jenis pakan: flake (serpihan), pellet (butiran), frozen (beku), dan live food (pakan hidup). Setiap jenis punya kelebihan dan cocok untuk kebutuhan ikan yang berbeda.",
+      "tags": [
+        "JenisPakan",
+        "FlakeFood",
+        "PelletFood",
+        "PakanHidup"
+      ]
+    },
+    {
+      "number": "03",
+      "title": "Sesuaikan dengan Ikanmu! 🤔",
+      "description": "Tidak semua ikan makan pakan yang sama. Ikan herbivora butuh serat tinggi (contoh: veggie wafer), karnivora butuh protein (contoh: bloodworms), dan omnivora butuh campuran keduanya. Selalu cek kebutuhan spesies ikanmu, ya!",
+      "tags": [
+        "DietIkan",
+        "PakanSpesifik",
+        "Herbivora",
+        "Karnivora"
+      ]
+    },
+    {
+      "number": "04",
+      "title": "Jangan Kebanyakan, ya! ⛔",
+      "description": "Overfeeding adalah masalah umum bagi pemula! Sisa pakan yang tidak termakan akan membusuk dan mencemari air, menyebabkan kualitas air menurun dan ikan mudah sakit. Beri makan secukupnya, yang habis dalam 2-3 menit saja.",
+      "tags": [
+        "Overfeeding",
+        "KualitasAir",
+        "PenyakitIkan"
+      ]
+    },
+    {
+      "number": "05",
+      "title": "Jadwal Makan Teratur! ⏰",
+      "description": "Idealnya, beri makan ikan 1-2 kali sehari dengan porsi kecil. Jadwal yang teratur membantu pencernaan ikan lebih baik dan mengurangi stres, sehingga mereka lebih aktif dan sehat.",
+      "tags": [
+        "JadwalPakan",
+        "PencernaanIkan",
+        "Rutinitas"
+      ]
+    },
+    {
+      "number": "06",
+      "title": "Variasi itu Penting! 🌈",
+      "description": "Sama seperti manusia, ikan juga butuh variasi makanan! Memberi berbagai jenis pakan (misal: selang-seling flake, pellet, dan frozen food) memastikan ikan mendapat spektrum nutrisi yang lengkap dan tidak bosan.",
+      "tags": [
+        "VariasiPakan",
+        "DietLengkap",
+        "PakanAlternatif"
+      ]
+    },
+    {
+      "number": "07",
+      "title": "Pakan Tambahan Aman? 🥦",
+      "description": "Beberapa ikan bisa diberi pakan tambahan seperti sayuran rebus (timun, zucchini, bayam) atau potongan udang beku (untuk karnivora). Pastikan bersih, tanpa bumbu, dan hanya diberikan dalam porsi sangat kecil sebagai selingan.",
+      "tags": [
+        "SnackIkan",
+        "PakanTambahan",
+        "SayuranIkan"
+      ]
+    },
+    {
+      "number": "08",
+      "title": "Tanda Ikan Kurang Nutrisi 📉",
+      "description": "Perhatikan ikanmu! Tanda-tanda kekurangan nutrisi meliputi warna pudar, lesu, pertumbuhan lambat, sirip kuncup, atau perut cekung. Jika melihat tanda ini, evaluasi kembali diet dan pakan yang kamu berikan.",
+      "tags": [
+        "DefisiensiNutrisi",
+        "GejalaPenyakit",
+        "IkanSakit"
+      ]
+    }
+  ],
+  "cta_text": "Follow @aquarisamatiran\nuntuk edukasi aquarium\nsetiap minggu!"
+}

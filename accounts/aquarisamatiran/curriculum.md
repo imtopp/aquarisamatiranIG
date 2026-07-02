@@ -32,7 +32,7 @@ Belajar aquarium dari nol sampai advanced — step by step, pake bahasa awam.
 | 02 | Hardscape & Layout (2026-06-29 19:00) | ✅ |
 | 03 | Gaya Aquascape (2026-06-30 19:00) | ✅ |
 | 04 | Udang & Keong (2026-07-01 19:00) | ✅ |
-| 05 | Aklimatisasi & Karantina (2026-07-02 19:00) | 📅 |
+| 05 | Aklimatisasi & Karantina (2026-07-02 19:00) | ✅ |
 | 06 | Pakan & Nutrisi | ⬜ |
 
 ### Subcategory 4: Advanced
